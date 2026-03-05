@@ -1,0 +1,54 @@
+@model IEnumerable<CafeManagement.Models.Domain.Topping>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Quản lý Topping";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">✨ Quản lý Topping</h4>
+    <a asp-action="Create" class="btn btn-primary">+ Thêm topping</a>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Tên topping</th>
+                    <th>Giá thêm</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var (topping, i) in Model.Select((t, i) => (t, i + 1)))
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td class="fw-semibold">@topping.Name</td>
+                        <td class="text-success fw-semibold">+@topping.Price.ToString("N0")đ</td>
+                        <td>
+                            <span class="badge @(topping.IsActive ? "bg-success" : "bg-secondary")">
+                                @(topping.IsActive ? "Đang dùng" : "Ẩn")
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <a asp-action="Edit" asp-route-id="@topping.Id" class="btn btn-sm btn-outline-primary">Sửa</a>
+                            <form asp-action="ToggleActive" asp-route-id="@topping.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm @(topping.IsActive ? "btn-outline-warning" : "btn-outline-success")">
+                                    @(topping.IsActive ? "Ẩn" : "Hiện")
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="5" class="text-center text-muted py-4">Chưa có topping nào.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

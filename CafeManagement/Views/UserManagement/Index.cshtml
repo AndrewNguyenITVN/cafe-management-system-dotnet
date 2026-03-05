@@ -1,0 +1,56 @@
+@model IEnumerable<CafeManagement.Models.Domain.AppUser>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Quản lý Nhân viên";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">👤 Quản lý Nhân viên</h4>
+    <a asp-action="Create" class="btn btn-primary">+ Thêm nhân viên</a>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Họ và tên</th>
+                    <th>Email</th>
+                    <th>Chức vụ</th>
+                    <th>Chi nhánh</th>
+                    <th>Mã PIN</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var (user, i) in Model.Select((u, i) => (u, i + 1)))
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td class="fw-semibold">@user.FullName</td>
+                        <td class="text-muted">@user.Email</td>
+                        <td>@(user.Position?.PositionName ?? "—")</td>
+                        <td>@(user.Store?.Name ?? "—")</td>
+                        <td>
+                            @(string.IsNullOrEmpty(user.PinCode) ? "—" : "••••••")
+                        </td>
+                        <td>
+                            <span class="badge @(user.IsActive ? "bg-success" : "bg-secondary")">
+                                @(user.IsActive ? "Hoạt động" : "Vô hiệu hóa")
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary">Sửa</a>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="8" class="text-center text-muted py-4">Chưa có nhân viên nào.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

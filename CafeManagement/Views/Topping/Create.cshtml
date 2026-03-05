@@ -1,0 +1,35 @@
+@model CafeManagement.Models.Domain.Topping
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Thêm Topping";
+}
+
+<div class="d-flex align-items-center mb-4">
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm me-3">← Quay lại</a>
+    <h4 class="fw-bold mb-0">Thêm Topping mới</h4>
+</div>
+
+<div class="card p-4" style="max-width:500px;">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label fw-semibold">Tên topping <span class="text-danger">*</span></label>
+            <input asp-for="Name" class="form-control" placeholder="VD: Trân châu đen" />
+            <span asp-validation-for="Name" class="text-danger small"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Price" class="form-label fw-semibold">Giá thêm (VNĐ) <span class="text-danger">*</span></label>
+            <input asp-for="Price" class="form-control" placeholder="10000" />
+            <span asp-validation-for="Price" class="text-danger small"></span>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary px-4">Lưu</button>
+            <a asp-action="Index" class="btn btn-outline-secondary px-4">Hủy</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

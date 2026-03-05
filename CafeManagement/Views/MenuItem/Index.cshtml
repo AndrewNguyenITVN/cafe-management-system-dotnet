@@ -1,0 +1,71 @@
+@model IEnumerable<CafeManagement.Models.Domain.MenuItem>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Quản lý Thực đơn";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">🍵 Quản lý Thực đơn</h4>
+    <a asp-action="Create" class="btn btn-primary">+ Thêm món</a>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Hình</th>
+                    <th>Tên món</th>
+                    <th>Danh mục</th>
+                    <th>Giá bán</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var (item, i) in Model.Select((m, i) => (m, i + 1)))
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(item.ImageUrl))
+                            {
+                                <img src="@item.ImageUrl" class="img-preview" alt="@item.Name" />
+                            }
+                            else
+                            {
+                                <div class="bg-light d-flex align-items-center justify-content-center rounded"
+                                     style="width:60px;height:60px;font-size:1.5rem;">🍵</div>
+                            }
+                        </td>
+                        <td>
+                            <div class="fw-semibold">@item.Name</div>
+                            <div class="text-muted small">@item.Description</div>
+                        </td>
+                        <td><span class="badge bg-light text-dark border">@item.Category?.Name</span></td>
+                        <td class="fw-semibold text-success">@item.BasePrice.ToString("N0")đ</td>
+                        <td>
+                            <span class="badge @(item.IsActive ? "bg-success" : "bg-secondary")">
+                                @(item.IsActive ? "Đang bán" : "Tạm ngưng")
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Sửa</a>
+                            <form asp-action="ToggleActive" asp-route-id="@item.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm @(item.IsActive ? "btn-outline-warning" : "btn-outline-success")">
+                                    @(item.IsActive ? "Ngưng bán" : "Bán lại")
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="7" class="text-center text-muted py-4">Chưa có món nào. Hãy thêm món đầu tiên!</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
