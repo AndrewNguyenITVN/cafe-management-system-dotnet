@@ -1,0 +1,53 @@
+/* Admin Layout */
+.sidebar .nav-link {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    margin: 1px 8px;
+    font-size: 0.9rem;
+    transition: background-color 0.15s;
+}
+
+.sidebar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Tables */
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Cards */
+.stat-card {
+    border-left: 4px solid;
+    border-radius: 8px;
+}
+
+.stat-card.revenue  { border-left-color: #28a745; }
+.stat-card.orders   { border-left-color: #007bff; }
+.stat-card.staff    { border-left-color: #ffc107; }
+.stat-card.warning  { border-left-color: #dc3545; }
+
+/* Badge status */
+.badge-pending    { background-color: #ffc107; color: #000; }
+.badge-processing { background-color: #007bff; }
+.badge-ready      { background-color: #28a745; }
+.badge-completed  { background-color: #6c757d; }
+
+/* Image preview */
+.img-preview {
+    max-width: 80px;
+    max-height: 80px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+/* Alerts */
+.alert {
+    border-radius: 8px;
+}
