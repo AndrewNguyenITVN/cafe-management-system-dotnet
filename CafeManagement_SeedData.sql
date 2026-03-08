@@ -55,6 +55,15 @@ INSERT INTO Toppings (Name, Price, IsActive) VALUES
     (N'Pudding trứng',    15000, 1),
     (N'Kem cheese',       15000, 1);
 
+-- Suppliers (Nhà cung cấp)
+INSERT INTO Suppliers (Name, Phone, Address, IsActive) VALUES
+    (N'Công ty Cà phê Trung Nguyên',  N'028-3826-1234', N'123 Nguyễn Đình Chiểu, Q.3, TP.HCM', 1),
+    (N'Vinamilk',                       N'028-5413-5678', N'10 Tôn Đức Thắng, Q.7, TP.HCM', 1),
+    (N'Công ty Trà & Thực phẩm Phương Nam', N'028-3827-9012', N'45 Lê Lợi, Q.1, TP.HCM', 1),
+    (N'Nhà cung cấp Nguyên liệu Đông Á', N'028-3829-3456', N'78 Hùng Vương, Q.5, TP.HCM', 1),
+    (N'Công ty Thạch & Topping Việt',  N'028-3826-7890', N'22 Nguyễn Văn Cừ, Q.5, TP.HCM', 1),
+    (N'Công ty Đường Biên Hòa',         N'028-3826-2345', N'15 Phạm Ngũ Lão, Q.1, TP.HCM', 1);
+
 -- Ingredients
 INSERT INTO Ingredients (Name, Unit, MinStockLevel, IsActive) VALUES
     (N'Cà phê hạt rang',     N'gram',  500,  1),
