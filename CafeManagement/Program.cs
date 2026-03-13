@@ -1,4 +1,5 @@
 using CafeManagement.Data;
+using CafeManagement.Hubs; // Thêm thư viện Hub mới
 using CafeManagement.Models.Domain;
 using CafeManagement.Services;
 using Microsoft.AspNetCore.Identity;
@@ -42,12 +43,14 @@ builder.Services.AddScoped<SupplierService>();
 builder.Services.AddScoped<JobPositionService>();
 builder.Services.AddScoped<UserService>();
 // POS / CRM / Inventory Services (TV2, TV3, TV5 implement)
+builder.Services.AddScoped<IOrderService, OrderService>(); // TV2: POS Order
 builder.Services.AddScoped<InventoryService>();
 builder.Services.AddScoped<PointService>();
 builder.Services.AddScoped<TransactionService>();
 
-// ── MVC ───────────────────────────────────────────────────
+// ── MVC & SIGNALR ──────────────────────────────────────────
 builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR(); // MỚI: Đăng ký dịch vụ phát sóng Real-time
 
 var app = builder.Build();
 
@@ -73,6 +76,9 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
+
+// MỚI: Mở cổng "/orderHub" để các trình duyệt kết nối WebSockets
+app.MapHub<OrderHub>("/orderHub");
 
 app.Run();
 

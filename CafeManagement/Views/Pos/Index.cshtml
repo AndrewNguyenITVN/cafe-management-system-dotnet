@@ -1,0 +1,690 @@
+@* Trang POS không dùng chung Layout Admin *@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>POS - Máy Thu Ngân</title>
+
+    @* Bootstrap CSS *@
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    @* Custom CSS *@
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+
+        /* ===== TOÀN TRANG ===== */
+        body {
+            background-color: #1a120b;  /* Nền nâu cà phê rất tối */
+            color: #f7e6c4;             /* Chữ trắng kem sáng */
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;           /* Tắt cuộn trang (POS cố định 1 màn hình) */
+            height: 100vh;              /* Chiếm hết chiều cao màn hình */
+        }
+
+        /* ===== CỘT TRÁI - DANH MỤC ===== */
+        .category-panel {
+            background-color: #2b1f14;  /* Nền nâu đậm */
+            height: 100vh;
+            padding: 20px 15px;
+            overflow-y: auto;           /* Cuộn được nếu danh mục nhiều */
+            border-right: 1px solid #3d2a1c;
+        }
+        .category-btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #3d2a1c;
+            border-radius: 12px;
+            background-color: #3d2a1c;
+            color: #f7e6c4;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .category-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 100%;
+            background-color: #d4a373; /* Caramel highlight */
+            transform: scaleY(0);
+            transition: transform 0.3s;
+        }
+        .category-btn:hover {
+            background-color: #4a3422;  /* Sáng hơn khi rê chuột */
+            transform: translateX(4px);
+        }
+        .category-btn.active {
+            background-color: #4a3422;  
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(212, 163, 115, 0.2);
+        }
+        .category-btn.active::before {
+            transform: scaleY(1);
+        }
+
+        /* ===== CỘT GIỮA - SẢN PHẨM ===== */
+        .product-panel {
+            height: 100vh;
+            padding: 24px;
+            overflow-y: auto;
+            background-image: radial-gradient(circle at center, #231810 0%, #1a120b 100%);
+        }
+        .product-card {
+            background: linear-gradient(145deg, #2b1f14, #1a120b);
+            border: 1px solid #3d2a1c;
+            border-radius: 16px;
+            padding: 20px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .product-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 2px;
+            background: #d4a373;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);      
+            border-color: #d4a373;
+            box-shadow: 0 12px 25px rgba(212, 163, 115, 0.15);
+        }
+        .product-card:hover::after {
+            transform: scaleX(1);
+        }
+        .product-card .name {
+            font-weight: 700;
+            margin-top: 12px;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+        }
+        .product-card .price {
+            color: #d4a373;
+            font-weight: bold;
+            font-size: 18px;
+            margin-top: 6px;
+        }
+
+        /* ===== CỘT PHẢI - GIỎ HÀNG ===== */
+        .cart-panel {
+            background-color: #2b1f14;
+            height: 100vh;
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;      /* Xếp các phần tử theo chiều dọc */
+            border-left: 1px solid #3d2a1c;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+        }
+        .cart-item {
+            background-color: #3d2a1c;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 3px solid #6c584c;
+            transition: background 0.2s;
+        }
+        .cart-item:hover { background-color: #4a3422; }
+        .cart-item .qty-btn {
+            background: #6c584c;
+            color: #f7e6c4;
+            border: none;
+            border-radius: 6px;
+            width: 28px;
+            height: 28px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .cart-item .qty-btn:hover {
+            background: #d4a373;
+            color: #1a120b;
+        }
+        .cart-item .item-details { flex-grow: 1; margin: 0 10px; }
+        .cart-item .name { font-weight: 600; font-size: 15px; }
+        .cart-item .price { color: #d4a373; font-size: 14px; margin-top: 2px; }
+
+        .cart-summary {
+            margin-top: auto;  /* Đẩy phần tổng tiền xuống cuối cột */
+            background-color: #1a120b;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid #3d2a1c;
+        }
+        .btn-checkout {
+            background: linear-gradient(135deg, #d4a373, #b07d4b);
+            color: #1a120b;
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-top: 15px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(212, 163, 115, 0.3);
+        }
+        .btn-checkout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 163, 115, 0.4);
+        }
+        
+        /* Tùy chỉnh thanh cuộn dải mỏng */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1a120b; }
+        ::-webkit-scrollbar-thumb { background: #3d2a1c; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #d4a373; }
+        
+        /* Tùy chỉnh input cho đẹp */
+        .form-control.bg-dark {
+            background-color: #1a120b !important;
+            border-color: #3d2a1c !important;
+            color: #f7e6c4 !important;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        .form-control.bg-dark:focus {
+            box-shadow: 0 0 0 0.25rem rgba(212, 163, 115, 0.25);
+            border-color: #d4a373 !important;
+        }
+        .form-check-input:checked {
+            background-color: #d4a373;
+            border-color: #d4a373;
+        }
+    </style>
+</head>
+
+<body>
+
+@* ══════════ MÀN HÌNH KHÓA PIN ══════════ *@
+<div id="pin-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center" style="background-color: #1a120b; z-index: 9999;">
+    <h2 class="mb-4 fw-bold" style="color: #d4a373;">🔒 MỞ CA LÀM VIỆC</h2>
+    <input type="password" id="pin-input" class="form-control bg-dark text-center text-light fs-3 mb-4 rounded-3 border-secondary" style="width: 250px; letter-spacing: 10px; height: 60px;" readonly />
+    <div class="d-grid gap-2" style="grid-template-columns: repeat(3, 1fr); width: 250px;">
+        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('1')">1</button>
+        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('2')">2</button>
+        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('3')">3</button>
+        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('4')">4</button>
+        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('5')">5</button>
+        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('6')">6</button>
+        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('7')">7</button>
+        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('8')">8</button>
+        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('9')">9</button>
+        <button class="btn btn-danger fs-4 py-2 fw-bold" onclick="clearPin()">C</button>
+        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('0')">0</button>
+        <button class="btn btn-success fs-4 py-2 fw-bold" onclick="submitPin()" style="background-color: #6c584c; border:none;">OK</button>
+    </div>
+    <span id="pin-error" class="text-danger mt-3 d-none fw-bold fs-5">Mã PIN không đúng!</span>
+</div>
+
+@* Layout 3 cột (Grid Bootstrap) *@
+
+<div class="container-fluid">
+    <div class="row">
+
+        @* ══════════ CỘT TRÁI: DANH MỤC ══════════ *@
+        <div class="col-2 category-panel">
+            <h5 class="mb-3">📋 Danh mục</h5>
+            <div id="category-list">
+                @* JavaScript sẽ tự động tạo các nút danh mục ở đây *@
+            </div>
+        </div>
+
+        @* ══════════ CỘT GIỮA: SẢN PHẨM ══════════ *@
+        <div class="col-6 product-panel">
+            <h5 class="mb-3">🍹 Menu</h5>
+            <div id="product-list" class="row g-3">
+                @* JavaScript sẽ tự động tạo các thẻ sản phẩm ở đây *@
+            </div>
+        </div>
+
+        @* ══════════ CỘT PHẢI: GIỎ HÀNG & KHÁCH ══════════ *@
+        <div class="col-4 cart-panel">
+
+            @* --- Khu vực nhập SĐT Khách hàng --- *@
+            <h5 class="mb-2">👤 Khách hàng</h5>
+            <div class="mb-3">
+                <input type="text" id="customer-phone" class="form-control bg-dark text-light border-secondary" 
+                       placeholder="Nhập SĐT khách hàng..." oninput="checkCustomerPhone()" maxlength="10" />
+                
+                <div id="customer-info-box" class="d-none mt-2 p-2 rounded" style="background-color: #3d2a1c;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span id="customer-info" class="text-light fw-bold fs-6"></span>
+                        <span class="text-secondary small">Điểm: <span id="customer-points" class="text-warning fw-bold fs-6">0</span></span>
+                    </div>
+                    <div class="mt-2 input-group input-group-sm">
+                        <span class="input-group-text bg-secondary text-light border-secondary px-2">Dùng điểm</span>
+                        <input type="number" id="use-points" class="form-control bg-dark text-light border-secondary text-end" placeholder="0" min="0" oninput="updateTotal()">
+                        <span class="input-group-text bg-secondary text-light border-secondary px-2">₫</span>
+                    </div>
+                </div>
+
+                <small id="customer-not-found" class="text-secondary mt-1 d-block">
+                    Nhập đủ 10 số để tìm khách hàng
+                </small>
+            </div>
+
+            @* --- Loại Đơn Hàng (Tại chỗ/Mang đi) --- *@
+            <h5 class="mb-2 mt-3">🍽️ Loại đơn</h5>
+            <div class="mb-3 d-flex gap-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="orderType" id="typeEatIn" value="EatIn" checked>
+                    <label class="form-check-label" for="typeEatIn">Tại chỗ</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="orderType" id="typeTakeAway" value="TakeAway">
+                    <label class="form-check-label" for="typeTakeAway">Mang đi</label>
+                </div>
+            </div>
+
+            @* --- Danh sách giỏ hàng --- *@
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">🛒 Giỏ hàng</h5>
+                <button class="btn btn-sm btn-outline-danger" onclick="clearCart()">🗑 Xóa hết</button>
+            </div>
+            <div id="cart-items" style="flex: 1; overflow-y: auto;">
+                <p class="text-secondary text-center mt-4">Chưa có món nào</p>
+            </div>
+
+            @* --- Tổng tiền & Nút thanh toán --- *@
+            <div class="cart-summary">
+                <div class="d-flex justify-content-between mb-1">
+                    <span>Tổng tiền:</span>
+                    <span id="total-amount" class="fw-bold" style="color: #e94560;">0 ₫</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Điểm sử dụng:</span>
+                    <span id="points-used">0 ₫</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="fw-bold fs-5">Thành tiền:</span>
+                    <span id="final-amount" class="fw-bold fs-5" style="color: #e94560;">0 ₫</span>
+                </div>
+                <button class="btn-checkout" onclick="checkout()">
+                    💳 THANH TOÁN
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@* JAVASCRIPT LOGIC *@
+
+<script>
+
+    // 1. Biến toàn cục
+
+    let categories = [];   
+    let products = [];     
+    let cart = [];         
+    let maxPoints = 0;     // Số điểm tối đa khách có thể dùng
+
+
+    // 2. Fetch dữ liệu API
+
+    // Hàm load danh mục từ Database
+    async function loadCategories() {
+        try {
+            // fetch() gửi GET Request tới URL /Pos/GetCategories
+            // Server C# (PosController.GetCategories) sẽ truy vấn DB và trả JSON
+            const response = await fetch('/Pos/GetCategories');
+            categories = await response.json();  // Ép kết quả thành mảng JS
+
+            renderCategories();  // Vẽ lên giao diện
+
+            // Tự động chọn danh mục đầu tiên (nếu có)
+            if (categories.length > 0) {
+                document.querySelector('.category-btn').classList.add('active');
+                loadProducts(categories[0].id);
+            }
+        } catch (error) {
+            console.error('❌ Lỗi load danh mục:', error);
+            // NẾU LỖI (VD: DB chưa có dữ liệu) → dùng dữ liệu mẫu tạm
+            categories = [
+                { id: 1, name: "☕ Cà phê (Demo)" },
+                { id: 2, name: "🧋 Trà sữa (Demo)" },
+            ];
+            renderCategories();
+            document.querySelector('.category-btn')?.classList.add('active');
+        }
+    }
+
+    // Hàm load sản phẩm từ Database
+    async function loadProducts(categoryId) {
+        try {
+            const response = await fetch('/Pos/GetMenuItems');
+            products = await response.json();
+
+            renderProducts(categoryId);  // Vẽ sản phẩm theo danh mục đang chọn
+        } catch (error) {
+            console.error('❌ Lỗi load sản phẩm:', error);
+            products = [];
+        }
+    }
+
+
+    // 3. Render danh mục
+
+    function renderCategories() {
+        const container = document.getElementById('category-list');
+        container.innerHTML = '';
+
+        categories.forEach(function (cat) {
+            const btn = document.createElement('button');
+            btn.className = 'category-btn';
+            btn.textContent = cat.name;
+
+            btn.onclick = function () {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                // GỌI loadProducts thay vì renderProducts trực tiếp
+                // Để đảm bảo luôn lấy dữ liệu mới nhất từ DB
+                renderProducts(cat.id);
+            };
+
+            container.appendChild(btn);
+        });
+    }
+
+
+    // 4. Render sản phẩm
+
+    function renderProducts(categoryId) {
+        const container = document.getElementById('product-list');
+        container.innerHTML = '';
+
+        const filtered = products.filter(p => p.categoryId === categoryId);
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<p class="text-secondary text-center mt-5">Chưa có sản phẩm trong danh mục này</p>';
+            return;
+        }
+
+        filtered.forEach(function (product) {
+            const col = document.createElement('div');
+            col.className = 'col-4';
+
+            col.innerHTML = `
+                <div class="product-card" onclick="addToCart(${product.id})">
+                    <div class="name">${product.name}</div>
+                    <div class="price">${formatMoney(product.price)}</div>
+                </div>
+            `;
+
+            container.appendChild(col);
+        });
+    }
+
+
+    // 5. Quản lý giỏ hàng
+
+    function addToCart(productId) {
+        const product = products.find(p => p.id === productId);
+        if (!product) return;
+
+        const existing = cart.find(item => item.id === productId);
+
+        if (existing) {
+            existing.quantity += 1;
+        } else {
+            cart.push({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                quantity: 1
+            });
+        }
+
+        renderCart();
+    }
+
+    function renderCart() {
+        const container = document.getElementById('cart-items');
+
+        if (cart.length === 0) {
+            container.innerHTML = '<p class="text-secondary text-center mt-4">Chưa có món nào</p>';
+            updateTotal();
+            return;
+        }
+
+        let html = '';
+        cart.forEach(function (item, index) {
+            html += `
+                <div class="cart-item">
+                    <div class="item-details">
+                        <div class="name">${item.name}</div>
+                        <div class="price">${formatMoney(item.price)}</div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="qty-btn" onclick="changeQty(${index}, -1)">−</button>
+                        <span class="fw-bold mx-1">${item.quantity}</span>
+                        <button class="qty-btn" onclick="changeQty(${index}, +1)">+</button>
+                        <span class="ms-2 price text-end" style="min-width: 80px;">
+                            ${formatMoney(item.price * item.quantity)}
+                        </span>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+        updateTotal();
+    }
+
+    function changeQty(index, delta) {
+        cart[index].quantity += delta;
+        if (cart[index].quantity <= 0) {
+            cart.splice(index, 1);
+        }
+        renderCart();
+    }
+
+    function clearCart() {
+        if (cart.length === 0) return;
+        if (!confirm('Xóa toàn bộ giỏ hàng?')) return;
+        cart = [];
+        renderCart();
+    }
+
+    function updateTotal() {
+        const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        
+        let usedPoints = parseInt(document.getElementById('use-points')?.value || 0, 10);
+        
+        // Validation: Không dùng quá số điểm đang có
+        if (usedPoints > maxPoints) {
+            usedPoints = maxPoints;
+            document.getElementById('use-points').value = usedPoints;
+        }
+        
+        // Validation: Không dùng quá giá trị đơn hàng
+        if (usedPoints > total) {
+            usedPoints = total;
+            document.getElementById('use-points').value = usedPoints;
+        }
+
+        const finalAmount = Math.max(total - usedPoints, 0);
+
+        document.getElementById('total-amount').textContent = formatMoney(total);
+        document.getElementById('points-used').textContent = "-" + formatMoney(usedPoints);
+        document.getElementById('final-amount').textContent = formatMoney(finalAmount);
+    }
+
+
+    // 6. Thanh toán
+
+    function checkout() {
+        if (cart.length === 0) {
+            alert('Giỏ hàng đang trống!');
+            return;
+        }
+
+        const orderData = {
+            storeId: currentStoreId, // <--- Đã được lấy tự động theo Chi nhánh của nhân viên
+            userId: activeCashierId, // <--- ID nhân viên vừa nhập PIN
+            customerPhone: document.getElementById('customer-phone').value,
+            customerName: null,
+            pointsUsed: parseInt(document.getElementById('use-points')?.value || 0, 10),
+            orderType: document.querySelector('input[name="orderType"]:checked').value,
+            orderItems: cart.map(item => ({
+                menuItemId: item.id,
+                quantity: item.quantity,
+                unitPrice: item.price,
+                note: null
+            }))
+        };
+
+        fetch('/Pos/CreateOrder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('✅ Đặt hàng thành công!\nSố thứ tự: ' + data.queueNumber);
+                cart = [];
+                renderCart();
+            } else {
+                alert('❌ Lỗi: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('❌ Lỗi kết nối: ' + error.message);
+        });
+    }
+
+
+    // 7. Hàm tiện ích
+
+    function formatMoney(amount) {
+        return amount.toLocaleString('vi-VN') + ' ₫';
+    }
+
+    // 8. Logic Khách Hàng (SĐT & Điểm)
+    function checkCustomerPhone() {
+        const phone = document.getElementById('customer-phone').value;
+        const infoBox = document.getElementById('customer-info-box');
+        const notFoundText = document.getElementById('customer-not-found');
+
+        if (phone.length === 10) {
+            // Đủ 10 số -> Fetch gọi C# Customer API
+            fetch('/Pos/GetCustomerInfo?phone=' + phone)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Khách hàng cũ
+                    infoBox.classList.remove('d-none');
+                    notFoundText.classList.add('d-none');
+                    document.getElementById('customer-info').textContent = data.name;
+                    document.getElementById('customer-points').textContent = formatMoney(data.points);
+                    
+                    maxPoints = data.points;
+                    document.getElementById('use-points').value = 0; // Reset điểm sử dụng
+                    updateTotal(); // Tính lại
+                } else {
+                    // Khách hàng mới
+                    infoBox.classList.add('d-none');
+                    notFoundText.classList.remove('d-none');
+                    notFoundText.textContent = "Khách hàng mới (Sẽ đổi điểm sau khi thanh toán)";
+                    notFoundText.style.color = "#d4a373";
+                    maxPoints = 0;
+                    updateTotal();
+                }
+            });
+        } else {
+            // Ẩn hộp điểm
+            infoBox.classList.add('d-none');
+            notFoundText.classList.remove('d-none');
+            notFoundText.textContent = "Nhập đủ 10 số để tìm khách hàng";
+            notFoundText.style.color = "";
+            maxPoints = 0;
+            updateTotal();
+        }
+    }
+
+    // 9. Logic PIN Code Thu Ngân
+    let currentPin = "";
+    let activeCashierId = "";
+    let activeCashierName = "";
+    let currentStoreId = 1; // Chi nhánh mặc định nếu NV chưa được gán
+
+    function addPin(num) {
+        if(currentPin.length < 6) {
+            currentPin += num;
+            document.getElementById('pin-input').value = currentPin;
+            document.getElementById('pin-error').classList.add('d-none');
+        }
+    }
+    
+    function clearPin() {
+        currentPin = "";
+        document.getElementById('pin-input').value = currentPin;
+    }
+
+    function submitPin() {
+        if (currentPin.length < 4) {
+            alert("Mã PIN phải ít nhất 4 số!");
+            return;
+        }
+
+        fetch('/Pos/VerifyPin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pinCode: currentPin })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // Lưu lại Session Cashier và StoreId từ DB để chèn vào đơn hàng
+                activeCashierId = data.userId;
+                activeCashierName = data.cashierName;
+                currentStoreId = data.storeId || 1; 
+                
+                // ĐÚNG PIN -> TẮT OVERLAY
+                const overlay = document.getElementById('pin-overlay');
+                overlay.classList.remove('d-flex');
+                overlay.classList.add('d-none');
+                
+                // Nạp data POS
+                loadCategories();
+                
+                // (Tùy chọn) Hiện thông báo trên màn hình
+                // document.getElementById('cashier-name-header').textContent = data.cashierName;
+            } else {
+                document.getElementById('pin-error').textContent = data.message || "Mã PIN không đúng!";
+                document.getElementById('pin-error').classList.remove('d-none');
+                clearPin();
+            }
+        });
+    }
+
+
+    // Không gọi tự động loadCategories nữa, chờ bấm PIN xong mới nạp.
+
+</script>
+
+</body>
+</html>
