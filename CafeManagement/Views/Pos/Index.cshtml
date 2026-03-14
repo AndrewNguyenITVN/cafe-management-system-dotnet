@@ -390,8 +390,23 @@
                     <span class="fw-bold fs-5">Thành tiền:</span>
                     <span id="final-amount" class="fw-bold fs-5" style="color: #e94560;">0 ₫</span>
                 </div>
+                @* --- Phương thức thanh toán (Branch 3 - TV5) --- *@
+                <h5 class="mb-2 mt-3">💳 Phương thức thanh toán</h5>
+                <div class="mb-2">
+                    <select id="payment-method" class="form-select bg-dark text-light border-secondary" onchange="onPaymentMethodChange()">
+                        <option value="">-- Chọn --</option>
+                    </select>
+                </div>
+                <div id="cash-tendered-row" class="mb-2 d-none">
+                    <label class="form-label small text-secondary mb-0">Tiền khách đưa</label>
+                    <input type="number" id="amount-tendered" class="form-control bg-dark text-light border-secondary text-end" placeholder="0" min="0" value="0" oninput="updateChangeDisplay()">
+                </div>
+                <div id="change-row" class="d-flex justify-content-between mb-3 d-none">
+                    <span>Tiền thối:</span>
+                    <span id="change-amount" class="fw-bold" style="color: #d4a373;">0 ₫</span>
+                </div>
                 <button class="btn-checkout" onclick="checkout()">
-                    💳 THANH TOÁN
+                    💳 HOÀN TẤT THANH TOÁN
                 </button>
             </div>
         </div>
@@ -415,6 +430,7 @@
     let activeCashierName = "";
     let currentStoreId = 1;
     let selectedCashierId = "";  // id nhân viên đang chọn (để gửi kèm PIN)
+    let paymentMethods = [];     // Danh sách phương thức thanh toán (id, name)
 
     // 2. Fetch dữ liệu API
 
@@ -433,6 +449,7 @@
                 document.querySelector('.category-btn').classList.add('active');
                 loadProducts(categories[0].id);
             }
+            loadPaymentMethods();
         } catch (error) {
             console.error('❌ Lỗi load danh mục:', error);
             // NẾU LỖI (VD: DB chưa có dữ liệu) → dùng dữ liệu mẫu tạm
@@ -442,7 +459,53 @@
             ];
             renderCategories();
             document.querySelector('.category-btn')?.classList.add('active');
+            loadPaymentMethods();
         }
+    }
+
+    // Hàm load phương thức thanh toán (Tiền mặt, Chuyển khoản...)
+    async function loadPaymentMethods() {
+        try {
+            const res = await fetch('/Pos/GetPaymentMethods');
+            paymentMethods = await res.json();
+            const sel = document.getElementById('payment-method');
+            sel.innerHTML = '<option value="">-- Chọn phương thức --</option>';
+            paymentMethods.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.name;
+                sel.appendChild(opt);
+            });
+        } catch (e) {
+            console.error('Lỗi load phương thức thanh toán:', e);
+        }
+    }
+
+    function onPaymentMethodChange() {
+        const sel = document.getElementById('payment-method');
+        const val = parseInt(sel.value, 10);
+        const cashRow = document.getElementById('cash-tendered-row');
+        const changeRow = document.getElementById('change-row');
+        const amountInput = document.getElementById('amount-tendered');
+        if (val === 1) {
+            cashRow.classList.remove('d-none');
+            changeRow.classList.remove('d-none');
+            amountInput.value = '';
+            updateChangeDisplay();
+        } else {
+            cashRow.classList.add('d-none');
+            changeRow.classList.add('d-none');
+            amountInput.value = '0';
+        }
+    }
+
+    function updateChangeDisplay() {
+        const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const usedPoints = parseInt(document.getElementById('use-points')?.value || 0, 10);
+        const finalAmount = Math.max(total - Math.min(usedPoints, maxPoints), 0);
+        const tendered = parseFloat(document.getElementById('amount-tendered')?.value || 0, 10) || 0;
+        const change = Math.max(tendered - finalAmount, 0);
+        document.getElementById('change-amount').textContent = formatMoney(change);
     }
 
     // Hàm load sản phẩm từ Database
@@ -604,6 +667,7 @@
         document.getElementById('total-amount').textContent = formatMoney(total);
         document.getElementById('points-used').textContent = "-" + formatMoney(usedPoints);
         document.getElementById('final-amount').textContent = formatMoney(finalAmount);
+        updateChangeDisplay();
     }
 
 
@@ -615,13 +679,34 @@
             return;
         }
 
+        const paymentMethodSel = document.getElementById('payment-method');
+        const paymentMethodId = parseInt(paymentMethodSel?.value || 0, 10);
+        if (!paymentMethodId) {
+            alert('Vui lòng chọn phương thức thanh toán.');
+            return;
+        }
+
+        const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const usedPoints = parseInt(document.getElementById('use-points')?.value || 0, 10);
+        const finalAmount = Math.max(total - Math.min(usedPoints, maxPoints), 0);
+        let amountTendered = finalAmount;
+        if (paymentMethodId === 1) {
+            amountTendered = parseFloat(document.getElementById('amount-tendered')?.value || 0, 10) || 0;
+            if (amountTendered < finalAmount) {
+                alert('Tiền khách đưa không đủ. Thành tiền: ' + formatMoney(finalAmount));
+                return;
+            }
+        }
+
         const orderData = {
-            storeId: currentStoreId, // <--- Đã được lấy tự động theo Chi nhánh của nhân viên
-            userId: activeCashierId, // <--- ID nhân viên vừa nhập PIN
+            storeId: currentStoreId,
+            userId: activeCashierId,
             customerPhone: document.getElementById('customer-phone').value,
             customerName: null,
-            pointsUsed: parseInt(document.getElementById('use-points')?.value || 0, 10),
+            pointsUsed: usedPoints,
             orderType: document.querySelector('input[name="orderType"]:checked').value,
+            paymentMethodId: paymentMethodId,
+            amountTendered: amountTendered,
             orderItems: cart.map(item => ({
                 menuItemId: item.id,
                 quantity: item.quantity,
