@@ -107,6 +107,17 @@ public class PosController : Controller
         return Ok(users);
     }
 
+    // API: Lấy danh sách phương thức thanh toán (cho dropdown POS)
+    [HttpGet]
+    public async Task<IActionResult> GetPaymentMethods()
+    {
+        var list = await _db.PaymentMethods
+            .Where(p => p.IsActive)
+            .Select(p => new { id = p.Id, name = p.MethodName })
+            .ToListAsync();
+        return Ok(list);
+    }
+
     // API: Tạo đơn hàng
     [HttpPost]
     public async Task<IActionResult> CreateOrder([FromBody] PosOrderRequestDto request)

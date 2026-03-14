@@ -10,13 +10,15 @@ public class OrderService : IOrderService
     private readonly AppDbContext _db;
     private readonly InventoryService _inventoryService;
     private readonly PointService _pointService;
+    private readonly TransactionService _transactionService;
 
     // Constructor: ASP.NET tự truyền AppDbContext thông qua DI
-    public OrderService(AppDbContext db, InventoryService inventoryService, PointService pointService)
+    public OrderService(AppDbContext db, InventoryService inventoryService, PointService pointService, TransactionService transactionService)
     {
         _db = db;
         _inventoryService = inventoryService;
         _pointService = pointService;
+        _transactionService = transactionService;
     }
 
     public async Task<OrderResultDto> CreateOrderAsync(PosOrderRequestDto request)
@@ -134,9 +136,14 @@ public class OrderService : IOrderService
             // BƯỚC 7: Hoàn tất Transaction
             await transaction.CommitAsync();
 
-            // GỌI DỊCH VỤ TRỪ KHO VÀ TÍNH ĐIỂM
+            // GỌI DỊCH VỤ TRỪ KHO, TÍNH ĐIỂM VÀ GHI GIAO DỊCH THANH TOÁN
             await _inventoryService.DeductStockAsync(order.Id);
             await _pointService.ProcessOrderPointsAsync(order.Id, order.PointsUsed);
+            if (request.PaymentMethodId > 0)
+            {
+                decimal amountTendered = request.AmountTendered > 0 ? request.AmountTendered : order.FinalAmount;
+                await _transactionService.RecordPaymentAsync(order.Id, request.PaymentMethodId, order.FinalAmount, amountTendered);
+            }
 
             // Trả kết quả thành công
             return new OrderResultDto

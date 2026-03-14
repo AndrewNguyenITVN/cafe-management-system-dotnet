@@ -22,7 +22,7 @@
             background-color: #1a120b;  /* Nền nâu cà phê rất tối */
             color: #f7e6c4;             /* Chữ trắng kem sáng */
             font-family: 'Outfit', sans-serif;
-            overflow: hidden;           /* Tắt cuộn trang (POS cố định 1 màn hình) */
+            overflow: hidden;           /* Giữ layout POS 1 màn hình, không cuộn toàn trang */
             height: 100vh;              /* Chiếm hết chiều cao màn hình */
         }
 
@@ -125,10 +125,9 @@
             background-color: #2b1f14;
             height: 100vh;
             padding: 20px 24px;
-            display: flex;
-            flex-direction: column;      /* Xếp các phần tử theo chiều dọc */
             border-left: 1px solid #3d2a1c;
             box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+            overflow-y: auto;            /* Chỉ riêng cột phải được cuộn */
         }
         .cart-item {
             background-color: #3d2a1c;
@@ -188,6 +187,35 @@
         .btn-checkout:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(212, 163, 115, 0.4);
+        }
+
+        /* Nút chọn phương thức thanh toán */
+        .payment-method-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .payment-method-btn {
+            flex: 1 1 45%;
+            padding: 10px 12px;
+            border-radius: 999px;
+            border: 1px solid #3d2a1c;
+            background-color: #2b1f14;
+            color: #f7e6c4;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .payment-method-btn:hover {
+            background-color: #4a3422;
+        }
+        .payment-method-btn.active {
+            background: linear-gradient(135deg, #d4a373, #b07d4b);
+            color: #1a120b;
+            border-color: #d4a373;
+            box-shadow: 0 0 10px rgba(212, 163, 115, 0.5);
         }
         
         /* Tùy chỉnh thanh cuộn dải mỏng */
@@ -372,7 +400,7 @@
                 <h5 class="mb-0">🛒 Giỏ hàng</h5>
                 <button class="btn btn-sm btn-outline-danger" onclick="clearCart()">🗑 Xóa hết</button>
             </div>
-            <div id="cart-items" style="flex: 1; overflow-y: auto;">
+            <div id="cart-items">
                 <p class="text-secondary text-center mt-4">Chưa có món nào</p>
             </div>
 
@@ -390,8 +418,21 @@
                     <span class="fw-bold fs-5">Thành tiền:</span>
                     <span id="final-amount" class="fw-bold fs-5" style="color: #e94560;">0 ₫</span>
                 </div>
+                @* --- Phương thức thanh toán (Branch 3 - TV5) --- *@
+                <h5 class="mb-2 mt-3">💳 Phương thức thanh toán</h5>
+                <div id="payment-method-group" class="payment-method-group mb-2">
+                    @* JavaScript sẽ render các nút phương thức thanh toán tại đây *@
+                </div>
+                <div id="cash-tendered-row" class="mb-2 d-none">
+                    <label class="form-label small text-secondary mb-0">Tiền khách đưa</label>
+                    <input type="number" id="amount-tendered" class="form-control bg-dark text-light border-secondary text-end" placeholder="0" min="0" value="0" oninput="updateChangeDisplay()">
+                </div>
+                <div id="change-row" class="d-flex justify-content-between mb-3 d-none">
+                    <span>Tiền thối:</span>
+                    <span id="change-amount" class="fw-bold" style="color: #d4a373;">0 ₫</span>
+                </div>
                 <button class="btn-checkout" onclick="checkout()">
-                    💳 THANH TOÁN
+                    💳 HOÀN TẤT THANH TOÁN
                 </button>
             </div>
         </div>
@@ -414,7 +455,9 @@
     let activeCashierId = "";
     let activeCashierName = "";
     let currentStoreId = 1;
-    let selectedCashierId = "";  // id nhân viên đang chọn (để gửi kèm PIN)
+    let selectedCashierId = "";      // id nhân viên đang chọn (để gửi kèm PIN)
+    let paymentMethods = [];         // Danh sách phương thức thanh toán (id, name)
+    let selectedPaymentMethodId = 0; // Id phương thức thanh toán đang chọn
 
     // 2. Fetch dữ liệu API
 
@@ -433,6 +476,7 @@
                 document.querySelector('.category-btn').classList.add('active');
                 loadProducts(categories[0].id);
             }
+            loadPaymentMethods();
         } catch (error) {
             console.error('❌ Lỗi load danh mục:', error);
             // NẾU LỖI (VD: DB chưa có dữ liệu) → dùng dữ liệu mẫu tạm
@@ -442,7 +486,119 @@
             ];
             renderCategories();
             document.querySelector('.category-btn')?.classList.add('active');
+            loadPaymentMethods();
         }
+    }
+
+    // Hàm load phương thức thanh toán (Tiền mặt, Chuyển khoản...)
+    async function loadPaymentMethods() {
+        try {
+            const res = await fetch('/Pos/GetPaymentMethods');
+            paymentMethods = await res.json();
+            const group = document.getElementById('payment-method-group');
+            if (!group) return;
+            group.innerHTML = '';
+            paymentMethods.forEach(p => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'payment-method-btn';
+                btn.dataset.id = p.id;
+                btn.textContent = p.name;
+                btn.onclick = () => selectPaymentMethod(p.id);
+                group.appendChild(btn);
+            });
+        } catch (e) {
+            console.error('Lỗi load phương thức thanh toán:', e);
+        }
+    }
+
+    function isCashMethod(id) {
+        const method = paymentMethods.find(p => p.id === id);
+        if (!method) return false;
+        const name = (method.name || '').toLowerCase();
+        return id === 1 || name.includes('tiền mặt');
+    }
+
+    function selectPaymentMethod(id) {
+        selectedPaymentMethodId = id;
+        const group = document.getElementById('payment-method-group');
+        if (group) {
+            group.querySelectorAll('.payment-method-btn').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.id, 10) === id);
+            });
+        }
+
+        const cashRow = document.getElementById('cash-tendered-row');
+        const changeRow = document.getElementById('change-row');
+        const amountInput = document.getElementById('amount-tendered');
+        if (isCashMethod(id)) {
+            cashRow.classList.remove('d-none');
+            changeRow.classList.remove('d-none');
+            amountInput.value = '';
+            updateChangeDisplay();
+        } else {
+            cashRow.classList.add('d-none');
+            changeRow.classList.add('d-none');
+            amountInput.value = '0';
+        }
+    }
+
+    function updateChangeDisplay() {
+        const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const usedPoints = parseInt(document.getElementById('use-points')?.value || 0, 10);
+        const finalAmount = Math.max(total - Math.min(usedPoints, maxPoints), 0);
+        const amountInput = document.getElementById('amount-tendered');
+        const changeLabel = document.getElementById('change-amount');
+        if (!amountInput || !changeLabel || !isCashMethod(selectedPaymentMethodId)) {
+            if (changeLabel) changeLabel.textContent = formatMoney(0);
+            return;
+        }
+        const tendered = parseFloat(amountInput.value || 0, 10) || 0;
+        const change = Math.max(tendered - finalAmount, 0);
+        changeLabel.textContent = formatMoney(change);
+    }
+
+    function resetAfterOrder() {
+        // Reset giỏ hàng
+        cart = [];
+        renderCart();
+
+        // Reset thông tin khách hàng
+        const phoneInput = document.getElementById('customer-phone');
+        if (phoneInput) phoneInput.value = '';
+
+        const infoBox = document.getElementById('customer-info-box');
+        const notFoundText = document.getElementById('customer-not-found');
+        if (infoBox) infoBox.classList.add('d-none');
+        if (notFoundText) {
+            notFoundText.classList.remove('d-none');
+            notFoundText.textContent = 'Nhập SĐT và bấm \"Kiểm tra\" để tìm khách hàng';
+            notFoundText.style.color = '';
+        }
+
+        const usePointsInput = document.getElementById('use-points');
+        if (usePointsInput) usePointsInput.value = 0;
+        maxPoints = 0;
+
+        // Reset phương thức thanh toán
+        selectedPaymentMethodId = 0;
+        const group = document.getElementById('payment-method-group');
+        if (group) {
+            group.querySelectorAll('.payment-method-btn').forEach(btn => btn.classList.remove('active'));
+        }
+
+        const amountInput = document.getElementById('amount-tendered');
+        if (amountInput) amountInput.value = 0;
+        const changeLabel = document.getElementById('change-amount');
+        if (changeLabel) changeLabel.textContent = formatMoney(0);
+
+        const cashRow = document.getElementById('cash-tendered-row');
+        const changeRow = document.getElementById('change-row');
+        if (cashRow) cashRow.classList.add('d-none');
+        if (changeRow) changeRow.classList.add('d-none');
+
+        // Tính lại tổng tiền (0) để đồng bộ UI
+        updateTotal();
     }
 
     // Hàm load sản phẩm từ Database
@@ -527,7 +683,8 @@
                 id: product.id,
                 name: product.name,
                 price: product.price,
-                quantity: 1
+                quantity: 1,
+                note: ''
             });
         }
 
@@ -545,19 +702,27 @@
 
         let html = '';
         cart.forEach(function (item, index) {
+            const safeNote = (item.note || '').replace(/"/g, '&quot;');
             html += `
-                <div class="cart-item">
+                <div class="cart-item mb-2">
                     <div class="item-details">
                         <div class="name">${item.name}</div>
                         <div class="price">${formatMoney(item.price)}</div>
                     </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <button class="qty-btn" onclick="changeQty(${index}, -1)">−</button>
-                        <span class="fw-bold mx-1">${item.quantity}</span>
-                        <button class="qty-btn" onclick="changeQty(${index}, +1)">+</button>
-                        <span class="ms-2 price text-end" style="min-width: 80px;">
-                            ${formatMoney(item.price * item.quantity)}
-                        </span>
+                    <div class="d-flex flex-column align-items-end gap-2" style="min-width: 140px;">
+                        <div class="d-flex align-items-center gap-2">
+                            <button class="qty-btn" onclick="changeQty(${index}, -1)">−</button>
+                            <span class="fw-bold mx-1">${item.quantity}</span>
+                            <button class="qty-btn" onclick="changeQty(${index}, +1)">+</button>
+                            <span class="ms-2 price text-end" style="min-width: 80px;">
+                                ${formatMoney(item.price * item.quantity)}
+                            </span>
+                        </div>
+                        <input type="text"
+                               class="form-control form-control-sm bg-dark text-light border-secondary"
+                               placeholder="Ghi chú món này..."
+                               value="${safeNote}"
+                               oninput="updateItemNote(${index}, this.value)" />
                     </div>
                 </div>
             `;
@@ -582,6 +747,11 @@
         renderCart();
     }
 
+    function updateItemNote(index, value) {
+        if (!cart[index]) return;
+        cart[index].note = value;
+    }
+
     function updateTotal() {
         const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
         
@@ -604,6 +774,7 @@
         document.getElementById('total-amount').textContent = formatMoney(total);
         document.getElementById('points-used').textContent = "-" + formatMoney(usedPoints);
         document.getElementById('final-amount').textContent = formatMoney(finalAmount);
+        updateChangeDisplay();
     }
 
 
@@ -615,18 +786,38 @@
             return;
         }
 
+        const paymentMethodId = selectedPaymentMethodId;
+        if (!paymentMethodId) {
+            alert('Vui lòng chọn phương thức thanh toán.');
+            return;
+        }
+
+        const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const usedPoints = parseInt(document.getElementById('use-points')?.value || 0, 10);
+        const finalAmount = Math.max(total - Math.min(usedPoints, maxPoints), 0);
+        let amountTendered = finalAmount;
+        if (paymentMethodId === 1) {
+            amountTendered = parseFloat(document.getElementById('amount-tendered')?.value || 0, 10) || 0;
+            if (amountTendered < finalAmount) {
+                alert('Tiền khách đưa không đủ. Thành tiền: ' + formatMoney(finalAmount));
+                return;
+            }
+        }
+
         const orderData = {
-            storeId: currentStoreId, // <--- Đã được lấy tự động theo Chi nhánh của nhân viên
-            userId: activeCashierId, // <--- ID nhân viên vừa nhập PIN
+            storeId: currentStoreId,
+            userId: activeCashierId,
             customerPhone: document.getElementById('customer-phone').value,
             customerName: null,
-            pointsUsed: parseInt(document.getElementById('use-points')?.value || 0, 10),
+            pointsUsed: usedPoints,
             orderType: document.querySelector('input[name="orderType"]:checked').value,
+            paymentMethodId: paymentMethodId,
+            amountTendered: amountTendered,
             orderItems: cart.map(item => ({
                 menuItemId: item.id,
                 quantity: item.quantity,
                 unitPrice: item.price,
-                note: null
+                note: item.note || null
             }))
         };
 
@@ -639,8 +830,7 @@
         .then(data => {
             if (data.success) {
                 alert('✅ Đặt hàng thành công!\nSố thứ tự: ' + data.queueNumber);
-                cart = [];
-                renderCart();
+                resetAfterOrder();
             } else {
                 alert('❌ Lỗi: ' + data.message);
             }
