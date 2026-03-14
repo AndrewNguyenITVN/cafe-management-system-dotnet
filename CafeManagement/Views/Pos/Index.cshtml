@@ -262,6 +262,16 @@
         <button class="btn btn-success fs-4 py-2 fw-bold" onclick="submitPin()" style="background-color: #6c584c; border:none;">OK</button>
     </div>
     <span id="pin-error" class="text-danger mt-3 d-none fw-bold fs-5">Mã PIN không đúng!</span>
+
+    @* Box thông báo khi nhập sai PIN *@
+    <div id="pin-error-box" class="position-fixed top-0 start-0 w-100 h-100 d-none align-items-center justify-content-center" style="background: rgba(0,0,0,0.6); z-index: 10000;">
+        <div class="bg-dark border rounded-3 shadow-lg p-4 text-center" style="max-width: 320px; border-color: #6c584c !important;">
+            <div class="mb-3 fs-1">⚠️</div>
+            <h5 class="text-warning mb-2">Mã PIN không đúng</h5>
+            <p id="pin-error-box-message" class="text-secondary small mb-4">Vui lòng kiểm tra lại mã PIN và thử lại.</p>
+            <button type="button" class="btn btn-outline-light px-4" onclick="closePinErrorBox()">Đóng</button>
+        </div>
+    </div>
 </div>
 
 @* Layout 3 cột (Grid Bootstrap) *@
@@ -774,11 +784,25 @@
                 // Sau khi đăng nhập ca thành công mới load menu POS
                 loadCategories();
             } else {
-                document.getElementById('pin-error').textContent = data.message || "Mã PIN không đúng!";
-                document.getElementById('pin-error').classList.remove('d-none');
+                const msg = data.message || "Vui lòng kiểm tra lại mã PIN và thử lại.";
+                const box = document.getElementById('pin-error-box');
+                const msgEl = document.getElementById('pin-error-box-message');
+                if (box && msgEl) {
+                    msgEl.textContent = msg;
+                    box.classList.remove('d-none');
+                    box.classList.add('d-flex');
+                }
                 clearPin();
             }
         });
+    }
+
+    function closePinErrorBox() {
+        const box = document.getElementById('pin-error-box');
+        if (box) {
+            box.classList.add('d-none');
+            box.classList.remove('d-flex');
+        }
     }
 
     //Hàm load nhân viên
