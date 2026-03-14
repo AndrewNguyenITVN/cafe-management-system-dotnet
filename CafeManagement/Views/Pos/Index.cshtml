@@ -689,8 +689,21 @@
         document.getElementById('etc-close-shift-panel').classList.add('d-none');
     }
 
+    // Parse chuỗi tiền VN: "129.600 ₫" → 129600 (dấu chấm là phân cách hàng nghìn, không phải thập phân).
     function parseMoneyInput(value) {
-        return parseFloat((value || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+        const s = (value || '0').toString().trim().replace(/\s*₫\s*/g, '');
+        if (!s) return 0;
+        // Có dấu phẩy → coi là thập phân (VN: 129,5)
+        if (s.includes(',')) {
+            const normalized = s.replace(/\./g, '').replace(',', '.');
+            return parseFloat(normalized) || 0;
+        }
+        // Chỉ có dấu chấm: nếu phần sau dấu chấm cuối có 3 chữ số → dấu chấm là nghìn (129.600 → 129600).
+        const parts = s.split('.');
+        if (parts.length > 1 && parts[parts.length - 1].length === 3 && /^\d+$/.test(parts[parts.length - 1])) {
+            return parseFloat(s.replace(/\./g, '')) || 0;
+        }
+        return parseFloat(s) || 0;
     }
 
     async function loadCloseShiftPreview() {
