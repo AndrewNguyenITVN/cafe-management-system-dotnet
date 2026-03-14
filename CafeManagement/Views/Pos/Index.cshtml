@@ -217,6 +217,54 @@
             border-color: #d4a373;
             box-shadow: 0 0 10px rgba(212, 163, 115, 0.5);
         }
+
+        /* ETC button and overlay */
+        .etc-button {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1030;
+            background-color: #3d2a1c;
+            border: 1px solid #d4a373;
+            color: #f7e6c4;
+            border-radius: 999px;
+            padding: 8px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .etc-button:hover {
+            background-color: #4a3422;
+        }
+        #etc-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 1040;
+        }
+        .etc-panel {
+            max-width: 520px;
+            background-color: #2b1f14;
+            border-radius: 16px;
+            border: 1px solid #d4a373;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+            padding: 24px 24px 18px;
+        }
+        .etc-action-btn {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid #3d2a1c;
+            background-color: #3d2a1c;
+            color: #f7e6c4;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+        .etc-action-btn:hover {
+            background-color: #4a3422;
+        }
         
         /* Tùy chỉnh thanh cuộn dải mỏng */
         ::-webkit-scrollbar { width: 6px; }
@@ -440,6 +488,94 @@
     </div>
 </div>
 
+<button type="button" class="etc-button" onclick="openEtcOverlay()">
+    ⚙️ ETC
+</button>
+
+<div id="etc-overlay" class="d-none align-items-center justify-content-center">
+    <div class="etc-panel">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0 fw-bold" style="color:#d4a373;">⚙️ Tùy chọn nâng cao</h5>
+            <button type="button" class="btn btn-sm btn-outline-light" onclick="closeEtcOverlay()">Đóng</button>
+        </div>
+
+        <div id="etc-main-menu">
+            <button type="button" class="etc-action-btn" onclick="openCloseShiftPanel()">
+                💰 Kết ca thu ngân
+            </button>
+            <button type="button" class="etc-action-btn" onclick="showFeatureWip('Báo cáo nhanh')">
+                📊 Báo cáo nhanh (đang phát triển)
+            </button>
+            <button type="button" class="etc-action-btn" onclick="showFeatureWip('Cấu hình máy')">
+                🛠️ Cấu hình máy (đang phát triển)
+            </button>
+        </div>
+
+        <div id="etc-close-shift-panel" class="d-none">
+            <h6 class="fw-bold mb-2" style="color:#d4a373;">💰 Kết ca thu ngân</h6>
+            <div class="small text-secondary mb-2" id="close-shift-store-label"></div>
+            <div class="row g-2 mb-2">
+                <div class="col-6">
+                    <label class="form-label form-label-sm">Ca làm việc</label>
+                    <select id="cs-shiftId" class="form-select form-select-sm">
+                        <option value="1">Ca Sáng (06:00 - 12:00)</option>
+                        <option value="2">Ca Chiều (12:00 - 18:00)</option>
+                        <option value="3">Ca Tối (18:00 - 00:00)</option>
+                    </select>
+                </div>
+                <div class="col-6">
+                    <label class="form-label form-label-sm">Ngày</label>
+                    <input id="cs-date" type="date" class="form-control form-control-sm" />
+                </div>
+            </div>
+
+            <div class="row g-2 mb-2">
+                <div class="col-6">
+                    <label class="form-label form-label-sm">Doanh thu ca</label>
+                    <input id="cs-totalRevenue" class="form-control form-control-sm" readonly value="0 ₫" />
+                </div>
+                <div class="col-6">
+                    <label class="form-label form-label-sm">Tiền mặt (máy)</label>
+                    <input id="cs-totalCash" class="form-control form-control-sm" readonly value="0 ₫" />
+                </div>
+            </div>
+
+            <div class="row g-2 mb-2">
+                <div class="col-4">
+                    <label class="form-label form-label-sm">Tiền đầu ca</label>
+                    <input id="cs-openingCash" type="number" class="form-control form-control-sm" value="0" min="0" />
+                </div>
+                <div class="col-4">
+                    <label class="form-label form-label-sm">Thực tế</label>
+                    <input id="cs-actualCash" type="number" class="form-control form-control-sm" value="0" min="0" />
+                </div>
+                <div class="col-4">
+                    <label class="form-label form-label-sm">Lý thuyết</label>
+                    <input id="cs-expectedCash" class="form-control form-control-sm" readonly value="0 ₫" />
+                </div>
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label form-label-sm">Chênh lệch</label>
+                <input id="cs-difference" class="form-control form-control-sm fw-bold" readonly value="0 ₫" />
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label form-label-sm">Ghi chú (bắt buộc nếu có chênh lệch)</label>
+                <textarea id="cs-note" class="form-control form-control-sm" rows="2"></textarea>
+            </div>
+
+            <div class="d-flex justify-content-between mt-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="backToEtcMenu()">⬅ Quay lại</button>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-light" onclick="loadCloseShiftPreview()">🔄 Tính lại</button>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="submitCloseShift()">✅ Kết ca</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @* JAVASCRIPT LOGIC *@
 
 <script>
@@ -510,6 +646,150 @@
         } catch (e) {
             console.error('Lỗi load phương thức thanh toán:', e);
         }
+    }
+
+    // ETC overlay logic
+    function openEtcOverlay() {
+        const overlay = document.getElementById('etc-overlay');
+        if (!overlay) return;
+        overlay.classList.remove('d-none');
+        overlay.classList.add('d-flex');
+
+        document.getElementById('etc-main-menu').classList.remove('d-none');
+        document.getElementById('etc-close-shift-panel').classList.add('d-none');
+
+        const dateInput = document.getElementById('cs-date');
+        if (dateInput) {
+            const today = new Date().toISOString().slice(0, 10);
+            dateInput.value = today;
+        }
+    }
+
+    function closeEtcOverlay() {
+        const overlay = document.getElementById('etc-overlay');
+        if (!overlay) return;
+        overlay.classList.add('d-none');
+        overlay.classList.remove('d-flex');
+    }
+
+    function showFeatureWip(name) {
+        alert('Tính năng "' + name + '" đang được triển khai.');
+    }
+
+    function openCloseShiftPanel() {
+        document.getElementById('etc-main-menu').classList.add('d-none');
+        document.getElementById('etc-close-shift-panel').classList.remove('d-none');
+        document.getElementById('close-shift-store-label').textContent =
+            'Chi nhánh hiện tại sẽ được dùng để tính ca (theo tài khoản đăng nhập).';
+        loadCloseShiftPreview();
+    }
+
+    function backToEtcMenu() {
+        document.getElementById('etc-main-menu').classList.remove('d-none');
+        document.getElementById('etc-close-shift-panel').classList.add('d-none');
+    }
+
+    function parseMoneyInput(value) {
+        return parseFloat((value || '0').toString().replace(/[^\d.-]/g, '')) || 0;
+    }
+
+    async function loadCloseShiftPreview() {
+        const shiftId = parseInt(document.getElementById('cs-shiftId').value || '1', 10);
+        const dateStr = document.getElementById('cs-date').value;
+        if (!dateStr) return;
+
+        const url = `/Pos/GetShiftHandoverPreview?shiftId=${shiftId}&date=${dateStr}`;
+        const res = await fetch(url);
+        if (!res.ok) {
+            const text = await res.text();
+            console.error('Preview error:', text);
+            alert('Không thể tải dữ liệu kết ca (mã ' + res.status + ').');
+            return;
+        }
+        const data = await res.json();
+        if (!data.success) {
+            alert(data.message || 'Không thể tải dữ liệu kết ca.');
+            return;
+        }
+
+        document.getElementById('cs-totalRevenue').value = formatMoney(parseMoneyInput(data.totalRevenue));
+        document.getElementById('cs-totalCash').value = formatMoney(parseMoneyInput(data.totalCash));
+
+        recalcCloseShiftExpectedAndDiff();
+    }
+
+    function recalcCloseShiftExpectedAndDiff() {
+        const totalCash = parseMoneyInput(document.getElementById('cs-totalCash').value);
+        const openingCash = parseFloat(document.getElementById('cs-openingCash').value || '0');
+        const actualCash = parseFloat(document.getElementById('cs-actualCash').value || '0');
+
+        const expected = openingCash + totalCash;
+        const diff = actualCash - expected;
+
+        document.getElementById('cs-expectedCash').value = formatMoney(expected);
+
+        const diffInput = document.getElementById('cs-difference');
+        diffInput.value = formatMoney(diff);
+        diffInput.classList.remove('text-danger', 'text-success');
+        if (diff < 0) diffInput.classList.add('text-danger');
+        if (diff > 0) diffInput.classList.add('text-success');
+    }
+
+    document.getElementById('cs-openingCash').addEventListener('input', recalcCloseShiftExpectedAndDiff);
+    document.getElementById('cs-actualCash').addEventListener('input', recalcCloseShiftExpectedAndDiff);
+
+    async function submitCloseShift() {
+        const shiftId = parseInt(document.getElementById('cs-shiftId').value || '1', 10);
+        const dateStr = document.getElementById('cs-date').value;
+        if (!dateStr) {
+            alert('Vui lòng chọn ngày kết ca.');
+            return;
+        }
+
+        const openingCash = parseFloat(document.getElementById('cs-openingCash').value || '0');
+        const actualCash = parseFloat(document.getElementById('cs-actualCash').value || '0');
+        const totalCash = parseMoneyInput(document.getElementById('cs-totalCash').value);
+        const expected = openingCash + totalCash;
+        const diff = actualCash - expected;
+
+        const note = (document.getElementById('cs-note').value || '').trim();
+        if (diff !== 0 && !note) {
+            alert('Có chênh lệch tiền mặt, vui lòng nhập ghi chú lý do.');
+            return;
+        }
+
+        if (!confirm('Xác nhận kết ca cho ngày ' + dateStr + ' ?')) {
+            return;
+        }
+
+        const payload = {
+            shiftId,
+            date: dateStr,
+            openingCash,
+            actualCashCounted: actualCash,
+            note
+        };
+
+        const res = await fetch('/Pos/SubmitShiftHandover', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (!res.ok) {
+            const text = await res.text();
+            console.error('Submit close shift error:', text);
+            alert('Kết ca thất bại (mã ' + res.status + ').');
+            return;
+        }
+        const data = await res.json();
+        if (!data.success) {
+            alert(data.message || 'Kết ca thất bại.');
+            return;
+        }
+
+        alert('✅ Đã kết ca thành công.\nChênh lệch: ' + formatMoney(data.difference));
+        // Reload về màn hình PIN
+        window.location.reload();
     }
 
     function isCashMethod(id) {

@@ -495,5 +495,23 @@ CREATE INDEX IX_Timekeepings_UserId_Date ON Timekeepings (UserId, Date);
 CREATE INDEX IX_Timekeepings_StoreId     ON Timekeepings (StoreId);
 GO
 
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='ShiftHandovers' AND xtype='U')
+CREATE TABLE ShiftHandovers (
+    Id                INT IDENTITY NOT NULL PRIMARY KEY,
+    StoreId           INT           NOT NULL,
+    ShiftId           INT           NOT NULL,
+    HandoverDate      DATE          NOT NULL,
+    OpeningCash       DECIMAL(12,0) NOT NULL DEFAULT 0,
+    ExpectedCash      DECIMAL(12,0) NOT NULL DEFAULT 0,
+    ActualCashCounted DECIMAL(12,0) NOT NULL DEFAULT 0,
+    Difference        DECIMAL(12,0) NOT NULL DEFAULT 0,
+    Note              NVARCHAR(500) NULL,
+    ConfirmedAt       DATETIME2     NOT NULL DEFAULT GETDATE(),
+    ConfirmedByUserId NVARCHAR(450) NULL,
+    CONSTRAINT FK_ShiftHandovers_Stores FOREIGN KEY (StoreId) REFERENCES Stores(Id),
+    CONSTRAINT FK_ShiftHandovers_Shifts FOREIGN KEY (ShiftId) REFERENCES Shifts(Id)
+);
+GO
+
 PRINT 'Schema created successfully. Run CafeManagement_SeedData.sql next.';
 GO
