@@ -48,6 +48,7 @@ builder.Services.AddScoped<InventoryService>();
 builder.Services.AddScoped<PointService>();
 builder.Services.AddScoped<TransactionService>();
 builder.Services.AddScoped<ShiftHandoverService>();
+builder.Services.AddScoped<ReportingService>();
 
 // ── MVC & SIGNALR ──────────────────────────────────────────
 builder.Services.AddControllersWithViews();
