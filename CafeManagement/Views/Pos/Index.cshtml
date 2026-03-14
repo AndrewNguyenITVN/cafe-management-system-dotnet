@@ -212,6 +212,24 @@
             background-color: #d4a373;
             border-color: #d4a373;
         }
+
+        #cashier-list-box .cashier-item {
+            padding: 12px 14px;
+            border-bottom: 1px solid #3d2a1c;
+            cursor: pointer;
+            color: #f7e6c4;
+            transition: background 0.2s;
+        }
+        #cashier-list-box .cashier-item:hover {
+            background-color: #3d2a1c;
+        }
+        #cashier-list-box .cashier-item.selected {
+            background-color: #4a3422;
+            border-left: 4px solid #d4a373;
+        }
+        #cashier-list-box .cashier-item:last-child {
+            border-bottom: none;
+        }
     </style>
 </head>
 
@@ -220,6 +238,14 @@
 @* ══════════ MÀN HÌNH KHÓA PIN ══════════ *@
 <div id="pin-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center" style="background-color: #1a120b; z-index: 9999;">
     <h2 class="mb-4 fw-bold" style="color: #d4a373;">🔒 MỞ CA LÀM VIỆC</h2>
+    <!-- Chọn nhân viên -->
+    <div class="mb-3" style="width: 280px;">
+        <label class="form-label small text-secondary mb-1">Chọn nhân viên</label>
+        <div id="cashier-list-box" class="border rounded overflow-y-auto bg-dark"
+            style="max-height: 200px; border-color: #3d2a1c !important;">
+            <p class="text-secondary text-center small py-3 mb-0">Đang tải...</p>
+        </div>
+    </div>
     <input type="password" id="pin-input" class="form-control bg-dark text-center text-light fs-3 mb-4 rounded-3 border-secondary" style="width: 250px; letter-spacing: 10px; height: 60px;" readonly />
     <div class="d-grid gap-2" style="grid-template-columns: repeat(3, 1fr); width: 250px;">
         <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('1')">1</button>
@@ -374,6 +400,11 @@
     let cart = [];         
     let maxPoints = 0;     // Số điểm tối đa khách có thể dùng
 
+    let currentPin = "";
+    let activeCashierId = "";
+    let activeCashierName = "";
+    let currentStoreId = 1;
+    let selectedCashierId = "";  // id nhân viên đang chọn (để gửi kèm PIN)
 
     // 2. Fetch dữ liệu API
 
@@ -658,11 +689,7 @@
         }
     }
 
-    // 9. Logic PIN Code Thu Ngân
-    let currentPin = "";
-    let activeCashierId = "";
-    let activeCashierName = "";
-    let currentStoreId = 1; // Chi nhánh mặc định nếu NV chưa được gán
+    // 9. Logic PIN Code Thu Ngân (biến currentPin, activeCashierId, ... đã khai báo ở đầu script)
 
     function addPin(num) {
         if(currentPin.length < 6) {
@@ -677,7 +704,49 @@
         document.getElementById('pin-input').value = currentPin;
     }
 
+    // function submitPin() {
+    //     if (currentPin.length < 4) {
+    //         alert("Mã PIN phải ít nhất 4 số!");
+    //         return;
+    //     }
+
+    //     fetch('/Pos/VerifyPin', {
+    //         method: 'POST',
+    //         headers: { 'Content-Type': 'application/json' },
+    //         body: JSON.stringify({ pinCode: currentPin })
+    //     })
+    //     .then(res => res.json())
+    //     .then(data => {
+    //         if (data.success) {
+    //             // Lưu lại Session Cashier và StoreId từ DB để chèn vào đơn hàng
+    //             activeCashierId = data.userId;
+    //             activeCashierName = data.cashierName;
+    //             currentStoreId = data.storeId || 1; 
+                
+    //             // ĐÚNG PIN -> TẮT OVERLAY
+    //             const overlay = document.getElementById('pin-overlay');
+    //             overlay.classList.remove('d-flex');
+    //             overlay.classList.add('d-none');
+                
+    //             // Nạp data POS
+    //             loadCategories();
+                
+    //             // (Tùy chọn) Hiện thông báo trên màn hình
+    //             // document.getElementById('cashier-name-header').textContent = data.cashierName;
+    //         } else {
+    //             document.getElementById('pin-error').textContent = data.message || "Mã PIN không đúng!";
+    //             document.getElementById('pin-error').classList.remove('d-none');
+    //             clearPin();
+    //         }
+    //     });
+    // }
+
     function submitPin() {
+        if (!selectedCashierId) {
+            alert("Vui lòng chọn nhân viên trong danh sách trước khi nhập PIN.");
+            return;
+        }
+
         if (currentPin.length < 4) {
             alert("Mã PIN phải ít nhất 4 số!");
             return;
@@ -686,26 +755,24 @@
         fetch('/Pos/VerifyPin', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pinCode: currentPin })
+            body: JSON.stringify({
+                pinCode: currentPin,
+                userId: selectedCashierId
+            })
         })
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                // Lưu lại Session Cashier và StoreId từ DB để chèn vào đơn hàng
                 activeCashierId = data.userId;
                 activeCashierName = data.cashierName;
-                currentStoreId = data.storeId || 1; 
-                
-                // ĐÚNG PIN -> TẮT OVERLAY
+                currentStoreId = data.storeId || 1;
+
                 const overlay = document.getElementById('pin-overlay');
                 overlay.classList.remove('d-flex');
                 overlay.classList.add('d-none');
-                
-                // Nạp data POS
+
+                // Sau khi đăng nhập ca thành công mới load menu POS
                 loadCategories();
-                
-                // (Tùy chọn) Hiện thông báo trên màn hình
-                // document.getElementById('cashier-name-header').textContent = data.cashierName;
             } else {
                 document.getElementById('pin-error').textContent = data.message || "Mã PIN không đúng!";
                 document.getElementById('pin-error').classList.remove('d-none');
@@ -714,8 +781,58 @@
         });
     }
 
+    //Hàm load nhân viên
+    async function loadCashiers() {
+        const box = document.getElementById('cashier-list-box');
+        if (!box) return;
+        try {
+            const res = await fetch('/Pos/GetCashiers', { credentials: 'same-origin' });
+            if (!res.ok) {
+                box.innerHTML = '<p class="text-danger text-center small py-3 mb-0">Lỗi tải danh sách (HTTP ' + res.status + ')</p>';
+                return;
+            }
+            const data = await res.json();
 
-    // Không gọi tự động loadCategories nữa, chờ bấm PIN xong mới nạp.
+            // Backend có thể trả array hoặc object có property (tương thích cả PascalCase/camelCase)
+            const list = Array.isArray(data) ? data : (data.data || data.items || []);
+            if (list.length === 0) {
+                box.innerHTML = '<p class="text-secondary text-center small py-3 mb-0">Chưa có nhân viên</p>';
+                return;
+            }
+
+            box.innerHTML = '';
+            list.forEach(c => {
+                const id = c.id ?? c.Id ?? '';
+                const name = (c.name ?? c.Name ?? '').trim() || 'Nhân viên';
+                const div = document.createElement('div');
+                div.className = 'cashier-item';
+                div.dataset.id = id;
+                div.dataset.name = name;
+                div.textContent = name;
+
+                div.onclick = function () {
+                    document.querySelectorAll('#cashier-list-box .cashier-item').forEach(el => el.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedCashierId = this.dataset.id;
+                };
+
+                box.appendChild(div);
+            });
+        } catch (e) {
+            console.error('Lỗi load danh sách nhân viên:', e);
+            box.innerHTML = '<p class="text-danger text-center small py-3 mb-0">Lỗi tải danh sách</p>';
+        }
+    }
+
+    // Cuối script: gọi load nhân viên ngay khi DOM sẵn sàng (script ở cuối body nên DOM thường đã load xong)
+    function initPos() {
+        loadCashiers();
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPos);
+    } else {
+        initPos();
+    }
 
 </script>
 

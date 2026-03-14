@@ -91,6 +91,21 @@ public class PosController : Controller
         return Ok(result);
     }
 
+    // Lấy danh sách nhân viên đang active để hiển thị trên màn PIN
+    [HttpGet]
+    public async Task<IActionResult> GetCashiers()
+    {
+        var users = await _db.Users
+            .Where(u => u.IsActive)
+            .Select(u => new {
+                id = u.Id,
+                name = u.FullName ?? u.UserName ?? "",
+                storeId = u.StoreId
+            })
+            .ToListAsync();
+
+        return Ok(users);
+    }
 
     // API: Tạo đơn hàng
     [HttpPost]
@@ -223,32 +238,62 @@ public class PosController : Controller
         return Ok(new { success = false });
     }
 
+    // public class PinRequest
+    // {
+    //     public string PinCode { get; set; } = string.Empty;
+    // }
+
+    // // API: Xác thực mã PIN của nhân viên
+    // [HttpPost]
+    // public IActionResult VerifyPin([FromBody] PinRequest request)
+    // {
+    //     var pinCode = request?.PinCode;
+    //     if (string.IsNullOrEmpty(pinCode)) return BadRequest(new { success = false, message = "Mã PIN rỗng!" });
+
+    //     // Trong các hệ thống POS, nhân viên dùng chung 1 máy và khóa màn hình bằng mã PIN.
+    //     // Ta sẽ dò trực tiếp người dùng có mã PIN này.
+    //     var cashier = _db.Users.FirstOrDefault(u => u.PinCode == pinCode);
+        
+    //     if (cashier != null && cashier.IsActive)
+    //     {
+    //         return Ok(new { 
+    //             success = true, 
+    //             userId = cashier.Id,
+    //             cashierName = cashier.FullName ?? cashier.UserName,
+    //             storeId = cashier.StoreId ?? 1 // Lấy ID Chi nhánh của Nhân viên này, mặc định 1 nếu chưa gán
+    //         });
+    //     }
+
+    //     return BadRequest(new { success = false, message = "Mã PIN không đúng hoặc đã bị khóa!" });
+    // }
     public class PinRequest
     {
         public string PinCode { get; set; } = string.Empty;
+        public string UserId { get; set; } = string.Empty; // THÊM
     }
 
-    // API: Xác thực mã PIN của nhân viên
     [HttpPost]
     public IActionResult VerifyPin([FromBody] PinRequest request)
     {
         var pinCode = request?.PinCode;
-        if (string.IsNullOrEmpty(pinCode)) return BadRequest(new { success = false, message = "Mã PIN rỗng!" });
+        var userId  = request?.UserId;
 
-        // Trong các hệ thống POS, nhân viên dùng chung 1 máy và khóa màn hình bằng mã PIN.
-        // Ta sẽ dò trực tiếp người dùng có mã PIN này.
-        var cashier = _db.Users.FirstOrDefault(u => u.PinCode == pinCode);
-        
+        if (string.IsNullOrEmpty(pinCode) || string.IsNullOrEmpty(userId))
+            return BadRequest(new { success = false, message = "Thiếu thông tin nhân viên hoặc PIN!" });
+
+        // Chỉ tìm đúng nhân viên đã chọn
+        var cashier = _db.Users.FirstOrDefault(u => u.Id == userId && u.PinCode == pinCode);
+
         if (cashier != null && cashier.IsActive)
         {
-            return Ok(new { 
-                success = true, 
+            return Ok(new {
+                success = true,
                 userId = cashier.Id,
                 cashierName = cashier.FullName ?? cashier.UserName,
-                storeId = cashier.StoreId ?? 1 // Lấy ID Chi nhánh của Nhân viên này, mặc định 1 nếu chưa gán
+                storeId = cashier.StoreId ?? 1
             });
         }
 
-        return BadRequest(new { success = false, message = "Mã PIN không đúng hoặc đã bị khóa!" });
+        return BadRequest(new { success = false, message = "Mã PIN không đúng hoặc nhân viên đã bị khóa!" });
     }
 }
