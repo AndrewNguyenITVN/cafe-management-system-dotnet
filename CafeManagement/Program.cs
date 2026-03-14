@@ -47,6 +47,7 @@ builder.Services.AddScoped<IOrderService, OrderService>(); // TV2: POS Order
 builder.Services.AddScoped<InventoryService>();
 builder.Services.AddScoped<PointService>();
 builder.Services.AddScoped<TransactionService>();
+builder.Services.AddScoped<ShiftHandoverService>();
 
 // ── MVC & SIGNALR ──────────────────────────────────────────
 builder.Services.AddControllersWithViews();
