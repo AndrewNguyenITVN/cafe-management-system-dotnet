@@ -20,19 +20,22 @@ public class PosController : Controller
     private readonly IOrderService _orderService;  
     private readonly IHubContext<OrderHub> _hubContext;
     private readonly AppDbContext _db;
+    private readonly ShiftHandoverService _shiftHandoverService;
 
     public PosController(
         CategoryService categoryService,
         MenuItemService menuItemService,
         IOrderService orderService,
         IHubContext<OrderHub> hubContext,
-        AppDbContext db)
+        AppDbContext db,
+        ShiftHandoverService shiftHandoverService)
     {
         _categoryService = categoryService;
         _menuItemService = menuItemService;
         _orderService = orderService;      
         _hubContext = hubContext;
         _db = db;
+        _shiftHandoverService = shiftHandoverService;
     }
 
 
@@ -116,6 +119,94 @@ public class PosController : Controller
             .Select(p => new { id = p.Id, name = p.MethodName })
             .ToListAsync();
         return Ok(list);
+    }
+
+    // API: Preview kết ca cho POS (dựa trên ca + ngày của chi nhánh hiện tại)
+    [HttpGet]
+    public async Task<IActionResult> GetShiftHandoverPreview(int shiftId, DateOnly date)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(new { success = false, message = "Chưa đăng nhập." });
+        }
+
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null || !user.StoreId.HasValue)
+        {
+            return BadRequest(new { success = false, message = "Nhân viên chưa được gán chi nhánh." });
+        }
+
+        var dateOnly = date;
+        var preview = await _shiftHandoverService.GetPreviewAsync(user.StoreId.Value, shiftId, dateOnly);
+        if (preview == null)
+        {
+            return BadRequest(new { success = false, message = "Không tìm thấy chi nhánh hoặc ca làm việc." });
+        }
+
+        return Ok(new
+        {
+            success = true,
+            storeId = preview.StoreId,
+            storeName = preview.StoreName,
+            shiftId = preview.ShiftId,
+            shiftName = preview.ShiftName,
+            date = preview.Date,
+            totalRevenue = preview.TotalRevenue,
+            totalCash = preview.TotalCash
+        });
+    }
+
+    public class PosCloseShiftRequest
+    {
+        public int ShiftId { get; set; }
+        public DateOnly Date { get; set; }
+        public decimal OpeningCash { get; set; }
+        public decimal ActualCashCounted { get; set; }
+        public string? Note { get; set; }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SubmitShiftHandover([FromBody] PosCloseShiftRequest model)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(new { success = false, message = "Chưa đăng nhập." });
+        }
+
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null || !user.StoreId.HasValue)
+        {
+            return BadRequest(new { success = false, message = "Nhân viên chưa được gán chi nhánh." });
+        }
+
+        var result = await _shiftHandoverService.CloseShiftAsync(
+            user.StoreId.Value,
+            model.ShiftId,
+            model.Date,
+            model.OpeningCash,
+            model.ActualCashCounted,
+            model.Note,
+            userId);
+
+        if (!result.Success)
+        {
+            return BadRequest(new { success = false, message = result.Message });
+        }
+
+        return Ok(new
+        {
+            success = true,
+            storeId = result.StoreId,
+            shiftId = result.ShiftId,
+            date = result.Date,
+            openingCash = result.OpeningCash,
+            totalCash = result.TotalCash,
+            expectedCash = result.ExpectedCash,
+            actualCash = result.ActualCashCounted,
+            difference = result.Difference
+        });
     }
 
     // API: Tạo đơn hàng
