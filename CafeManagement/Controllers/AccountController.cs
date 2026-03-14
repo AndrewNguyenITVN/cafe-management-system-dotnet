@@ -17,10 +17,15 @@ public class AccountController : Controller
     }
 
     [HttpGet]
-    public IActionResult Login(string? returnUrl = null)
+    public async Task<IActionResult> Login(string? returnUrl = null)
     {
         if (User.Identity?.IsAuthenticated == true)
-            return RedirectToAction("Index", "Dashboard");
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null && await IsDashboardRoleAsync(user))
+                return RedirectToAction("Index", "Dashboard");
+            return RedirectToAction("Index", "Pos");
+        }
 
         ViewData["ReturnUrl"] = returnUrl;
         return View();
@@ -46,7 +51,9 @@ public class AccountController : Controller
         {
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return Redirect(returnUrl);
-            return RedirectToAction("Index", "Dashboard");
+            if (await IsDashboardRoleAsync(user))
+                return RedirectToAction("Index", "Dashboard");
+            return RedirectToAction("Index", "Pos");
         }
 
         ModelState.AddModelError(string.Empty, "Email hoặc mật khẩu không đúng.");
@@ -62,4 +69,13 @@ public class AccountController : Controller
     }
 
     public IActionResult AccessDenied() => View();
+
+    /// <summary>True nếu user là Admin hoặc Manager (redirect Dashboard); ngược lại redirect Pos.</summary>
+    private async Task<bool> IsDashboardRoleAsync(AppUser user)
+    {
+        var roles = await _userManager.GetRolesAsync(user);
+        return roles.Any(r =>
+            string.Equals(r, "Admin", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(r, "Manager", StringComparison.OrdinalIgnoreCase));
+    }
 }
