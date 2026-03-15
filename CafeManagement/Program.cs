@@ -14,11 +14,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // ── Identity ──────────────────────────────────────────────
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
-    options.Password.RequireDigit           = true;
-    options.Password.RequiredLength         = 6;
-    options.Password.RequireUppercase       = false;
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 6;
+    options.Password.RequireUppercase = false;
     options.Password.RequireNonAlphanumeric = false;
-    options.User.RequireUniqueEmail         = true;
+    options.User.RequireUniqueEmail = true;
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
@@ -26,10 +26,10 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 // ── Cookie Auth ───────────────────────────────────────────
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath        = "/Account/Login";
-    options.LogoutPath       = "/Account/Logout";
+    options.LoginPath = "/Account/Login";
+    options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/Account/AccessDenied";
-    options.ExpireTimeSpan   = TimeSpan.FromHours(8);
+    options.ExpireTimeSpan = TimeSpan.FromHours(8);
     options.SlidingExpiration = true;
 });
 
@@ -42,6 +42,8 @@ builder.Services.AddScoped<ToppingService>();
 builder.Services.AddScoped<SupplierService>();
 builder.Services.AddScoped<JobPositionService>();
 builder.Services.AddScoped<UserService>();
+// TV3: Inventory & Recipe
+builder.Services.AddScoped<RecipeService>();
 // POS / CRM / Inventory Services (TV2, TV3, TV5 implement)
 builder.Services.AddScoped<IOrderService, OrderService>(); // TV2: POS Order
 builder.Services.AddScoped<InventoryService>();
@@ -99,17 +101,17 @@ static async Task SeedAdminAsync(IServiceProvider services)
     }
 
     // Tạo tài khoản Admin mặc định
-    const string adminEmail    = "admin@cafe.com";
+    const string adminEmail = "admin@cafe.com";
     const string adminPassword = "Admin@123";
 
     if (await userManager.FindByEmailAsync(adminEmail) == null)
     {
         var admin = new AppUser
         {
-            UserName  = adminEmail,
-            Email     = adminEmail,
-            FullName  = "Quản trị viên",
-            IsActive  = true,
+            UserName = adminEmail,
+            Email = adminEmail,
+            FullName = "Quản trị viên",
+            IsActive = true,
             EmailConfirmed = true
         };
         var result = await userManager.CreateAsync(admin, adminPassword);
