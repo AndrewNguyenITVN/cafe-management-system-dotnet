@@ -66,8 +66,18 @@
             width: 100%;
             max-width: 760px;
         }
+        .card-grid .nav-card:last-child:nth-child(odd) {
+            grid-column: 1 / -1;
+            max-width: calc(50% - 10px);
+            justify-self: center;
+        }
         @@media (max-width: 540px) {
             .card-grid { grid-template-columns: 1fr; }
+            .card-grid .nav-card:last-child:nth-child(odd) {
+                grid-column: auto;
+                max-width: 100%;
+                justify-self: auto;
+            }
             .brand-title { font-size: 1.8rem; }
         }
 
@@ -88,6 +98,7 @@
                         box-shadow .25s cubic-bezier(.4,0,.2,1),
                         border-color .25s;
             cursor: pointer;
+            width: 100%;
         }
         .nav-card::before {
             content: '';
@@ -115,18 +126,8 @@
             background-color: rgba(255,255,255,.04);
             border: 1px solid rgba(255,255,255,.06);
         }
-        .card-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin: 0 0 6px;
-            letter-spacing: .3px;
-        }
-        .card-desc {
-            font-size: .85rem;
-            color: #8a7060;
-            line-height: 1.5;
-            flex-grow: 1;
-        }
+        .card-title { font-size: 1.2rem; font-weight: 700; margin: 0 0 6px; letter-spacing: .3px; }
+        .card-desc  { font-size: .85rem; color: #8a7060; line-height: 1.5; flex-grow: 1; }
         .card-arrow {
             margin-top: 20px;
             font-size: .82rem;
@@ -143,38 +144,47 @@
             gap: 10px;
         }
 
-        /* Màu accent riêng từng thẻ */
-        .card-admin   { --accent: #d4a373; }
-        .card-pos     { --accent: #7ec8e3; }
-        .card-kds     { --accent: #f4a261; }
-        .card-display { --accent: #90e0ae; }
+        /* Accent per card */
+        .card-admin     { --accent: #d4a373; }
+        .card-pos       { --accent: #7ec8e3; }
+        .card-kds       { --accent: #f4a261; }
+        .card-display   { --accent: #90e0ae; }
+        .card-inventory { --accent: #c77dff; }
 
-        .card-admin   .card-icon { color: #d4a373; }
-        .card-pos     .card-icon { color: #7ec8e3; }
-        .card-kds     .card-icon { color: #f4a261; }
-        .card-display .card-icon { color: #90e0ae; }
+        .card-admin     .card-icon { color: #d4a373; }
+        .card-pos       .card-icon { color: #7ec8e3; }
+        .card-kds       .card-icon { color: #f4a261; }
+        .card-display   .card-icon { color: #90e0ae; }
+        .card-inventory .card-icon { color: #c77dff; }
 
-        .card-admin:hover   { box-shadow: 0 20px 40px rgba(212,163,115,.15); }
-        .card-pos:hover     { box-shadow: 0 20px 40px rgba(126,200,227,.12); }
-        .card-kds:hover     { box-shadow: 0 20px 40px rgba(244,162,97,.12);  }
-        .card-display:hover { box-shadow: 0 20px 40px rgba(144,224,174,.12); }
+        .card-admin:hover     { box-shadow: 0 20px 40px rgba(212,163,115,.15); }
+        .card-pos:hover       { box-shadow: 0 20px 40px rgba(126,200,227,.12); }
+        .card-kds:hover       { box-shadow: 0 20px 40px rgba(244,162,97,.12);  }
+        .card-display:hover   { box-shadow: 0 20px 40px rgba(144,224,174,.12); }
+        .card-inventory:hover { box-shadow: 0 20px 40px rgba(199,125,255,.15); }
 
-        /* Badge góc */
         .badge-corner {
             position: absolute;
-            top: 14px;
-            right: 16px;
-            font-size: .68rem;
-            font-weight: 700;
+            top: 14px; right: 16px;
+            font-size: .68rem; font-weight: 700;
             padding: 3px 9px;
             border-radius: 999px;
             letter-spacing: .5px;
             text-transform: uppercase;
         }
-        .badge-admin   { background: rgba(212,163,115,.15); color: #d4a373; border: 1px solid rgba(212,163,115,.3); }
-        .badge-pos     { background: rgba(126,200,227,.12); color: #7ec8e3; border: 1px solid rgba(126,200,227,.3); }
-        .badge-kds     { background: rgba(244,162,97,.12);  color: #f4a261; border: 1px solid rgba(244,162,97,.3);  }
-        .badge-display { background: rgba(144,224,174,.12); color: #90e0ae; border: 1px solid rgba(144,224,174,.3); }
+        .badge-admin     { background: rgba(212,163,115,.15); color: #d4a373; border: 1px solid rgba(212,163,115,.3); }
+        .badge-pos       { background: rgba(126,200,227,.12); color: #7ec8e3; border: 1px solid rgba(126,200,227,.3); }
+        .badge-kds       { background: rgba(244,162,97,.12);  color: #f4a261; border: 1px solid rgba(244,162,97,.3);  }
+        .badge-display   { background: rgba(144,224,174,.12); color: #90e0ae; border: 1px solid rgba(144,224,174,.3); }
+        .badge-inventory { background: rgba(199,125,255,.12); color: #c77dff; border: 1px solid rgba(199,125,255,.3); }
+
+        /* Lock icon trên card inventory */
+        .card-lock {
+            position: absolute;
+            bottom: 26px; right: 24px;
+            font-size: 1rem;
+            opacity: .35;
+        }
 
         .footer-note {
             margin-top: 40px;
@@ -182,6 +192,128 @@
             color: #4a3422;
             text-align: center;
         }
+
+        /* ══════ PIN MODAL ══════ */
+        #pin-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.75);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pin-modal-box {
+            background: #1a120b;
+            border: 1px solid #3d2a1c;
+            border-radius: 20px;
+            padding: 32px 28px 28px;
+            width: 100%;
+            max-width: 340px;
+            box-shadow: 0 24px 60px rgba(0,0,0,.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        .pin-modal-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #c77dff;
+            margin-bottom: 4px;
+        }
+        .pin-modal-sub {
+            font-size: .8rem;
+            color: #6a5060;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        /* Danh sách Manager */
+        #mgr-list-box {
+            width: 100%;
+            max-height: 160px;
+            overflow-y: auto;
+            border: 1px solid #3d2a1c;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            background: #0f0a06;
+        }
+        .mgr-item {
+            padding: 11px 14px;
+            border-bottom: 1px solid #2a1a0e;
+            cursor: pointer;
+            font-size: .9rem;
+            color: #f7e6c4;
+            transition: background .15s;
+        }
+        .mgr-item:last-child { border-bottom: none; }
+        .mgr-item:hover { background: #2b1f14; }
+        .mgr-item.selected { background: #3d2a1c; border-left: 3px solid #c77dff; }
+
+        /* PIN input */
+        #mgr-pin-input {
+            width: 220px;
+            height: 56px;
+            background: #0f0a06;
+            border: 1px solid #3d2a1c;
+            border-radius: 10px;
+            color: #f7e6c4;
+            font-size: 2rem;
+            text-align: center;
+            letter-spacing: 10px;
+            margin-bottom: 16px;
+            outline: none;
+        }
+        #mgr-pin-input:focus { border-color: #c77dff; box-shadow: 0 0 0 3px rgba(199,125,255,.2); }
+
+        /* Keypad */
+        .pin-keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            width: 220px;
+            margin-bottom: 16px;
+        }
+        .pin-key {
+            padding: 12px 0;
+            border-radius: 10px;
+            border: 1px solid #3d2a1c;
+            background: #2b1f14;
+            color: #f7e6c4;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .15s;
+        }
+        .pin-key:hover { background: #4a3422; }
+        .pin-key.danger { background: #3b1010; border-color: #6b2020; color: #f87171; }
+        .pin-key.confirm { background: #2a1a4a; border-color: #7a3db0; color: #c77dff; }
+
+        #mgr-pin-error {
+            color: #f87171;
+            font-size: .82rem;
+            font-weight: 600;
+            min-height: 20px;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .pin-close-btn {
+            position: absolute;
+            top: 14px; right: 16px;
+            background: none;
+            border: none;
+            color: #6a5060;
+            font-size: 1.2rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .pin-close-btn:hover { color: #f7e6c4; }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #0f0a06; }
+        ::-webkit-scrollbar-thumb { background: #3d2a1c; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -226,11 +358,157 @@
             <div class="card-arrow">Mở màn hình <span>→</span></div>
         </a>
 
+        <div class="nav-card card-inventory" onclick="openInventoryPin()" style="cursor:pointer;">
+            <span class="badge-corner badge-inventory">Manager</span>
+            <div class="card-icon">📦</div>
+            <div class="card-title">Kho hàng</div>
+            <div class="card-desc">Quản lý tồn kho, nhập kho và theo dõi nguyên liệu theo chi nhánh. Yêu cầu mã PIN Manager.</div>
+            <div class="card-arrow">Mở Kho hàng <span>→</span></div>
+            <span class="card-lock">🔒</span>
+        </div>
+
     </div>
 
     <div class="footer-note">
         Cafe Management System &nbsp;·&nbsp; v1.0
     </div>
+
+    <!-- ══════ PIN MODAL (Inventory / Manager) ══════ -->
+    <div id="pin-modal-backdrop" style="display:none;">
+        <div class="pin-modal-box">
+            <button class="pin-close-btn" onclick="closeInventoryPin()" title="Đóng">✕</button>
+            <div class="pin-modal-title">🔒 Xác thực Manager</div>
+            <div class="pin-modal-sub">Chọn tài khoản và nhập mã PIN để vào Kho hàng</div>
+
+            <div id="mgr-list-box">
+                <div class="mgr-item" style="color:#6a5060;cursor:default;">Đang tải...</div>
+            </div>
+
+            <input type="password" id="mgr-pin-input" maxlength="6" readonly
+                   placeholder="••••••" autocomplete="off" />
+
+            <div class="pin-keypad">
+                <button class="pin-key" onclick="mgrAddPin('1')">1</button>
+                <button class="pin-key" onclick="mgrAddPin('2')">2</button>
+                <button class="pin-key" onclick="mgrAddPin('3')">3</button>
+                <button class="pin-key" onclick="mgrAddPin('4')">4</button>
+                <button class="pin-key" onclick="mgrAddPin('5')">5</button>
+                <button class="pin-key" onclick="mgrAddPin('6')">6</button>
+                <button class="pin-key" onclick="mgrAddPin('7')">7</button>
+                <button class="pin-key" onclick="mgrAddPin('8')">8</button>
+                <button class="pin-key" onclick="mgrAddPin('9')">9</button>
+                <button class="pin-key danger" onclick="mgrClearPin()">C</button>
+                <button class="pin-key" onclick="mgrAddPin('0')">0</button>
+                <button class="pin-key confirm" onclick="mgrSubmitPin()">OK</button>
+            </div>
+
+            <div id="mgr-pin-error"></div>
+        </div>
+    </div>
+
+<script>
+    let mgrPin = '';
+    let mgrSelectedId = '';
+    let managersLoaded = false;
+
+    async function openInventoryPin() {
+        document.getElementById('pin-modal-backdrop').style.display = 'flex';
+        mgrClearPin();
+        document.getElementById('mgr-pin-error').textContent = '';
+
+        if (!managersLoaded) {
+            await loadManagers();
+        }
+    }
+
+    function closeInventoryPin() {
+        document.getElementById('pin-modal-backdrop').style.display = 'none';
+        mgrClearPin();
+        mgrSelectedId = '';
+        document.getElementById('mgr-pin-error').textContent = '';
+    }
+
+    async function loadManagers() {
+        const box = document.getElementById('mgr-list-box');
+        try {
+            const res = await fetch('/Home/GetManagers');
+            if (!res.ok) {
+                box.innerHTML = '<div class="mgr-item" style="color:#f87171;cursor:default;">Lỗi tải danh sách</div>';
+                return;
+            }
+            const list = await res.json();
+            if (!list || list.length === 0) {
+                box.innerHTML = '<div class="mgr-item" style="color:#6a5060;cursor:default;">Chưa có Manager nào có mã PIN</div>';
+                return;
+            }
+            box.innerHTML = '';
+            list.forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'mgr-item';
+                div.textContent = (m.name || m.Name || '').trim() || 'Manager';
+                div.dataset.id = m.id || m.Id || '';
+                div.onclick = function () {
+                    document.querySelectorAll('.mgr-item').forEach(el => el.classList.remove('selected'));
+                    this.classList.add('selected');
+                    mgrSelectedId = this.dataset.id;
+                    document.getElementById('mgr-pin-error').textContent = '';
+                };
+                box.appendChild(div);
+            });
+            managersLoaded = true;
+        } catch (e) {
+            box.innerHTML = '<div class="mgr-item" style="color:#f87171;cursor:default;">Lỗi kết nối</div>';
+        }
+    }
+
+    function mgrAddPin(num) {
+        if (mgrPin.length >= 6) return;
+        mgrPin += num;
+        document.getElementById('mgr-pin-input').value = mgrPin;
+        document.getElementById('mgr-pin-error').textContent = '';
+    }
+
+    function mgrClearPin() {
+        mgrPin = '';
+        const input = document.getElementById('mgr-pin-input');
+        if (input) input.value = '';
+    }
+
+    async function mgrSubmitPin() {
+        if (!mgrSelectedId) {
+            document.getElementById('mgr-pin-error').textContent = 'Vui lòng chọn tài khoản Manager.';
+            return;
+        }
+        if (mgrPin.length < 4) {
+            document.getElementById('mgr-pin-error').textContent = 'Mã PIN phải ít nhất 4 số.';
+            return;
+        }
+
+        try {
+            const res = await fetch('/Home/VerifyManagerPin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: mgrSelectedId, pinCode: mgrPin })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                window.location.href = data.redirectUrl || '/Inventory/Index';
+            } else {
+                document.getElementById('mgr-pin-error').textContent = data.message || 'Mã PIN không đúng.';
+                mgrClearPin();
+            }
+        } catch (e) {
+            document.getElementById('mgr-pin-error').textContent = 'Lỗi kết nối. Thử lại.';
+            mgrClearPin();
+        }
+    }
+
+    // Đóng modal khi click ra ngoài
+    document.getElementById('pin-modal-backdrop').addEventListener('click', function (e) {
+        if (e.target === this) closeInventoryPin();
+    });
+</script>
 
 </body>
 </html>
