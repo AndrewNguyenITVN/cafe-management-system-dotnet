@@ -123,6 +123,11 @@
             const readyHtml = `<div class="queue-box box-ready blink-ready" id="ready-box-${queueNum}">${queueNum}</div>`;
             readyList.insertAdjacentHTML('afterbegin', readyHtml);
 
+            // Giới hạn hiển thị 12 đơn mới nhất để không tràn màn hình Mời Nhận Món
+            while (readyList.children.length > 12) {
+                readyList.removeChild(readyList.lastChild);
+            }
+
             try {
                 document.getElementById('ready-sound').play();
             } catch(e) {
@@ -133,6 +138,15 @@
                 const boxToRemove = document.getElementById('ready-box-' + queueNum);
                 if (boxToRemove) boxToRemove.remove();
             }, 120000);
+        });
+
+        // Xử lý 3: Khách hàng/Bếp hủy đơn hàng
+        connection.on("OrderCancelled", function (data) {
+            const arr = ['queue-box-', 'ready-box-'];
+            arr.forEach(prefix => {
+                const box = document.getElementById(prefix + data.queueNumber);
+                if (box) box.remove();
+            });
         });
 
         // LOAD LẠI ĐƠN TỪ DATABASE KHI F5 / MỞ TRANG
