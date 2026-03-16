@@ -89,6 +89,18 @@
                     💼 Chức vụ & Lương
                 </a>
             </li>
+			<li class="nav-item">
+				<a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Schedule" ? "active bg-secondary rounded" : "")"
+				   asp-controller="Schedule" asp-action="Index">
+					📅 Lịch làm việc
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Timekeeping" ? "active bg-secondary rounded" : "")"
+				   asp-controller="Timekeeping" asp-action="Pin">
+					⏱️ Chấm công
+				</a>
+			</li>
         </ul>
     </nav>
 

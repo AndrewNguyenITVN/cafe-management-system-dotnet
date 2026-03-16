@@ -1,0 +1,47 @@
+﻿@model CafeManagement.Models.Domain.Schedule
+
+@{
+Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2>Edit Schedule</h2>
+
+<form asp-action="Edit" method="post">
+
+<input type="hidden" asp-for="Id" />
+
+<div class="mb-3">
+<label>User</label>
+<select asp-for="UserId" class="form-control"
+asp-items="@(new SelectList(ViewBag.Users,"Id","Email"))">
+</select>
+</div>
+
+<div class="mb-3">
+<label>Store</label>
+<select asp-for="StoreId" class="form-control"
+asp-items="@(new SelectList(ViewBag.Stores,"Id","Name"))">
+</select>
+</div>
+
+<div class="mb-3">
+<label>Shift</label>
+<select asp-for="ShiftId" class="form-control"
+asp-items="@(new SelectList(ViewBag.Shifts,"Id","ShiftName"))">
+</select>
+</div>
+
+<div class="mb-3">
+<label>Date</label>
+<input asp-for="WorkDate" type="date" class="form-control" />
+</div>
+
+<button type="submit" class="btn btn-success">
+Save
+</button>
+
+<a asp-action="Index" class="btn btn-secondary">
+Cancel
+</a>
+
+</form>

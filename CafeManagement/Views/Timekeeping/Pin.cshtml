@@ -1,0 +1,100 @@
+﻿@{
+    ViewData["Title"] = "Chấm công";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2 class="mb-4">⏱️ Chấm công nhân viên</h2>
+
+<form method="post" class="w-25">
+
+    <input id="pinInput"
+           type="password"
+           name="pinCode"
+           maxlength="6"
+           class="form-control text-center fs-4 mb-3"
+           placeholder="••••••"
+           readonly />
+
+    <div class="row g-2">
+
+        <div class="col-4">
+            <button type="button" class="btn btn-outline-dark w-100 num">1</button>
+        </div>
+        <div class="col-4">
+            <button type="button" class="btn btn-outline-dark w-100 num">2</button>
+        </div>
+        <div class="col-4">
+            <button type="button" class="btn btn-outline-dark w-100 num">3</button>
+        </div>
+
+        <div class="col-4">
+            <button type="button" class="btn btn-outline-dark w-100 num">4</button>
+        </div>
+        <div class="col-4">
+            <button type="button" class="btn btn-outline-dark w-100 num">5</button>
+        </div>
+        <div class="col-4">
+            <button type="button" class="btn btn-outline-dark w-100 num">6</button>
+        </div>
+
+        <div class="col-4">
+            <button type="button" class="btn btn-outline-dark w-100 num">7</button>
+        </div>
+        <div class="col-4">
+            <button type="button" class="btn btn-outline-dark w-100 num">8</button>
+        </div>
+        <div class="col-4">
+            <button type="button" class="btn btn-outline-dark w-100 num">9</button>
+        </div>
+
+        <div class="col-4">
+            <button type="button" id="clearBtn" class="btn btn-warning w-100">Clear</button>
+        </div>
+
+        <div class="col-4">
+            <button type="button" class="btn btn-outline-dark w-100 num">0</button>
+        </div>
+
+        <div class="col-4">
+            <button type="submit" class="btn btn-success w-100">Enter</button>
+        </div>
+
+    </div>
+
+</form>
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-info mt-4 w-25">
+        @ViewBag.Message
+    </div>
+}
+
+@section Scripts{
+
+<script>
+
+const input = document.getElementById("pinInput")
+
+document.querySelectorAll(".num").forEach(btn => {
+
+    btn.addEventListener("click", () => {
+
+        if (input.value.length < 6)
+        {
+            input.value += btn.innerText
+        }
+
+    })
+
+})
+
+document.getElementById("clearBtn").addEventListener("click", () => {
+
+    input.value = ""
+
+})
+
+</script>
+
+}

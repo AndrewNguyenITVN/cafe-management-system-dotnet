@@ -42,6 +42,8 @@ builder.Services.AddScoped<ToppingService>();
 builder.Services.AddScoped<SupplierService>();
 builder.Services.AddScoped<JobPositionService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<ScheduleService>();
+builder.Services.AddScoped<TimekeepingService>();
 // POS / CRM / Inventory Services (TV2, TV3, TV5 implement)
 builder.Services.AddScoped<IOrderService, OrderService>(); // TV2: POS Order
 builder.Services.AddScoped<InventoryService>();
@@ -108,7 +110,8 @@ static async Task SeedAdminAsync(IServiceProvider services)
             Email     = adminEmail,
             FullName  = "Quản trị viên",
             IsActive  = true,
-            EmailConfirmed = true
+            EmailConfirmed = true,
+            PinCode = "123456"
         };
         var result = await userManager.CreateAsync(admin, adminPassword);
         if (result.Succeeded)
