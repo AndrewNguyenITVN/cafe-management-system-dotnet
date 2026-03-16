@@ -20,7 +20,15 @@
     <div class="alert alert-warning">@Html.Raw(TempData["Warning"])</div>
 }
 
+@if (ViewBag.ManagerStoreId != null)
+{
+    <div class="mb-4">
+        <span class="badge bg-secondary fs-6"> @ViewBag.ManagerStoreName</span>
+    </div>
+}
 <form method="get" class="mb-4">
+    @if (ViewBag.ManagerStoreId == null)
+    {
     <div class="row w-50">
         <div class="col-8">
             <select name="storeId" class="form-select" onchange="this.form.submit()">
@@ -33,6 +41,7 @@
             </select>
         </div>
     </div>
+    }
 </form>
 
 @if (selectedStoreId.HasValue)

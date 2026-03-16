@@ -7,7 +7,7 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="fw-bold mb-0">📥 Tạo Đơn Nhập Kho</h4>
+    <h4 class="fw-bold mb-0">Tạo Đơn Nhập Kho</h4>
     <a asp-action="Index" class="btn btn-outline-secondary">← Quay lại Tồn kho</a>
 </div>
 
@@ -17,13 +17,21 @@
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Cửa hàng nhập <span class="text-danger">*</span></label>
-                    <select name="storeId" class="form-select" required>
-                        <option value="">-- Chọn cửa hàng --</option>
-                        @foreach (var s in stores)
-                        {
-                            <option value="@s.Id">@s.Name</option>
-                        }
-                    </select>
+                    @if (ViewBag.ManagerStoreId != null)
+                    {
+                        <input type="hidden" name="storeId" value="@ViewBag.ManagerStoreId" />
+                        <div class="form-control bg-light"> @ViewBag.ManagerStoreName</div>
+                    }
+                    else
+                    {
+                        <select name="storeId" class="form-select" required>
+                            <option value="">-- Chọn cửa hàng --</option>
+                            @foreach (var s in stores)
+                            {
+                                <option value="@s.Id">@s.Name</option>
+                            }
+                        </select>
+                    }
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Nhà cung cấp <span class="text-danger">*</span></label>
@@ -70,7 +78,7 @@
                 <button type="button" class="btn btn-outline-secondary btn-sm" id="btnAddRow">+ Thêm dòng</button>
             </div>
 
-            <button type="submit" class="btn btn-success px-5 fw-bold">✅ Xác nhận Nhập Kho</button>
+            <button type="submit" class="btn btn-success px-5 fw-bold">Xác nhận Nhập Kho</button>
         </form>
     </div>
 </div>
