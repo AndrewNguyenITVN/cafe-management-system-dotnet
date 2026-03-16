@@ -1,0 +1,105 @@
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Nhập Kho";
+    var stores = ViewBag.Stores as List<CafeManagement.Models.Domain.Store> ?? new List<CafeManagement.Models.Domain.Store>();
+    var suppliers = ViewBag.Suppliers as List<CafeManagement.Models.Domain.Supplier> ?? new List<CafeManagement.Models.Domain.Supplier>();
+    var ingredients = ViewBag.Ingredients as List<CafeManagement.Models.Domain.Ingredient> ?? new List<CafeManagement.Models.Domain.Ingredient>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">Tạo Đơn Nhập Kho</h4>
+    <a asp-action="Index" class="btn btn-outline-secondary">← Quay lại Tồn kho</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form asp-action="CreatePurchase" method="post">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Cửa hàng nhập <span class="text-danger">*</span></label>
+                    @if (ViewBag.ManagerStoreId != null)
+                    {
+                        <input type="hidden" name="storeId" value="@ViewBag.ManagerStoreId" />
+                        <div class="form-control bg-light"> @ViewBag.ManagerStoreName</div>
+                    }
+                    else
+                    {
+                        <select name="storeId" class="form-select" required>
+                            <option value="">-- Chọn cửa hàng --</option>
+                            @foreach (var s in stores)
+                            {
+                                <option value="@s.Id">@s.Name</option>
+                            }
+                        </select>
+                    }
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Nhà cung cấp <span class="text-danger">*</span></label>
+                    <select name="supplierId" class="form-select" required>
+                        <option value="">-- Chọn nhà cung cấp --</option>
+                        @foreach (var sup in suppliers)
+                        {
+                            <option value="@sup.Id">@sup.Name</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <hr />
+            <h6 class="fw-bold mb-3">Chi tiết nguyên liệu nhập</h6>
+
+            <table class="table table-bordered" id="purchaseTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nguyên liệu</th>
+                        <th width="140">Số lượng</th>
+                        <th width="160">Giá vốn (VNĐ)</th>
+                        <th width="60"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <select name="ingredientIds" class="form-select form-select-sm">
+                                @foreach (var ing in ingredients)
+                                {
+                                    <option value="@ing.Id">@ing.Name (@ing.Unit)</option>
+                                }
+                            </select>
+                        </td>
+                        <td><input type="number" name="quantities" value="0" class="form-control form-control-sm" step="0.01" min="0" /></td>
+                        <td><input type="number" name="prices" value="0" class="form-control form-control-sm" min="0" /></td>
+                        <td><button type="button" class="btn btn-sm btn-outline-danger btn-remove-row">✕</button></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="mb-4">
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="btnAddRow">+ Thêm dòng</button>
+            </div>
+
+            <button type="submit" class="btn btn-success px-5 fw-bold">Xác nhận Nhập Kho</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var ingredientOptions = `@foreach (var ing in ingredients) { @Html.Raw($"<option value='{ing.Id}'>{ing.Name} ({ing.Unit})</option>") }`;
+
+        document.getElementById('btnAddRow').addEventListener('click', function () {
+            var tbody = document.querySelector('#purchaseTable tbody');
+            var row = document.createElement('tr');
+            row.innerHTML = `
+                <td><select name="ingredientIds" class="form-select form-select-sm">${ingredientOptions}</select></td>
+                <td><input type="number" name="quantities" value="0" class="form-control form-control-sm" step="0.01" min="0"/></td>
+                <td><input type="number" name="prices" value="0" class="form-control form-control-sm" min="0"/></td>
+                <td><button type="button" class="btn btn-sm btn-outline-danger btn-remove-row">✕</button></td>`;
+            tbody.appendChild(row);
+        });
+
+        document.addEventListener('click', function (e) {
+            if (e.target.classList.contains('btn-remove-row')) e.target.closest('tr').remove();
+        });
+    </script>
+}

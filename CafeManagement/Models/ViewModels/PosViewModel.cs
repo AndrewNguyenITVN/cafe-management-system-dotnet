@@ -9,7 +9,12 @@ public class PosOrderRequestDto
     public string? CustomerName { get; set; }  // Dành cho khách hàng chưa có SĐT
     public int PointsUsed { get; set; }
     public string OrderType { get; set; } = "EatIn"; // EatIn (Tại quán) hoặc TakeAway (Mang đi)
-    
+
+    /// <summary>Id phương thức thanh toán (1=Tiền mặt, 2=Chuyển khoản...). Bắt buộc khi ghi Transaction.</summary>
+    public int PaymentMethodId { get; set; }
+    /// <summary>Tiền khách đưa (tiền mặt). Nếu chuyển khoản thường = FinalAmount.</summary>
+    public decimal AmountTendered { get; set; }
+
     // Mảng danh sách các món ăn khách đã chọn
     public List<PosOrderItemDto> OrderItems { get; set; } = new List<PosOrderItemDto>();
 }

@@ -1,0 +1,125 @@
+@model List<CafeManagement.Models.Domain.InventoryStock>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Kiểm Kê Kho";
+    var stores = ViewBag.Stores as List<CafeManagement.Models.Domain.Store> ?? new List<CafeManagement.Models.Domain.Store>();
+    int? selectedStoreId = ViewBag.SelectedStoreId as int?;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="fw-bold mb-0">⚠️ Kiểm Kê Kho Thực Tế</h4>
+    <a asp-action="Index" class="btn btn-outline-secondary">← Quay lại Tồn kho</a>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Warning"] != null)
+{
+    <div class="alert alert-warning">@Html.Raw(TempData["Warning"])</div>
+}
+
+@if (ViewBag.ManagerStoreId != null)
+{
+    <div class="mb-4">
+        <span class="badge bg-secondary fs-6"> @ViewBag.ManagerStoreName</span>
+    </div>
+}
+<form method="get" class="mb-4">
+    @if (ViewBag.ManagerStoreId == null)
+    {
+    <div class="row w-50">
+        <div class="col-8">
+            <select name="storeId" class="form-select" onchange="this.form.submit()">
+                <option value="">-- Chọn cửa hàng --</option>
+                @foreach (var s in stores)
+                {
+                    if (s.Id == selectedStoreId) { <option value="@s.Id" selected>@s.Name</option> }
+                    else { <option value="@s.Id">@s.Name</option> }
+                }
+            </select>
+        </div>
+    </div>
+    }
+</form>
+
+@if (selectedStoreId.HasValue)
+{
+    <div class="card shadow-sm border-warning">
+        <div class="card-header bg-warning py-3">
+            <h5 class="mb-0 text-dark">Bảng Đối Chiếu Số Liệu</h5>
+            <small class="text-dark">Nhập số lượng đếm được thực tế. Bấm Chốt để cập nhật hệ thống.</small>
+        </div>
+        <div class="card-body">
+            <form asp-action="SubmitStocktake" method="post" id="stocktakeForm">
+                <input type="hidden" name="storeId" value="@selectedStoreId.Value" />
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr class="text-center align-middle">
+                            <th class="text-start">Nguyên liệu</th>
+                            <th width="100">Đơn vị</th>
+                            <th width="150" class="bg-light">TỒN MÁY TÍNH</th>
+                            <th width="180" class="bg-info bg-opacity-10 text-primary">TỒN THỰC TẾ</th>
+                            <th width="150">CHÊNH LỆCH</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                string theoStr = item.CurrentQuantity.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+                                <tr>
+                                    <td class="align-middle fw-bold">
+                                        @item.Ingredient?.Name
+                                        <input type="hidden" name="ingredientIds" value="@item.IngredientId" />
+                                    </td>
+                                    <td class="align-middle text-center">@item.Ingredient?.Unit</td>
+                                    <td class="align-middle text-center text-muted bg-light">
+                                        <span class="theo-val" data-val="@theoStr">@theoStr</span>
+                                    </td>
+                                    <td>
+                                        <input type="number" name="actualQuantities" value="@theoStr"
+                                               class="form-control text-center actual-input fw-bold text-primary"
+                                               step="0.01" min="0" required />
+                                    </td>
+                                    <td class="align-middle text-center delta-cell fw-bold">0</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="5" class="text-center text-muted">Không có dữ liệu tồn kho</td></tr>
+                        }
+                    </tbody>
+                </table>
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="button" class="btn btn-warning px-5 fw-bold text-dark" id="btnSubmit">CHỐT KIỂM KÊ VÀ LƯU</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            function updateDelta(row) {
+                var theo = parseFloat(row.find('.theo-val').attr('data-val').replace(',', '.')) || 0;
+                var actual = parseFloat(row.find('.actual-input').val().replace(',', '.')) || 0;
+                var delta = Math.round((actual - theo) * 100) / 100;
+                var cell = row.find('.delta-cell');
+                if (delta > 0) cell.text('+' + delta).attr('class', 'align-middle text-center delta-cell fw-bold text-success');
+                else if (delta < 0) cell.text(delta).attr('class', 'align-middle text-center delta-cell fw-bold text-danger');
+                else cell.text('0').attr('class', 'align-middle text-center delta-cell fw-bold text-muted');
+            }
+            $('.actual-input').on('input change', function () { updateDelta($(this).closest('tr')); });
+            $('#stocktakeForm tbody tr').each(function () { updateDelta($(this)); });
+            $('#btnSubmit').click(function () {
+                if (confirm('Bạn có chắc muốn chốt kiểm kê?\nSố lượng TỒN THỰC TẾ sẽ thay thế TỒN MÁY TÍNH.'))
+                    $('#stocktakeForm').submit();
+            });
+        });
+    </script>
+}

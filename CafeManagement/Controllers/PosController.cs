@@ -10,7 +10,7 @@ using System.Security.Claims;
 
 namespace CafeManagement.Controllers;
 
-[Authorize]
+[AllowAnonymous]
 public class PosController : Controller
 {
     // Dependency Injection
@@ -20,19 +20,22 @@ public class PosController : Controller
     private readonly IOrderService _orderService;  
     private readonly IHubContext<OrderHub> _hubContext;
     private readonly AppDbContext _db;
+    private readonly ShiftHandoverService _shiftHandoverService;
 
     public PosController(
         CategoryService categoryService,
         MenuItemService menuItemService,
         IOrderService orderService,
         IHubContext<OrderHub> hubContext,
-        AppDbContext db)
+        AppDbContext db,
+        ShiftHandoverService shiftHandoverService)
     {
         _categoryService = categoryService;
         _menuItemService = menuItemService;
         _orderService = orderService;      
         _hubContext = hubContext;
         _db = db;
+        _shiftHandoverService = shiftHandoverService;
     }
 
 
@@ -52,7 +55,6 @@ public class PosController : Controller
 
     // Giao diện Customer Display
     [HttpGet]
-    [AllowAnonymous] // Cho phép mở màn hình khách hàng mà không cần đăng nhập
     public IActionResult CustomerDisplay()
     {
         return View();
@@ -105,6 +107,116 @@ public class PosController : Controller
             .ToListAsync();
 
         return Ok(users);
+    }
+
+    // API: Lấy danh sách chi nhánh đang hoạt động (dùng cho KDS / Customer Display)
+    [HttpGet]
+    public async Task<IActionResult> GetStores()
+    {
+        var stores = await _db.Stores
+            .Where(s => s.IsActive)
+            .Select(s => new { id = s.Id, name = s.Name })
+            .ToListAsync();
+        return Ok(stores);
+    }
+
+    // API: Lấy danh sách phương thức thanh toán (cho dropdown POS)
+    [HttpGet]
+    public async Task<IActionResult> GetPaymentMethods()
+    {
+        var list = await _db.PaymentMethods
+            .Where(p => p.IsActive)
+            .Select(p => new { id = p.Id, name = p.MethodName })
+            .ToListAsync();
+        return Ok(list);
+    }
+
+    // API: Preview kết ca cho POS (dựa trên ca + ngày của chi nhánh hiện tại)
+    [HttpGet]
+    public async Task<IActionResult> GetShiftHandoverPreview(int shiftId, DateOnly date)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(new { success = false, message = "Chưa đăng nhập." });
+        }
+
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null || !user.StoreId.HasValue)
+        {
+            return BadRequest(new { success = false, message = "Nhân viên chưa được gán chi nhánh." });
+        }
+
+        var dateOnly = date;
+        var preview = await _shiftHandoverService.GetPreviewAsync(user.StoreId.Value, shiftId, dateOnly);
+        if (preview == null)
+        {
+            return BadRequest(new { success = false, message = "Không tìm thấy chi nhánh hoặc ca làm việc." });
+        }
+
+        return Ok(new
+        {
+            success = true,
+            storeId = preview.StoreId,
+            storeName = preview.StoreName,
+            shiftId = preview.ShiftId,
+            shiftName = preview.ShiftName,
+            date = preview.Date,
+            totalRevenue = preview.TotalRevenue,
+            totalCash = preview.TotalCash
+        });
+    }
+
+    public class PosCloseShiftRequest
+    {
+        public int ShiftId { get; set; }
+        public DateOnly Date { get; set; }
+        public decimal OpeningCash { get; set; }
+        public decimal ActualCashCounted { get; set; }
+        public string? Note { get; set; }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SubmitShiftHandover([FromBody] PosCloseShiftRequest model)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(new { success = false, message = "Chưa đăng nhập." });
+        }
+
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null || !user.StoreId.HasValue)
+        {
+            return BadRequest(new { success = false, message = "Nhân viên chưa được gán chi nhánh." });
+        }
+
+        var result = await _shiftHandoverService.CloseShiftAsync(
+            user.StoreId.Value,
+            model.ShiftId,
+            model.Date,
+            model.OpeningCash,
+            model.ActualCashCounted,
+            model.Note,
+            userId);
+
+        if (!result.Success)
+        {
+            return BadRequest(new { success = false, message = result.Message });
+        }
+
+        return Ok(new
+        {
+            success = true,
+            storeId = result.StoreId,
+            shiftId = result.ShiftId,
+            date = result.Date,
+            openingCash = result.OpeningCash,
+            totalCash = result.TotalCash,
+            expectedCash = result.ExpectedCash,
+            actualCash = result.ActualCashCounted,
+            difference = result.Difference
+        });
     }
 
     // API: Tạo đơn hàng
@@ -173,7 +285,6 @@ public class PosController : Controller
 
     // API: Lấy danh sách đơn hàng đang hoạt động (Pending + Processing) theo Chi nhánh
     [HttpGet]
-    [AllowAnonymous]
     public IActionResult GetActiveOrders(int storeId)
     {
         var today = DateTime.Today;
@@ -183,7 +294,7 @@ public class PosController : Controller
                 .ThenInclude(d => d.MenuItem)
             .Where(o => o.StoreId == storeId
                      && o.OrderDate.Date == today
-                     && o.Status < 2) // 0 = Pending, 1 = Processing
+                     && (o.Status == 0 || o.Status == 1)) // 0 = Pending, 1 = Processing
             .OrderBy(o => o.OrderDate)
             .Select(o => new {
                 orderId = o.Id,
@@ -202,7 +313,7 @@ public class PosController : Controller
 
     // API: Hủy đơn hàng (Dành cho KDS khi bếp không thể thực hiện)
     [HttpPost]
-    public async Task<IActionResult> CancelOrder(int orderId)
+    public async Task<IActionResult> CancelOrder(int orderId, string reason = "")
     {
         var order = await _db.Orders.FindAsync(orderId);
         if (order == null)
@@ -214,6 +325,13 @@ public class PosController : Controller
         order.Status = -1; // -1 = Cancelled
 
         await _db.SaveChangesAsync();
+
+        // Bắn tín hiệu SignalR báo hủy đơn để Customer Display và POS có thể tự xóa / nghe
+        string storeGroup = $"Store_{order.StoreId}";
+        await _hubContext.Clients.Group(storeGroup).SendAsync("OrderCancelled", new {
+            queueNumber = order.QueueNumber,
+            reason = string.IsNullOrWhiteSpace(reason) ? "Không có lý do" : reason
+        });
 
         return Ok(new { success = true, storeId = order.StoreId, queueNumber = order.QueueNumber });
     }

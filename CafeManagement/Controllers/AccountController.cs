@@ -17,10 +17,13 @@ public class AccountController : Controller
     }
 
     [HttpGet]
-    public IActionResult Login(string? returnUrl = null)
+    public async Task<IActionResult> Login(string? returnUrl = null)
     {
         if (User.Identity?.IsAuthenticated == true)
-            return RedirectToAction("Index", "Dashboard");
+        {
+            var user = await _userManager.GetUserAsync(User);
+            return Redirect(await GetDefaultRedirectAsync(user));
+        }
 
         ViewData["ReturnUrl"] = returnUrl;
         return View();
@@ -46,7 +49,7 @@ public class AccountController : Controller
         {
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return Redirect(returnUrl);
-            return RedirectToAction("Index", "Dashboard");
+            return Redirect(await GetDefaultRedirectAsync(user));
         }
 
         ModelState.AddModelError(string.Empty, "Email hoặc mật khẩu không đúng.");
@@ -58,8 +61,25 @@ public class AccountController : Controller
     public async Task<IActionResult> Logout()
     {
         await _signInManager.SignOutAsync();
-        return RedirectToAction("Login");
+        return Redirect("/");
     }
 
     public IActionResult AccessDenied() => View();
+
+    /// <summary>
+    /// Trả về URL mặc định sau khi đăng nhập theo role:
+    ///   Admin   → /Dashboard/Index
+    ///   Manager → /Home/Index  (landing page, vào Inventory bằng PIN)
+    ///   Staff   → /Pos/Index
+    /// </summary>
+    private async Task<string> GetDefaultRedirectAsync(AppUser? user)
+    {
+        if (user == null) return "/Account/Login";
+        var roles = await _userManager.GetRolesAsync(user);
+        if (roles.Any(r => string.Equals(r, "Admin", StringComparison.OrdinalIgnoreCase)))
+            return "/Dashboard/Index";
+        if (roles.Any(r => string.Equals(r, "Manager", StringComparison.OrdinalIgnoreCase)))
+            return "/Home/Index";
+        return "/Pos/Index";
+    }
 }

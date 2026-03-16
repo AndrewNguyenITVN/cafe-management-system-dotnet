@@ -1,0 +1,89 @@
+@model IEnumerable<CafeManagement.Models.Domain.ShiftHandover>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Kết ca";
+    var stores = ViewBag.Stores as IEnumerable<CafeManagement.Models.Domain.Store> ?? Enumerable.Empty<CafeManagement.Models.Domain.Store>();
+    int? selectedStoreId = ViewBag.StoreId as int?;
+    var date = (DateOnly)(ViewBag.Date ?? DateOnly.FromDateTime(DateTime.Today));
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">💰 Danh sách ca đã kết</h4>
+</div>
+
+<form method="get" class="row g-3 mb-3">
+    <div class="col-md-4">
+        <label class="form-label">Ngày</label>
+        <input type="date" name="date" class="form-control" value="@date.ToDateTime(TimeOnly.MinValue).ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Chi nhánh</label>
+        <select name="storeId" class="form-select">
+            <option value="">Tất cả</option>
+            @foreach (var s in stores)
+            {
+                <option value="@s.Id" selected="@(selectedStoreId == s.Id ? "selected" : null)">@s.Name</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-4 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary me-2">Lọc</button>
+    </div>
+</form>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Chi nhánh</th>
+                    <th>Ca</th>
+                    <th>Ngày</th>
+                    <th class="text-end">Tiền đầu ca</th>
+                    <th class="text-end">Tiền mặt (máy)</th>
+                    <th class="text-end">Tiền lý thuyết</th>
+                    <th class="text-end">Tiền thực tế</th>
+                    <th class="text-end">Chênh lệch</th>
+                    <th>Ghi chú</th>
+                    <th>Nhân viên kết ca</th>
+                    <th>Thời gian xác nhận</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="12" class="text-center text-muted py-4">
+                            Chưa có ca nào được kết trong ngày này.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    var i = 0;
+                    foreach (var h in Model)
+                    {
+                        i++;
+                        var diffClass = h.Difference < 0 ? "text-danger" : (h.Difference > 0 ? "text-success" : "");
+                        <tr>
+                            <td>@i</td>
+                            <td>@h.Store.Name</td>
+                            <td>@h.Shift.ShiftName</td>
+                            <td>@h.HandoverDate.ToString("dd/MM/yyyy")</td>
+                            <td class="text-end">@h.OpeningCash.ToString("N0") ₫</td>
+                            <td class="text-end">@((h.ExpectedCash - h.OpeningCash).ToString("N0")) ₫</td>
+                            <td class="text-end">@h.ExpectedCash.ToString("N0") ₫</td>
+                            <td class="text-end">@h.ActualCashCounted.ToString("N0") ₫</td>
+                            <td class="text-end @diffClass">@h.Difference.ToString("N0") ₫</td>
+                            <td>@(string.IsNullOrWhiteSpace(h.Note) ? "—" : h.Note)</td>
+                            <td>@(h.ConfirmedByUser?.FullName ?? h.ConfirmedByUser?.Email ?? "—")</td>
+                            <td>@h.ConfirmedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+

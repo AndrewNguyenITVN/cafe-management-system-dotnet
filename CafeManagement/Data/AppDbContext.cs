@@ -39,6 +39,7 @@ public class AppDbContext : IdentityDbContext<AppUser>
     public DbSet<Shift> Shifts => Set<Shift>();
     public DbSet<Schedule> Schedules => Set<Schedule>();
     public DbSet<Timekeeping> Timekeepings => Set<Timekeeping>();
+    public DbSet<ShiftHandover> ShiftHandovers => Set<ShiftHandover>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -95,6 +96,14 @@ public class AppDbContext : IdentityDbContext<AppUser>
             .Property(x => x.TotalHours).HasColumnType("decimal(5,2)");
         builder.Entity<Timekeeping>()
             .Property(x => x.HourlyRateAtTime).HasColumnType("decimal(12,2)");
+        builder.Entity<ShiftHandover>()
+            .Property(x => x.OpeningCash).HasColumnType("decimal(12,0)");
+        builder.Entity<ShiftHandover>()
+            .Property(x => x.ExpectedCash).HasColumnType("decimal(12,0)");
+        builder.Entity<ShiftHandover>()
+            .Property(x => x.ActualCashCounted).HasColumnType("decimal(12,0)");
+        builder.Entity<ShiftHandover>()
+            .Property(x => x.Difference).HasColumnType("decimal(12,0)");
 
         // AppUser FK relationships
         builder.Entity<AppUser>()
