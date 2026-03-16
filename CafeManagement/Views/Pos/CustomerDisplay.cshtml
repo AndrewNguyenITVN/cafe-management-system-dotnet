@@ -58,12 +58,23 @@
             70% { transform: scale(0.9); }
             100% { transform: scale(1); }
         }
+        /* Store picker overlay */
+        #store-picker { position:fixed; inset:0; background:rgba(15,8,3,0.97); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:32px; }
+        #store-picker h2 { color:#d4a373; font-size:2.2rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; }
+        .store-btn { background:linear-gradient(145deg,#3d2a1c,#2b1f14); border:2px solid #5c3a21; color:#f7e6c4; border-radius:14px; padding:24px 56px; font-size:1.5rem; font-weight:700; cursor:pointer; transition:all .25s; min-width:280px; text-align:center; }
+        .store-btn:hover { border-color:#d4a373; color:#d4a373; box-shadow:0 0 20px rgba(212,163,115,.4); transform:scale(1.04); }
     </style>
 </head>
 <body>
 
+    <!-- Overlay chọn chi nhánh -->
+    <div id="store-picker">
+        <h2>Chọn Chi Nhánh</h2>
+        <div id="store-btn-list" style="display:flex;flex-direction:column;gap:16px;"></div>
+    </div>
+
     <div class="header">
-        <h1>BẢNG GỌI MÓN (CHI NHÁNH <span id="storeNameId">1</span>)</h1>
+        <h1>BẢNG GỌI MÓN (<span id="storeNameId"></span>)</h1>
     </div>
 
     <!-- 1. Thẻ Audio báo đơn xong -->
@@ -90,8 +101,39 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const storeId = urlParams.get('storeId') || "1";
-        document.getElementById('storeNameId').textContent = storeId;
+        let storeId = urlParams.get('storeId');
+
+        async function loadStorePicker() {
+            try {
+                const res = await fetch('/Pos/GetStores');
+                const stores = await res.json();
+                const btnList = document.getElementById('store-btn-list');
+                btnList.innerHTML = '';
+                stores.forEach(s => {
+                    const btn = document.createElement('button');
+                    btn.className = 'store-btn';
+                    btn.textContent = s.name;
+                    btn.onclick = () => {
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('storeId', s.id);
+                        window.location.href = url.toString();
+                    };
+                    btnList.appendChild(btn);
+                });
+            } catch(e) {
+                document.getElementById('store-btn-list').innerHTML = '<p style="color:#f87171">Lỗi tải danh sách chi nhánh</p>';
+            }
+        }
+
+        if (!storeId) {
+            loadStorePicker();
+        } else {
+            document.getElementById('store-picker').style.display = 'none';
+            fetch('/Pos/GetStores').then(r => r.json()).then(stores => {
+                const found = stores.find(s => String(s.id) === String(storeId));
+                document.getElementById('storeNameId').textContent = found ? found.name : 'Chi nhánh ' + storeId;
+            });
+        }
         
         const preparingList = document.getElementById('preparing-list');
         const readyList = document.getElementById('ready-list');

@@ -34,13 +34,27 @@
         .btn-warning { background-color: #d4a373; border: none; color: #1a120b; font-size: 1.1rem; transition: background 0.3s; }
         .btn-warning:hover { background-color: #b07d4b; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         @@keyframes blinker { 50% { opacity: 0.8; border-color: #8d3a24; } }
+        /* Store picker overlay */
+        #store-picker { position:fixed; inset:0; background:rgba(15,8,3,0.96); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:32px; }
+        #store-picker h2 { color:#d4a373; font-size:2rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; }
+        .store-btn { background:linear-gradient(145deg,#3d2a1c,#2b1f14); border:2px solid #5c3a21; color:#f7e6c4; border-radius:14px; padding:22px 48px; font-size:1.4rem; font-weight:700; cursor:pointer; transition:all .25s; min-width:260px; text-align:center; }
+        .store-btn:hover { border-color:#d4a373; color:#d4a373; box-shadow:0 0 18px rgba(212,163,115,.35); transform:scale(1.04); }
     </style>
 </head>
 <body>
-    
+
+    <!-- Overlay chọn chi nhánh (chỉ hiện khi chưa có storeId trong URL) -->
+    <div id="store-picker">
+        <h2>Chọn Chi Nhánh</h2>
+        <div id="store-btn-list" style="display:flex;flex-direction:column;gap:16px;"></div>
+    </div>
+
     <div class="d-flex justify-content-between mb-4">
-        <h1>👨‍🍳 KITCHEN DISPLAY (CHI NHÁNH <span id="storeNameId">1</span>)</h1>
-        <div><span id="conn-status" class="badge bg-danger">Đang ngắt kết nối</span></div>
+        <h1>KITCHEN DISPLAY (<span id="storeNameId"></span>)</h1>
+        <div>
+            <button onclick="changeBranch()" class="btn btn-outline-warning btn-sm me-3">🔄 Đổi chi nhánh</button>
+            <span id="conn-status" class="badge bg-danger">Đang ngắt kết nối</span>
+        </div>
     </div>
 
     <div class="row g-4" id="kds-board">
@@ -55,8 +69,47 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const storeId = urlParams.get('storeId') || "1";
-        document.getElementById('storeNameId').textContent = storeId;
+        let storeId = urlParams.get('storeId');
+        let storeName = '';
+
+        async function loadStorePicker() {
+            try {
+                const res = await fetch('/Pos/GetStores');
+                const stores = await res.json();
+                const btnList = document.getElementById('store-btn-list');
+                btnList.innerHTML = '';
+                stores.forEach(s => {
+                    const btn = document.createElement('button');
+                    btn.className = 'store-btn';
+                    btn.textContent =  s.name;
+                    btn.onclick = () => {
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('storeId', s.id);
+                        window.location.href = url.toString();
+                    };
+                    btnList.appendChild(btn);
+                });
+            } catch(e) {
+                document.getElementById('store-btn-list').innerHTML = '<p style="color:#f87171">Lỗi tải danh sách chi nhánh</p>';
+            }
+        }
+
+        function changeBranch() {
+            document.getElementById('store-picker').style.display = 'flex';
+            loadStorePicker();
+        }
+
+        // Nếu chưa chọn chi nhánh → hiện overlay, ngược lại → ẩn overlay và load tên
+        if (!storeId) {
+            loadStorePicker();
+        } else {
+            document.getElementById('store-picker').style.display = 'none';
+            // Lấy tên chi nhánh từ API để hiển thị đẹp hơn số ID
+            fetch('/Pos/GetStores').then(r => r.json()).then(stores => {
+                const found = stores.find(s => String(s.id) === String(storeId));
+                document.getElementById('storeNameId').textContent = found ? found.name : 'Chi nhánh ' + storeId;
+            });
+        }
         const board = document.getElementById('kds-board');
         const statusBadge = document.getElementById('conn-status');
 
@@ -84,7 +137,7 @@
             
             // Nút chính
             const btnClass = isProcessing ? 'btn btn-success' : 'btn btn-warning';
-            const btnText = isProcessing ? '🛎️ XONG ĐƠN' : '👨‍🍳 BẮT ĐẦU NẤU';
+            const btnText = isProcessing ? 'XONG ĐƠN' : 'BẮT ĐẦU NẤU';
             const nextStatus = isProcessing ? 2 : 1;
 
             const cardHtml = `
@@ -152,7 +205,7 @@
                 if(data.success) {
                     if (status === 1) {
                         btnElement.className = "btn btn-success w-100 fw-bold py-2 shadow mb-2";
-                        btnElement.innerHTML = "🛎️ XONG ĐƠN";
+                        btnElement.innerHTML = "XONG ĐƠN";
                         btnElement.onclick = function() { updateOrderStatus(orderId, 2, this); };
                         btnElement.disabled = false;
                         
