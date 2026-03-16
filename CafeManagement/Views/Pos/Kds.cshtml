@@ -47,6 +47,28 @@
         <!-- Danh sách thẻ Order sẽ được render bằng JS ở đây -->
     </div>
 
+    <!-- Hộp thoại Xác nhận Hủy Đơn -->
+    <div id="cancel-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-none align-items-center justify-content-center" style="background: rgba(0,0,0,0.85); z-index: 10000;">
+        <div class="bg-dark border rounded-4 shadow-lg p-4" style="max-width: 400px; width: 100%; border-color: #e07a5f !important;">
+            <h4 class="text-danger mb-3 fw-bold text-center">❌ HỦY ĐƠN #<span id="cancel-queue-number"></span></h4>
+            <p class="text-secondary mb-3 text-center">Chọn lý do hủy để báo máy Thu Ngân:</p>
+            
+            <div class="d-grid gap-2 mb-3">
+                <button class="btn btn-outline-warning text-start fw-bold" onclick="setCancelReason('Hết nguyên liệu')">Hết nguyên liệu</button>
+                <button class="btn btn-outline-warning text-start fw-bold" onclick="setCancelReason('Khách đổi ý / Đổi món')">Khách đổi ý / Đổi món</button>
+                <button class="btn btn-outline-warning text-start fw-bold" onclick="setCancelReason('Máy hỏng / Trục trặc kỹ thuật')">Máy hỏng / Trục trặc kỹ thuật</button>
+                <button class="btn btn-outline-warning text-start fw-bold" onclick="setCancelReason('Lý do khác')">Lý do khác...</button>
+            </div>
+            
+            <input type="text" id="cancel-reason-input" class="form-control mb-4 bg-dark text-light border-secondary d-none" placeholder="Nhập lý do cụ thể..." />
+            
+            <div class="d-flex gap-2">
+                <button class="btn btn-secondary flex-grow-1 fw-bold py-2" onclick="closeCancelModal()">ĐÓNG</button>
+                <button class="btn btn-danger flex-grow-1 fw-bold py-2" onclick="submitCancelOrder()">XÁC NHẬN HỦY</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 1. Thẻ Audio để phát tiếng báo đơn mới -->
     <audio id="notification-sound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
 
@@ -68,8 +90,10 @@
             let itemsHtml = '<ul class="list-group list-group-flush mb-3 rounded">';
             if (data.items && data.items.length > 0) {
                 data.items.forEach(item => {
+                    let noteHtml = item.note ? `<div class="small mt-1" style="color: #f4a261;"><em>* Ghi chú: ${item.note}</em></div>` : '';
                     itemsHtml += `<li class="list-group-item bg-dark text-light border-secondary">
                         <span class="fw-bold" style="color: yellow;">${item.quantity}x</span> ${item.name}
+                        ${noteHtml}
                     </li>`;
                 });
             }
@@ -101,7 +125,7 @@
                         <button class="${btnClass} w-100 fw-bold py-2 shadow mb-2" id="btn-status-${data.orderId}" onclick="updateOrderStatus(${data.orderId}, ${nextStatus}, this)">
                             ${btnText}
                         </button>
-                        <button class="btn btn-outline-danger w-100 fw-bold py-1" onclick="cancelOrder(${data.orderId})">
+                        <button class="btn btn-outline-danger w-100 fw-bold py-1" onclick="openCancelModal(${data.orderId}, ${data.queueNumber})">
                             ❌ HỦY ĐƠN
                         </button>
                     </div>
@@ -183,16 +207,62 @@
             });
         }
 
-        // 4. HỦY ĐƠN HÀNG
-        function cancelOrder(orderId) {
-            if (!confirm('Bạn có chắc chắn muốn HỦY đơn #' + orderId + '?')) return;
+        // 4. HỦY ĐƠN HÀNG (Sử dụng Popup)
+        let currentCancelOrderId = null;
+        let currentCancelReason = "";
 
-            fetch('/Pos/CancelOrder?orderId=' + orderId, { method: 'POST' })
+        function openCancelModal(orderId, queueNumber) {
+            currentCancelOrderId = orderId;
+            currentCancelReason = "";
+            document.getElementById('cancel-queue-number').textContent = queueNumber;
+            document.getElementById('cancel-reason-input').value = '';
+            document.getElementById('cancel-reason-input').classList.add('d-none');
+            
+            const overlay = document.getElementById('cancel-overlay');
+            overlay.classList.remove('d-none');
+            overlay.classList.add('d-flex');
+        }
+
+        function closeCancelModal() {
+            const overlay = document.getElementById('cancel-overlay');
+            overlay.classList.add('d-none');
+            overlay.classList.remove('d-flex');
+            currentCancelOrderId = null;
+        }
+
+        function setCancelReason(reason) {
+            currentCancelReason = reason;
+            const input = document.getElementById('cancel-reason-input');
+            if (reason === 'Lý do khác') {
+                input.classList.remove('d-none');
+                input.focus();
+                currentCancelReason = ""; // user will type
+            } else {
+                input.classList.add('d-none');
+                input.value = reason; 
+            }
+        }
+
+        function submitCancelOrder() {
+            if (!currentCancelOrderId) return;
+            
+            let finalReason = currentCancelReason;
+            const inputVal = document.getElementById('cancel-reason-input').value.trim();
+            if (!finalReason || document.getElementById('cancel-reason-input').classList.contains('d-none') === false) {
+                if (!inputVal) {
+                    alert("Vui lòng chọn hoặc nhập lý do hủy đơn!");
+                    return;
+                }
+                finalReason = inputVal;
+            }
+
+            fetch('/Pos/CancelOrder?orderId=' + currentCancelOrderId + '&reason=' + encodeURIComponent(finalReason), { method: 'POST' })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    const cardOuter = document.getElementById('order-card-' + orderId);
+                    const cardOuter = document.getElementById('order-card-' + currentCancelOrderId);
                     if (cardOuter) cardOuter.remove();
+                    closeCancelModal();
                 } else {
                     alert(data.message);
                 }

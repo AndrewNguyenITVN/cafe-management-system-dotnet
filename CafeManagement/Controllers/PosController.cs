@@ -285,7 +285,7 @@ public class PosController : Controller
                 .ThenInclude(d => d.MenuItem)
             .Where(o => o.StoreId == storeId
                      && o.OrderDate.Date == today
-                     && o.Status < 2) // 0 = Pending, 1 = Processing
+                     && (o.Status == 0 || o.Status == 1)) // 0 = Pending, 1 = Processing
             .OrderBy(o => o.OrderDate)
             .Select(o => new {
                 orderId = o.Id,
@@ -304,7 +304,7 @@ public class PosController : Controller
 
     // API: Hủy đơn hàng (Dành cho KDS khi bếp không thể thực hiện)
     [HttpPost]
-    public async Task<IActionResult> CancelOrder(int orderId)
+    public async Task<IActionResult> CancelOrder(int orderId, string reason = "")
     {
         var order = await _db.Orders.FindAsync(orderId);
         if (order == null)
@@ -316,6 +316,13 @@ public class PosController : Controller
         order.Status = -1; // -1 = Cancelled
 
         await _db.SaveChangesAsync();
+
+        // Bắn tín hiệu SignalR báo hủy đơn để Customer Display và POS có thể tự xóa / nghe
+        string storeGroup = $"Store_{order.StoreId}";
+        await _hubContext.Clients.Group(storeGroup).SendAsync("OrderCancelled", new {
+            queueNumber = order.QueueNumber,
+            reason = string.IsNullOrWhiteSpace(reason) ? "Không có lý do" : reason
+        });
 
         return Ok(new { success = true, storeId = order.StoreId, queueNumber = order.QueueNumber });
     }

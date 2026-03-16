@@ -350,6 +350,48 @@
     </div>
 </div>
 
+@* Box thông báo Đặt Hàng Thành Công Popup *@
+<div id="order-success-box" class="position-fixed top-0 start-0 w-100 h-100 d-none align-items-center justify-content-center" style="background: rgba(0,0,0,0.85); z-index: 10000;">
+    <div class="bg-dark border rounded-4 shadow-lg p-5 text-center" style="max-width: 450px; border-color: #6c584c !important; position: relative;">
+        <!-- Icon Success Animation -->
+        <div class="mb-3 d-flex justify-content-center">
+            <div class="rounded-circle d-flex align-items-center justify-content-center text-success" 
+                 style="width: 110px; height: 110px; background: rgba(108, 88, 76, 0.2); border: 4px solid #d4a373; font-size: 5rem; animation: bounceIn 0.5s ease;">
+                ✓
+            </div>
+        </div>
+        <h3 class="text-light mb-2 fw-bold" style="color: #f7e6c4 !important;">ĐẶT HÀNG THÀNH CÔNG!</h3>
+        <p class="text-secondary fs-5 mb-4">Số thứ tự của khách: <span id="success-queue-number" class="text-warning fw-bold fs-2 ms-2">#0</span></p>
+        
+        <button type="button" class="btn w-100 fs-4 py-3 fw-bold shadow" 
+                style="background: linear-gradient(135deg, #d4a373, #b07d4b); color:#1a120b; border-radius: 12px; transition: transform 0.2s;"
+                onclick="closeOrderSuccessBox()">
+            Tiếp Tục Bán Hàng ❯
+        </button>
+    </div>
+</div>
+
+@* Box Cảnh báo Bếp HỦY ĐƠN *@
+<div id="order-cancelled-box" class="position-fixed top-0 start-0 w-100 h-100 d-none align-items-center justify-content-center" style="background: rgba(0,0,0,0.85); z-index: 10000;">
+    <div class="bg-dark border rounded-4 shadow-lg p-5 text-center" style="max-width: 450px; border-color: #e07a5f !important; position: relative;">
+        <!-- Icon Alert Animation -->
+        <div class="mb-3 d-flex justify-content-center">
+            <div class="rounded-circle d-flex align-items-center justify-content-center text-danger" 
+                 style="width: 110px; height: 110px; background: rgba(224, 122, 95, 0.2); border: 4px solid #e07a5f; font-size: 5rem; animation: bounceIn 0.5s ease;">
+                !
+            </div>
+        </div>
+        <h3 class="text-danger mb-2 fw-bold">BẾP VỪA HỦY ĐƠN</h3>
+        <p class="text-secondary fs-5 mb-2">Đơn STT: <span id="cancelled-queue-number" class="text-warning fw-bold fs-3 ms-2">#0</span></p>
+        <p class="text-light fs-5 mb-4 bg-secondary p-3 rounded" style="background-color: #3d2a1c !important;">Lý do: <br><strong id="cancelled-reason" style="color: #d4a373;">Nguyên liệu</strong></p>
+        
+        <button type="button" class="btn btn-outline-danger w-100 fs-5 py-2 fw-bold" 
+                onclick="closeOrderCancelledBox()">
+            Đã rõ
+        </button>
+    </div>
+</div>
+
 @* Layout 3 cột (Grid Bootstrap) *@
 
 <div class="container-fluid">
@@ -577,6 +619,7 @@
 </div>
 
 @* JAVASCRIPT LOGIC *@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 
 <script>
 
@@ -1122,7 +1165,16 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('✅ Đặt hàng thành công!\nSố thứ tự: ' + data.queueNumber);
+                // Hiển thị Popup Đặt Hàng Thành Công
+                const msgEl = document.getElementById('success-queue-number');
+                if (msgEl) msgEl.textContent = data.queueNumber;
+                
+                const box = document.getElementById('order-success-box');
+                if (box) {
+                    box.classList.remove('d-none');
+                    box.classList.add('d-flex');
+                }
+                
                 resetAfterOrder();
             } else {
                 alert('❌ Lỗi: ' + data.message);
@@ -1266,6 +1318,12 @@
 
                 // Sau khi đăng nhập ca thành công mới load menu POS
                 loadCategories();
+                
+                // Thu Ngân tham gia vào Hub Group của chi nhánh sau khi có StoreId
+                connection.start().then(() => {
+                    connection.invoke("JoinGroup", currentStoreId.toString())
+                        .catch(err => console.error("SignalR JoinGroup Error: ", err));
+                }).catch(err => console.error("SignalR Start Error: ", err));
             } else {
                 const msg = data.message || "Vui lòng kiểm tra lại mã PIN và thử lại.";
                 const box = document.getElementById('pin-error-box');
@@ -1282,6 +1340,22 @@
 
     function closePinErrorBox() {
         const box = document.getElementById('pin-error-box');
+        if (box) {
+            box.classList.add('d-none');
+            box.classList.remove('d-flex');
+        }
+    }
+
+    function closeOrderSuccessBox() {
+        const box = document.getElementById('order-success-box');
+        if (box) {
+            box.classList.add('d-none');
+            box.classList.remove('d-flex');
+        }
+    }
+
+    function closeOrderCancelledBox() {
+        const box = document.getElementById('order-cancelled-box');
         if (box) {
             box.classList.add('d-none');
             box.classList.remove('d-flex');
@@ -1331,7 +1405,25 @@
         }
     }
 
-    // Cuối script: gọi load nhân viên ngay khi DOM sẵn sàng (script ở cuối body nên DOM thường đã load xong)
+    // Cài đặt SignalR cho Màn hình Thu Ngân để nhận thông báo Hủy đơn
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/orderHub")
+        .withAutomaticReconnect()
+        .build();
+
+    connection.on("OrderCancelled", function (data) {
+        // Mở popup Cảnh báo Hủy Đơn
+        const box = document.getElementById('order-cancelled-box');
+        if (box) {
+            document.getElementById('cancelled-queue-number').textContent = "#" + data.queueNumber;
+            document.getElementById('cancelled-reason').textContent = data.reason;
+            
+            box.classList.remove('d-none');
+            box.classList.add('d-flex');
+        }
+    });
+
+    // Gọi hàm load nhân viên ngay khi DOM bắt đầu
     function initPos() {
         loadCashiers();
     }
