@@ -10,7 +10,7 @@ using System.Security.Claims;
 
 namespace CafeManagement.Controllers;
 
-[Authorize]
+[AllowAnonymous]
 public class PosController : Controller
 {
     // Dependency Injection
@@ -55,7 +55,6 @@ public class PosController : Controller
 
     // Giao diện Customer Display
     [HttpGet]
-    [AllowAnonymous] // Cho phép mở màn hình khách hàng mà không cần đăng nhập
     public IActionResult CustomerDisplay()
     {
         return View();
@@ -108,6 +107,17 @@ public class PosController : Controller
             .ToListAsync();
 
         return Ok(users);
+    }
+
+    // API: Lấy danh sách chi nhánh đang hoạt động (dùng cho KDS / Customer Display)
+    [HttpGet]
+    public async Task<IActionResult> GetStores()
+    {
+        var stores = await _db.Stores
+            .Where(s => s.IsActive)
+            .Select(s => new { id = s.Id, name = s.Name })
+            .ToListAsync();
+        return Ok(stores);
     }
 
     // API: Lấy danh sách phương thức thanh toán (cho dropdown POS)
@@ -275,7 +285,6 @@ public class PosController : Controller
 
     // API: Lấy danh sách đơn hàng đang hoạt động (Pending + Processing) theo Chi nhánh
     [HttpGet]
-    [AllowAnonymous]
     public IActionResult GetActiveOrders(int storeId)
     {
         var today = DateTime.Today;
