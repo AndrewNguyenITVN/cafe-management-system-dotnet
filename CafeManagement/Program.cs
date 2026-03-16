@@ -79,7 +79,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 // MỚI: Mở cổng "/orderHub" để các trình duyệt kết nối WebSockets
 app.MapHub<OrderHub>("/orderHub");
