@@ -19,8 +19,8 @@
 
         /* ===== TOÀN TRANG ===== */
         body {
-            background-color: #1a120b;  /* Nền nâu cà phê rất tối */
-            color: #f7e6c4;             /* Chữ trắng kem sáng */
+            background-color: #f8f9fa;  /* Nền sáng */
+            color: #212529;             /* Chữ đen */
             font-family: 'Outfit', sans-serif;
             overflow: hidden;           /* Giữ layout POS 1 màn hình, không cuộn toàn trang */
             height: 100vh;              /* Chiếm hết chiều cao màn hình */
@@ -28,21 +28,21 @@
 
         /* ===== CỘT TRÁI - DANH MỤC ===== */
         .category-panel {
-            background-color: #2b1f14;  /* Nền nâu đậm */
+            background-color: #ffffff;  /* Nền trắng */
             height: 100vh;
             padding: 20px 15px;
             overflow-y: auto;           /* Cuộn được nếu danh mục nhiều */
-            border-right: 1px solid #3d2a1c;
+            border-right: 1px solid #dee2e6;
         }
         .category-btn {
             display: block;
             width: 100%;
             padding: 16px;
             margin-bottom: 12px;
-            border: 1px solid #3d2a1c;
+            border: 1px solid #dee2e6;
             border-radius: 12px;
-            background-color: #3d2a1c;
-            color: #f7e6c4;
+            background-color: #ffffff;
+            color: #212529;
             font-size: 16px;
             font-weight: 600;
             text-align: left;
@@ -55,18 +55,18 @@
             content: '';
             position: absolute;
             top: 0; left: 0; width: 4px; height: 100%;
-            background-color: #d4a373; /* Caramel highlight */
+            background-color: #0d6efd; /* Caramel highlight */
             transform: scaleY(0);
             transition: transform 0.3s;
         }
         .category-btn:hover {
-            background-color: #4a3422;  /* Sáng hơn khi rê chuột */
+            background-color: #e9ecef;
             transform: translateX(4px);
         }
         .category-btn.active {
-            background-color: #4a3422;  
-            color: #fff;
-            box-shadow: 0 4px 15px rgba(212, 163, 115, 0.2);
+            background-color: #e9ecef;  
+            color: #000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         .category-btn.active::before {
             transform: scaleY(1);
@@ -77,17 +77,17 @@
             height: 100vh;
             padding: 24px;
             overflow-y: auto;
-            background-image: radial-gradient(circle at center, #231810 0%, #1a120b 100%);
+            background-color: #f8f9fa;
         }
         .product-card {
-            background: linear-gradient(145deg, #2b1f14, #1a120b);
-            border: 1px solid #3d2a1c;
+            background: #ffffff;
+            border: 1px solid #dee2e6;
             border-radius: 16px;
             padding: 20px 16px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             position: relative;
             overflow: hidden;
         }
@@ -95,14 +95,14 @@
             content: '';
             position: absolute;
             bottom: 0; left: 0; width: 100%; height: 2px;
-            background: #d4a373;
+            background: #0d6efd;
             transform: scaleX(0);
             transition: transform 0.3s ease;
         }
         .product-card:hover {
             transform: translateY(-5px);      
-            border-color: #d4a373;
-            box-shadow: 0 12px 25px rgba(212, 163, 115, 0.15);
+            border-color: #0d6efd;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
         }
         .product-card:hover::after {
             transform: scaleX(1);
@@ -114,7 +114,7 @@
             letter-spacing: 0.5px;
         }
         .product-card .price {
-            color: #d4a373;
+            color: #0d6efd;
             font-weight: bold;
             font-size: 18px;
             margin-top: 6px;
@@ -122,28 +122,28 @@
 
         /* ===== CỘT PHẢI - GIỎ HÀNG ===== */
         .cart-panel {
-            background-color: #2b1f14;
+            background-color: #ffffff;
             height: 100vh;
             padding: 20px 24px;
-            border-left: 1px solid #3d2a1c;
-            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+            border-left: 1px solid #dee2e6;
+            box-shadow: -4px 0 15px rgba(0,0,0,0.05);
             overflow-y: auto;            /* Chỉ riêng cột phải được cuộn */
         }
         .cart-item {
-            background-color: #3d2a1c;
+            background-color: #ffffff;
             border-radius: 12px;
             padding: 12px 16px;
             margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-left: 3px solid #6c584c;
+            border-left: 3px solid #0d6efd;
             transition: background 0.2s;
         }
-        .cart-item:hover { background-color: #4a3422; }
+        .cart-item:hover { background-color: #e9ecef; }
         .cart-item .qty-btn {
-            background: #6c584c;
-            color: #f7e6c4;
+            background: #e9ecef;
+            color: #212529;
             border: none;
             border-radius: 6px;
             width: 28px;
@@ -154,23 +154,23 @@
             transition: all 0.2s;
         }
         .cart-item .qty-btn:hover {
-            background: #d4a373;
-            color: #1a120b;
+            background: #0d6efd;
+            color: #ffffff;
         }
         .cart-item .item-details { flex-grow: 1; margin: 0 10px; }
         .cart-item .name { font-weight: 600; font-size: 15px; }
-        .cart-item .price { color: #d4a373; font-size: 14px; margin-top: 2px; }
+        .cart-item .price { color: #0d6efd; font-size: 14px; margin-top: 2px; }
 
         .cart-summary {
             margin-top: auto;  /* Đẩy phần tổng tiền xuống cuối cột */
-            background-color: #1a120b;
+            background-color: #ffffff;
             padding: 20px;
             border-radius: 16px;
-            border: 1px solid #3d2a1c;
+            border: 1px solid #dee2e6;
         }
         .btn-checkout {
-            background: linear-gradient(135deg, #d4a373, #b07d4b);
-            color: #1a120b;
+            background: #0d6efd;
+            color: #ffffff;
             width: 100%;
             padding: 16px;
             border: none;
@@ -182,11 +182,11 @@
             cursor: pointer;
             text-transform: uppercase;
             transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(212, 163, 115, 0.3);
+            box-shadow: 0 4px 15px rgba(13,110,253,0.3);
         }
         .btn-checkout:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(212, 163, 115, 0.4);
+            box-shadow: 0 6px 20px rgba(13,110,253,0.4);
         }
 
         /* Nút chọn phương thức thanh toán */
@@ -199,9 +199,9 @@
             flex: 1 1 45%;
             padding: 10px 12px;
             border-radius: 999px;
-            border: 1px solid #3d2a1c;
-            background-color: #2b1f14;
-            color: #f7e6c4;
+            border: 1px solid #dee2e6;
+            background-color: #ffffff;
+            color: #212529;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -209,13 +209,13 @@
             text-align: center;
         }
         .payment-method-btn:hover {
-            background-color: #4a3422;
+            background-color: #e9ecef;
         }
         .payment-method-btn.active {
-            background: linear-gradient(135deg, #d4a373, #b07d4b);
-            color: #1a120b;
-            border-color: #d4a373;
-            box-shadow: 0 0 10px rgba(212, 163, 115, 0.5);
+            background: #0d6efd;
+            color: #ffffff;
+            border-color: #0d6efd;
+            box-shadow: 0 0 10px rgba(13,110,253,0.5);
         }
 
         /* ETC button and overlay */
@@ -224,58 +224,58 @@
             bottom: 20px;
             left: 20px;
             z-index: 1030;
-            background-color: #3d2a1c;
-            border: 1px solid #d4a373;
-            color: #f7e6c4;
+            background-color: #ffffff;
+            border: 1px solid #0d6efd;
+            color: #212529;
             border-radius: 999px;
             padding: 8px 16px;
             font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         .etc-button:hover {
-            background-color: #4a3422;
+            background-color: #e9ecef;
         }
         #etc-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.75);
+            background: rgba(0,0,0,0.5);
             z-index: 1040;
         }
         .etc-panel {
             max-width: 520px;
-            background-color: #2b1f14;
+            background-color: #ffffff;
             border-radius: 16px;
-            border: 1px solid #d4a373;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+            border: 1px solid #0d6efd;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
             padding: 24px 24px 18px;
         }
         .etc-action-btn {
             width: 100%;
             padding: 10px 12px;
             border-radius: 10px;
-            border: 1px solid #3d2a1c;
-            background-color: #3d2a1c;
-            color: #f7e6c4;
+            border: 1px solid #dee2e6;
+            background-color: #ffffff;
+            color: #212529;
             font-weight: 600;
             text-align: left;
             cursor: pointer;
             margin-bottom: 8px;
         }
         .etc-action-btn:hover {
-            background-color: #4a3422;
+            background-color: #e9ecef;
         }
         
         /* Tùy chỉnh thanh cuộn dải mỏng */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #1a120b; }
         ::-webkit-scrollbar-thumb { background: #3d2a1c; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #d4a373; }
+        ::-webkit-scrollbar-thumb:hover { background: #0d6efd; }
         
         /* Tùy chỉnh input cho đẹp */
         .form-control.bg-dark {
             background-color: #1a120b !important;
-            border-color: #3d2a1c !important;
+            border-color: #dee2e6 !important;
             color: #f7e6c4 !important;
             padding: 12px;
             border-radius: 8px;
@@ -285,23 +285,23 @@
             border-color: #d4a373 !important;
         }
         .form-check-input:checked {
-            background-color: #d4a373;
-            border-color: #d4a373;
+            background-color: #0d6efd;
+            border-color: #0d6efd;
         }
 
         #cashier-list-box .cashier-item {
             padding: 12px 14px;
-            border-bottom: 1px solid #3d2a1c;
+            border-bottom: 1px solid #dee2e6;
             cursor: pointer;
-            color: #f7e6c4;
+            color: #212529;
             transition: background 0.2s;
         }
         #cashier-list-box .cashier-item:hover {
-            background-color: #3d2a1c;
+            background-color: #ffffff;
         }
         #cashier-list-box .cashier-item.selected {
-            background-color: #4a3422;
-            border-left: 4px solid #d4a373;
+            background-color: #e9ecef;
+            border-left: 4px solid #0d6efd;
         }
         #cashier-list-box .cashier-item:last-child {
             border-bottom: none;
@@ -312,59 +312,59 @@
 <body>
 
 @* ══════════ MÀN HÌNH KHÓA PIN ══════════ *@
-<div id="pin-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center" style="background-color: #1a120b; z-index: 9999;">
-    <h2 class="mb-4 fw-bold" style="color: #d4a373;">🔒 MỞ CA LÀM VIỆC</h2>
+<div id="pin-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center" style="background-color: #ffffff; z-index: 9999;">
+    <h2 class="mb-4 fw-bold" style="color: #0d6efd;">🔒 MỞ CA LÀM VIỆC</h2>
     <!-- Chọn nhân viên -->
     <div class="mb-3" style="width: 280px;">
         <label class="form-label small text-secondary mb-1">Chọn nhân viên</label>
-        <div id="cashier-list-box" class="border rounded overflow-y-auto bg-dark"
-            style="max-height: 200px; border-color: #3d2a1c !important;">
+        <div id="cashier-list-box" class="border rounded overflow-y-auto bg-light"
+            style="max-height: 200px; border-color: #dee2e6 !important;">
             <p class="text-secondary text-center small py-3 mb-0">Đang tải...</p>
         </div>
     </div>
-    <input type="password" id="pin-input" class="form-control bg-dark text-center text-light fs-3 mb-4 rounded-3 border-secondary" style="width: 250px; letter-spacing: 10px; height: 60px;" readonly />
+    <input type="password" id="pin-input" class="form-control bg-white text-center text-dark fs-3 mb-4 rounded-3 border-secondary" style="width: 250px; letter-spacing: 10px; height: 60px;" readonly />
     <div class="d-grid gap-2" style="grid-template-columns: repeat(3, 1fr); width: 250px;">
-        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('1')">1</button>
-        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('2')">2</button>
-        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('3')">3</button>
-        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('4')">4</button>
-        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('5')">5</button>
-        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('6')">6</button>
-        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('7')">7</button>
-        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('8')">8</button>
-        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('9')">9</button>
-        <button class="btn btn-danger fs-4 py-2 fw-bold" onclick="clearPin()">C</button>
-        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('0')">0</button>
-        <button class="btn btn-success fs-4 py-2 fw-bold" onclick="submitPin()" style="background-color: #6c584c; border:none;">OK</button>
+        <button class="btn btn-outline-dark fs-4 py-2" onclick="addPin('1')">1</button>
+        <button class="btn btn-outline-dark fs-4 py-2" onclick="addPin('2')">2</button>
+        <button class="btn btn-outline-dark fs-4 py-2" onclick="addPin('3')">3</button>
+        <button class="btn btn-outline-dark fs-4 py-2" onclick="addPin('4')">4</button>
+        <button class="btn btn-outline-dark fs-4 py-2" onclick="addPin('5')">5</button>
+        <button class="btn btn-outline-dark fs-4 py-2" onclick="addPin('6')">6</button>
+        <button class="btn btn-outline-dark fs-4 py-2" onclick="addPin('7')">7</button>
+        <button class="btn btn-outline-dark fs-4 py-2" onclick="addPin('8')">8</button>
+        <button class="btn btn-outline-dark fs-4 py-2" onclick="addPin('9')">9</button>
+        <button class="btn btn-danger fs-4 py-2 fw-bold text-white" onclick="clearPin()">C</button>
+        <button class="btn btn-outline-dark fs-4 py-2" onclick="addPin('0')">0</button>
+        <button class="btn btn-success fs-4 py-2 fw-bold text-white" onclick="submitPin()">OK</button>
     </div>
     <span id="pin-error" class="text-danger mt-3 d-none fw-bold fs-5">Mã PIN không đúng!</span>
 
     @* Box thông báo khi nhập sai PIN *@
     <div id="pin-error-box" class="position-fixed top-0 start-0 w-100 h-100 d-none align-items-center justify-content-center" style="background: rgba(0,0,0,0.6); z-index: 10000;">
-        <div class="bg-dark border rounded-3 shadow-lg p-4 text-center" style="max-width: 320px; border-color: #6c584c !important;">
+        <div class="bg-white border rounded-3 shadow-lg p-4 text-center" style="max-width: 320px; border-color: #dee2e6 !important;">
             <div class="mb-3 fs-1">⚠️</div>
-            <h5 class="text-warning mb-2">Mã PIN không đúng</h5>
+            <h5 class="text-primary mb-2">Mã PIN không đúng</h5>
             <p id="pin-error-box-message" class="text-secondary small mb-4">Vui lòng kiểm tra lại mã PIN và thử lại.</p>
-            <button type="button" class="btn btn-outline-light px-4" onclick="closePinErrorBox()">Đóng</button>
+            <button type="button" class="btn btn-outline-dark px-4" onclick="closePinErrorBox()">Đóng</button>
         </div>
     </div>
 </div>
 
 @* Box thông báo Đặt Hàng Thành Công Popup *@
-<div id="order-success-box" class="position-fixed top-0 start-0 w-100 h-100 d-none align-items-center justify-content-center" style="background: rgba(0,0,0,0.85); z-index: 10000;">
-    <div class="bg-dark border rounded-4 shadow-lg p-5 text-center" style="max-width: 450px; border-color: #6c584c !important; position: relative;">
+<div id="order-success-box" class="position-fixed top-0 start-0 w-100 h-100 d-none align-items-center justify-content-center" style="background: rgba(0,0,0,0.5); z-index: 10000;">
+    <div class="bg-white border rounded-4 shadow-lg p-5 text-center" style="max-width: 450px; border-color: #dee2e6 !important; position: relative;">
         <!-- Icon Success Animation -->
         <div class="mb-3 d-flex justify-content-center">
             <div class="rounded-circle d-flex align-items-center justify-content-center text-success" 
-                 style="width: 110px; height: 110px; background: rgba(108, 88, 76, 0.2); border: 4px solid #d4a373; font-size: 5rem; animation: bounceIn 0.5s ease;">
+                 style="width: 110px; height: 110px; background: rgba(13, 110, 253, 0.2); border: 4px solid #0d6efd; font-size: 5rem; animation: bounceIn 0.5s ease;">
                 ✓
             </div>
         </div>
-        <h3 class="text-light mb-2 fw-bold" style="color: #f7e6c4 !important;">ĐẶT HÀNG THÀNH CÔNG!</h3>
-        <p class="text-secondary fs-5 mb-4">Số thứ tự của khách: <span id="success-queue-number" class="text-warning fw-bold fs-2 ms-2">#0</span></p>
+        <h3 class="text-dark mb-2 fw-bold" style="color: #212529 !important;">ĐẶT HÀNG THÀNH CÔNG!</h3>
+        <p class="text-secondary fs-5 mb-4">Số thứ tự của khách: <span id="success-queue-number" class="text-primary fw-bold fs-2 ms-2">#0</span></p>
         
         <button type="button" class="btn w-100 fs-4 py-3 fw-bold shadow" 
-                style="background: linear-gradient(135deg, #d4a373, #b07d4b); color:#1a120b; border-radius: 12px; transition: transform 0.2s;"
+                style="background: #0d6efd; color:#ffffff; border-radius: 12px; transition: transform 0.2s;"
                 onclick="closeOrderSuccessBox()">
             Tiếp Tục Bán Hàng ❯
         </button>
@@ -372,8 +372,8 @@
 </div>
 
 @* Box Cảnh báo Bếp HỦY ĐƠN *@
-<div id="order-cancelled-box" class="position-fixed top-0 start-0 w-100 h-100 d-none align-items-center justify-content-center" style="background: rgba(0,0,0,0.85); z-index: 10000;">
-    <div class="bg-dark border rounded-4 shadow-lg p-5 text-center" style="max-width: 450px; border-color: #e07a5f !important; position: relative;">
+<div id="order-cancelled-box" class="position-fixed top-0 start-0 w-100 h-100 d-none align-items-center justify-content-center" style="background: rgba(0,0,0,0.5); z-index: 10000;">
+    <div class="bg-white border rounded-4 shadow-lg p-5 text-center" style="max-width: 450px; border-color: #e07a5f !important; position: relative;">
         <!-- Icon Alert Animation -->
         <div class="mb-3 d-flex justify-content-center">
             <div class="rounded-circle d-flex align-items-center justify-content-center text-danger" 
@@ -382,8 +382,8 @@
             </div>
         </div>
         <h3 class="text-danger mb-2 fw-bold">BẾP VỪA HỦY ĐƠN</h3>
-        <p class="text-secondary fs-5 mb-2">Đơn STT: <span id="cancelled-queue-number" class="text-warning fw-bold fs-3 ms-2">#0</span></p>
-        <p class="text-light fs-5 mb-4 bg-secondary p-3 rounded" style="background-color: #3d2a1c !important;">Lý do: <br><strong id="cancelled-reason" style="color: #d4a373;">Nguyên liệu</strong></p>
+        <p class="text-secondary fs-5 mb-2">Đơn STT: <span id="cancelled-queue-number" class="text-primary fw-bold fs-3 ms-2">#0</span></p>
+        <p class="text-dark fs-5 mb-4 bg-light p-3 rounded" style="background-color: #ffffff !important;">Lý do: <br><strong id="cancelled-reason" style="color: #0d6efd;">Nguyên liệu</strong></p>
         
         <button type="button" class="btn btn-outline-danger w-100 fs-5 py-2 fw-bold" 
                 onclick="closeOrderCancelledBox()">
@@ -419,18 +419,18 @@
             @* --- Khu vực nhập SĐT Khách hàng --- *@
             <h5 class="mb-2">👤 Khách hàng</h5>
             <!-- <div class="mb-3">
-                <input type="text" id="customer-phone" class="form-control bg-dark text-light border-secondary" 
+                <input type="text" id="customer-phone" class="form-control bg-white text-dark border-secondary" 
                        placeholder="Nhập SĐT khách hàng..." oninput="checkCustomerPhone()" maxlength="10" />
                 
-                <div id="customer-info-box" class="d-none mt-2 p-2 rounded" style="background-color: #3d2a1c;">
+                <div id="customer-info-box" class="d-none mt-2 p-2 rounded" style="background-color: #ffffff;">
                     <div class="d-flex justify-content-between align-items-center">
-                        <span id="customer-info" class="text-light fw-bold fs-6"></span>
-                        <span class="text-secondary small">Điểm: <span id="customer-points" class="text-warning fw-bold fs-6">0</span></span>
+                        <span id="customer-info" class="text-dark fw-bold fs-6"></span>
+                        <span class="text-secondary small">Điểm: <span id="customer-points" class="text-primary fw-bold fs-6">0</span></span>
                     </div>
                     <div class="mt-2 input-group input-group-sm">
-                        <span class="input-group-text bg-secondary text-light border-secondary px-2">Dùng điểm</span>
-                        <input type="number" id="use-points" class="form-control bg-dark text-light border-secondary text-end" placeholder="0" min="0" oninput="updateTotal()">
-                        <span class="input-group-text bg-secondary text-light border-secondary px-2">₫</span>
+                        <span class="input-group-text bg-light text-dark border-secondary px-2">Dùng điểm</span>
+                        <input type="number" id="use-points" class="form-control bg-white text-dark border-secondary text-end" placeholder="0" min="0" oninput="updateTotal()">
+                        <span class="input-group-text bg-light text-dark border-secondary px-2">₫</span>
                     </div>
                 </div>
 
@@ -442,28 +442,28 @@
                 <div class="input-group">
                     <input type="text"
                         id="customer-phone"
-                        class="form-control bg-dark text-light border-secondary"
+                        class="form-control bg-white text-dark border-secondary"
                         placeholder="Nhập SĐT khách hàng..."
                         maxlength="10" />
-                    <button class="btn btn-outline-light"
+                    <button class="btn btn-outline-dark"
                             type="button"
                             onclick="checkCustomerPhone()">
                         Kiểm tra
                     </button>
                 </div>
 
-                <div id="customer-info-box" class="d-none mt-2 p-2 rounded" style="background-color: #3d2a1c;">
+                <div id="customer-info-box" class="d-none mt-2 p-2 rounded" style="background-color: #ffffff;">
                     <div class="d-flex justify-content-between align-items-center">
-                        <span id="customer-info" class="text-light fw-bold fs-6"></span>
-                        <span class="text-secondary small">Điểm: <span id="customer-points" class="text-warning fw-bold fs-6">0</span></span>
+                        <span id="customer-info" class="text-dark fw-bold fs-6"></span>
+                        <span class="text-secondary small">Điểm: <span id="customer-points" class="text-primary fw-bold fs-6">0</span></span>
                     </div>
                     <div class="mt-2 input-group input-group-sm">
-                        <span class="input-group-text bg-secondary text-light border-secondary px-2">Dùng điểm</span>
+                        <span class="input-group-text bg-light text-dark border-secondary px-2">Dùng điểm</span>
                         <input type="number" id="use-points"
-                            class="form-control bg-dark text-light border-secondary text-end"
+                            class="form-control bg-white text-dark border-secondary text-end"
                             placeholder="0" min="0"
                             oninput="updateTotal()">
-                        <span class="input-group-text bg-secondary text-light border-secondary px-2">₫</span>
+                        <span class="input-group-text bg-light text-dark border-secondary px-2">₫</span>
                     </div>
                 </div>
 
@@ -515,11 +515,11 @@
                 </div>
                 <div id="cash-tendered-row" class="mb-2 d-none">
                     <label class="form-label small text-secondary mb-0">Tiền khách đưa</label>
-                    <input type="number" id="amount-tendered" class="form-control bg-dark text-light border-secondary text-end" placeholder="0" min="0" value="0" oninput="updateChangeDisplay()">
+                    <input type="number" id="amount-tendered" class="form-control bg-white text-dark border-secondary text-end" placeholder="0" min="0" value="0" oninput="updateChangeDisplay()">
                 </div>
                 <div id="change-row" class="d-flex justify-content-between mb-3 d-none">
                     <span>Tiền thối:</span>
-                    <span id="change-amount" class="fw-bold" style="color: #d4a373;">0 ₫</span>
+                    <span id="change-amount" class="fw-bold" style="color: #0d6efd;">0 ₫</span>
                 </div>
                 <button class="btn-checkout" onclick="checkout()">
                     💳 HOÀN TẤT THANH TOÁN
@@ -538,7 +538,7 @@
     <div class="etc-panel">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="mb-0 fw-bold" style="color:#d4a373;">⚙️ Tùy chọn nâng cao</h5>
-            <button type="button" class="btn btn-sm btn-outline-light" onclick="closeEtcOverlay()">Đóng</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" onclick="closeEtcOverlay()">Đóng</button>
         </div>
 
         <div id="etc-main-menu">
@@ -610,7 +610,7 @@
             <div class="d-flex justify-content-between mt-2">
                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="backToEtcMenu()">⬅ Quay lại</button>
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-light" onclick="loadCloseShiftPreview()">🔄 Tính lại</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="loadCloseShiftPreview()">🔄 Tính lại</button>
                     <button type="button" class="btn btn-sm btn-primary" onclick="submitCloseShift()">✅ Kết ca</button>
                 </div>
             </div>
@@ -1055,7 +1055,7 @@
                             </span>
                         </div>
                         <input type="text"
-                               class="form-control form-control-sm bg-dark text-light border-secondary"
+                               class="form-control form-control-sm bg-white text-dark border-secondary"
                                placeholder="Ghi chú món này..."
                                value="${safeNote}"
                                oninput="updateItemNote(${index}, this.value)" />
@@ -1386,14 +1386,19 @@
                 const id = c.id ?? c.Id ?? '';
                 const name = (c.name ?? c.Name ?? '').trim() || 'Nhân viên';
                 const div = document.createElement('div');
-                div.className = 'cashier-item';
+                div.className = 'cashier-item px-3 py-2 text-dark border-bottom';
+                div.style.cursor = 'pointer';
                 div.dataset.id = id;
                 div.dataset.name = name;
                 div.textContent = name;
 
                 div.onclick = function () {
-                    document.querySelectorAll('#cashier-list-box .cashier-item').forEach(el => el.classList.remove('selected'));
-                    this.classList.add('selected');
+                    document.querySelectorAll('#cashier-list-box .cashier-item').forEach(el => {
+                        el.classList.remove('selected', 'bg-primary', 'text-white');
+                        el.classList.add('text-dark');
+                    });
+                    this.classList.add('selected', 'bg-primary', 'text-white');
+                    this.classList.remove('text-dark');
                     selectedCashierId = this.dataset.id;
                 };
 
