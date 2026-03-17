@@ -15,14 +15,14 @@
 
         body {
             font-family: 'Outfit', sans-serif;
-            background-color: #0f0a06;
+            background-color: #f8f9fa;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 32px 16px;
-            color: #f7e6c4;
+            color: #212529;
             overflow-x: hidden;
         }
 
@@ -32,8 +32,8 @@
             position: fixed;
             inset: 0;
             background:
-                radial-gradient(ellipse at 20% 20%, rgba(212,163,115,.12) 0%, transparent 55%),
-                radial-gradient(ellipse at 80% 80%, rgba(176,125,75,.10) 0%, transparent 55%);
+                radial-gradient(ellipse at 20% 20%, rgba(13,110,253,.08) 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 80%, rgba(25,135,84,.08) 0%, transparent 55%);
             pointer-events: none;
         }
 
@@ -48,13 +48,13 @@
         .brand-title {
             font-size: 2.4rem;
             font-weight: 800;
-            color: #d4a373;
+            color: #0d6efd;
             letter-spacing: 1px;
             margin: 8px 0 4px;
         }
         .brand-sub {
             font-size: 1rem;
-            color: #8a7060;
+            color: #6c757d;
             font-weight: 400;
         }
 
@@ -89,9 +89,9 @@
             padding: 28px 28px 24px;
             border-radius: 20px;
             text-decoration: none;
-            color: #f7e6c4;
-            background-color: #1e1208;
-            border: 1px solid #3d2a1c;
+            color: #212529;
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
             position: relative;
             overflow: hidden;
             transition: transform .25s cubic-bezier(.4,0,.2,1),
@@ -104,15 +104,15 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, rgba(212,163,115,.08) 0%, transparent 60%);
+            background: linear-gradient(135deg, rgba(13,110,253,.05) 0%, transparent 60%);
             opacity: 0;
             transition: opacity .25s;
         }
         .nav-card:hover {
             transform: translateY(-6px);
-            box-shadow: 0 20px 40px rgba(0,0,0,.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,.1);
             border-color: var(--accent);
-            color: #f7e6c4;
+            color: #212529;
             text-decoration: none;
         }
         .nav-card:hover::before { opacity: 1; }
@@ -123,11 +123,11 @@
             margin-bottom: 16px;
             padding: 14px;
             border-radius: 14px;
-            background-color: rgba(255,255,255,.04);
-            border: 1px solid rgba(255,255,255,.06);
+            background-color: rgba(0,0,0,.02);
+            border: 1px solid rgba(0,0,0,.05);
         }
         .card-title { font-size: 1.2rem; font-weight: 700; margin: 0 0 6px; letter-spacing: .3px; }
-        .card-desc  { font-size: .85rem; color: #8a7060; line-height: 1.5; flex-grow: 1; }
+        .card-desc  { font-size: .85rem; color: #6c757d; line-height: 1.5; flex-grow: 1; }
         .card-arrow {
             margin-top: 20px;
             font-size: .82rem;
@@ -151,11 +151,11 @@
         .card-display   { --accent: #90e0ae; }
         .card-inventory { --accent: #c77dff; }
 
-        .card-admin     .card-icon { color: #d4a373; }
+        .card-admin     .card-icon { color: #0d6efd; }
         .card-pos       .card-icon { color: #7ec8e3; }
         .card-kds       .card-icon { color: #f4a261; }
         .card-display   .card-icon { color: #90e0ae; }
-        .card-inventory .card-icon { color: #c77dff; }
+        .card-inventory .card-icon { color: #6f42c1; }
 
         .card-admin:hover     { box-shadow: 0 20px 40px rgba(212,163,115,.15); }
         .card-pos:hover       { box-shadow: 0 20px 40px rgba(126,200,227,.12); }
@@ -172,11 +172,11 @@
             letter-spacing: .5px;
             text-transform: uppercase;
         }
-        .badge-admin     { background: rgba(212,163,115,.15); color: #d4a373; border: 1px solid rgba(212,163,115,.3); }
+        .badge-admin     { background: rgba(212,163,115,.15); color: #0d6efd; border: 1px solid rgba(212,163,115,.3); }
         .badge-pos       { background: rgba(126,200,227,.12); color: #7ec8e3; border: 1px solid rgba(126,200,227,.3); }
         .badge-kds       { background: rgba(244,162,97,.12);  color: #f4a261; border: 1px solid rgba(244,162,97,.3);  }
         .badge-display   { background: rgba(144,224,174,.12); color: #90e0ae; border: 1px solid rgba(144,224,174,.3); }
-        .badge-inventory { background: rgba(199,125,255,.12); color: #c77dff; border: 1px solid rgba(199,125,255,.3); }
+        .badge-inventory { background: rgba(199,125,255,.12); color: #6f42c1; border: 1px solid rgba(199,125,255,.3); }
 
         /* Lock icon trên card inventory */
         .card-lock {
@@ -197,7 +197,7 @@
         #pin-modal-backdrop {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,.75);
+            background: rgba(0,0,0,.5);
             backdrop-filter: blur(4px);
             z-index: 2000;
             display: flex;
@@ -205,13 +205,13 @@
             justify-content: center;
         }
         .pin-modal-box {
-            background: #1a120b;
-            border: 1px solid #3d2a1c;
+            background: #ffffff;
+            border: 1px solid #dee2e6;
             border-radius: 20px;
             padding: 32px 28px 28px;
             width: 100%;
             max-width: 340px;
-            box-shadow: 0 24px 60px rgba(0,0,0,.7);
+            box-shadow: 0 15px 40px rgba(0,0,0,.15);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -220,12 +220,12 @@
         .pin-modal-title {
             font-size: 1.15rem;
             font-weight: 700;
-            color: #c77dff;
+            color: #6f42c1;
             margin-bottom: 4px;
         }
         .pin-modal-sub {
             font-size: .8rem;
-            color: #6a5060;
+            color: #6c757d;
             margin-bottom: 20px;
             text-align: center;
         }
@@ -234,38 +234,38 @@
             width: 100%;
             max-height: 160px;
             overflow-y: auto;
-            border: 1px solid #3d2a1c;
+            border: 1px solid #dee2e6;
             border-radius: 10px;
             margin-bottom: 16px;
-            background: #0f0a06;
+            background: #f8f9fa;
         }
         .mgr-item {
             padding: 11px 14px;
-            border-bottom: 1px solid #2a1a0e;
+            border-bottom: 1px solid #dee2e6;
             cursor: pointer;
             font-size: .9rem;
-            color: #f7e6c4;
+            color: #212529;
             transition: background .15s;
         }
         .mgr-item:last-child { border-bottom: none; }
-        .mgr-item:hover { background: #2b1f14; }
-        .mgr-item.selected { background: #3d2a1c; border-left: 3px solid #c77dff; }
+        .mgr-item:hover { background: #e9ecef; }
+        .mgr-item.selected { background: #e9ecef; border-left: 3px solid #0d6efd; }
 
         /* PIN input */
         #mgr-pin-input {
             width: 220px;
             height: 56px;
-            background: #0f0a06;
-            border: 1px solid #3d2a1c;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
             border-radius: 10px;
-            color: #f7e6c4;
+            color: #212529;
             font-size: 2rem;
             text-align: center;
             letter-spacing: 10px;
             margin-bottom: 16px;
             outline: none;
         }
-        #mgr-pin-input:focus { border-color: #c77dff; box-shadow: 0 0 0 3px rgba(199,125,255,.2); }
+        #mgr-pin-input:focus { border-color: #6f42c1; box-shadow: 0 0 0 3px rgba(199,125,255,.2); }
 
         /* Keypad */
         .pin-keypad {
@@ -278,20 +278,20 @@
         .pin-key {
             padding: 12px 0;
             border-radius: 10px;
-            border: 1px solid #3d2a1c;
-            background: #2b1f14;
-            color: #f7e6c4;
+            border: 1px solid #dee2e6;
+            background: #e9ecef;
+            color: #212529;
             font-size: 1.2rem;
             font-weight: 700;
             cursor: pointer;
             transition: background .15s;
         }
-        .pin-key:hover { background: #4a3422; }
-        .pin-key.danger { background: #3b1010; border-color: #6b2020; color: #f87171; }
-        .pin-key.confirm { background: #2a1a4a; border-color: #7a3db0; color: #c77dff; }
+        .pin-key:hover { background: #dee2e6; }
+        .pin-key.danger { background: #f8d7da; border-color: #f5c2c7; color: #dc3545; }
+        .pin-key.confirm { background: #e0cffc; border-color: #6f42c1; color: #6f42c1; }
 
         #mgr-pin-error {
-            color: #f87171;
+            color: #dc3545;
             font-size: .82rem;
             font-weight: 600;
             min-height: 20px;
@@ -304,16 +304,16 @@
             top: 14px; right: 16px;
             background: none;
             border: none;
-            color: #6a5060;
+            color: #6c757d;
             font-size: 1.2rem;
             cursor: pointer;
             line-height: 1;
         }
-        .pin-close-btn:hover { color: #f7e6c4; }
+        .pin-close-btn:hover { color: #212529; }
 
         ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #0f0a06; }
-        ::-webkit-scrollbar-thumb { background: #3d2a1c; border-radius: 4px; }
+        ::-webkit-scrollbar-track { background: #f8f9fa; }
+        ::-webkit-scrollbar-thumb { background: #e9ecef; border-radius: 4px; }
     </style>
 </head>
 <body>
