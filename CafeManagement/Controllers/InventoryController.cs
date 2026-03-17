@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace CafeManagement.Controllers;
 
@@ -98,7 +99,7 @@ public class InventoryController : Controller
 
     // POST: /Inventory/CreatePurchase
     [HttpPost]
-    public async Task<IActionResult> CreatePurchase(int storeId, int supplierId,
+    public async Task<IActionResult> CreatePurchase(int storeId, int? supplierId,
         List<int> ingredientIds, List<decimal> quantities, List<decimal> prices)
     {
         // Manager không được nhập kho hộ store khác
@@ -131,7 +132,8 @@ public class InventoryController : Controller
             }
         }
 
-        await _inventoryService.CreatePurchaseOrderAsync(po, details);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        await _inventoryService.CreatePurchaseOrderAsync(po, details, userId);
         TempData["Success"] = "Đã nhập hàng vào kho thành công!";
         return RedirectToAction("Index", new { storeId });
     }
@@ -169,9 +171,20 @@ public class InventoryController : Controller
                 result.Add(stock);
             }
 
+            var historyLogs = await _db.InventoryLogs
+                .Include(l => l.Ingredient)
+                .Include(l => l.User)
+                .Where(l => l.StoreId == storeId && l.Type == "Adjustment")
+                .OrderByDescending(l => l.CreatedAt)
+                .Take(50)
+                .ToListAsync();
+            
+            ViewBag.HistoryLogs = historyLogs;
+
             return View(result);
         }
 
+        ViewBag.HistoryLogs = new List<InventoryLog>();
         return View(new List<InventoryStock>());
     }
 
@@ -198,7 +211,8 @@ public class InventoryController : Controller
             });
         }
 
-        var warnings = await _inventoryService.HandleStocktakeAsync(storeId, dtos);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        var warnings = await _inventoryService.HandleStocktakeAsync(storeId, dtos, userId);
 
         if (warnings.Any())
             TempData["Warning"] = string.Join("<br/>", warnings);

@@ -33,16 +33,6 @@
                         </select>
                     }
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Nhà cung cấp <span class="text-danger">*</span></label>
-                    <select name="supplierId" class="form-select" required>
-                        <option value="">-- Chọn nhà cung cấp --</option>
-                        @foreach (var sup in suppliers)
-                        {
-                            <option value="@sup.Id">@sup.Name</option>
-                        }
-                    </select>
-                </div>
             </div>
 
             <hr />

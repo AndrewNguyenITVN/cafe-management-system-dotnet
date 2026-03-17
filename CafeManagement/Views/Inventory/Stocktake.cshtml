@@ -11,10 +11,7 @@
     <a asp-action="Index" class="btn btn-outline-secondary">← Quay lại Tồn kho</a>
 </div>
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">@TempData["Success"]</div>
-}
+
 @if (TempData["Warning"] != null)
 {
     <div class="alert alert-warning">@Html.Raw(TempData["Warning"])</div>
@@ -100,7 +97,71 @@
             </form>
         </div>
     </div>
+    
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-light py-3">
+            <h6 class="mb-0 text-dark fw-bold">🕒 Lịch sử kiểm kê gần đây</h6>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Thời gian</th>
+                        <th>Người thực hiện</th>
+                        <th>Nguyên liệu</th>
+                        <th class="text-end">Chênh lệch</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var historyLogs = ViewBag.HistoryLogs as List<CafeManagement.Models.Domain.InventoryLog> ?? new List<CafeManagement.Models.Domain.InventoryLog>();
+                    }
+                    @if (historyLogs.Any())
+                    {
+                        foreach (var log in historyLogs)
+                        {
+                            <tr>
+                                <td class="ps-3">@log.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td><span class="badge bg-secondary">@(log.User?.FullName ?? "Hệ thống")</span></td>
+                                <td>@log.Ingredient?.Name</td>
+                                <td class="text-end fw-bold @(log.ChangeQuantity > 0 ? "text-success" : (log.ChangeQuantity < 0 ? "text-danger" : ""))">
+                                    @(log.ChangeQuantity > 0 ? "+" : "")@log.ChangeQuantity.ToString("0.##") @log.Ingredient?.Unit
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-3">Chưa có lịch sử kiểm kê nào cho chi nhánh này gần đây.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 }
+
+<!-- Modal Xác nhận Chốt Kiểm Kê -->
+<div class="modal fade" id="confirmStocktakeModal" tabindex="-1" aria-labelledby="confirmStocktakeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning text-dark border-0">
+                <h5 class="modal-title fw-bold" id="confirmStocktakeModalLabel">⚠️ Xác nhận Chốt Kiểm Kê</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <i class="fs-1 text-warning mb-3">📦</i>
+                <p class="mb-1 fw-bold fs-5">Bạn có chắc chắn muốn chốt số liệu?</p>
+                <p class="text-muted mb-0">Số lượng TỒN THỰC TẾ sẽ được lưu và thay thế TỒN MÁY TÍNH hiện tại.</p>
+            </div>
+            <div class="modal-footer bg-light border-0 justify-content-center">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-warning px-4 fw-bold" id="btnConfirmSubmit">Đồng ý Chốt</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <script>
@@ -116,9 +177,17 @@
             }
             $('.actual-input').on('input change', function () { updateDelta($(this).closest('tr')); });
             $('#stocktakeForm tbody tr').each(function () { updateDelta($(this)); });
+            
+            // Show modal instead of native confirm
             $('#btnSubmit').click(function () {
-                if (confirm('Bạn có chắc muốn chốt kiểm kê?\nSố lượng TỒN THỰC TẾ sẽ thay thế TỒN MÁY TÍNH.'))
-                    $('#stocktakeForm').submit();
+                var confirmModal = new bootstrap.Modal(document.getElementById('confirmStocktakeModal'));
+                confirmModal.show();
+            });
+
+            // Submit form from modal
+            $('#btnConfirmSubmit').click(function () {
+                $(this).prop('disabled', true).text('Đang xử lý...'); // Prevent double click
+                $('#stocktakeForm').submit();
             });
         });
     </script>

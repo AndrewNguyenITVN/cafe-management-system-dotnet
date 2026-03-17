@@ -57,7 +57,7 @@ public class InventoryService
     }
 
     // ── 1.3 Purchase ──────────────────────────────────────────────────────────
-    public async Task CreatePurchaseOrderAsync(PurchaseOrder po, List<PurchaseOrderDetail> details)
+    public async Task CreatePurchaseOrderAsync(PurchaseOrder po, List<PurchaseOrderDetail> details, string? userId)
     {
         po.Status = "Received";
         _db.PurchaseOrders.Add(po);
@@ -85,7 +85,8 @@ public class InventoryService
                 IngredientId = detail.IngredientId,
                 ChangeQuantity = detail.Quantity,
                 Type = "Purchase",
-                ReferenceId = po.Id
+                ReferenceId = po.Id,
+                UserId = userId
             });
         }
 
@@ -93,7 +94,7 @@ public class InventoryService
     }
 
     // ── 1.4 Stocktake ─────────────────────────────────────────────────────────
-    public async Task<List<string>> HandleStocktakeAsync(int storeId, List<StocktakeDto> items)
+    public async Task<List<string>> HandleStocktakeAsync(int storeId, List<StocktakeDto> items, string? userId)
     {
         var warnings = new List<string>();
 
@@ -122,7 +123,8 @@ public class InventoryService
                     IngredientId = item.IngredientId,
                     ChangeQuantity = delta,
                     Type = "Adjustment",
-                    ReferenceId = null
+                    ReferenceId = null,
+                    UserId = userId
                 });
 
                 if (theoretical > 0 && delta < 0)
