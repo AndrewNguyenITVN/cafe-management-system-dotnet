@@ -135,20 +135,17 @@ public class PosController : Controller
     [HttpGet]
     public async Task<IActionResult> GetShiftHandoverPreview(int shiftId, DateOnly date)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId))
-        {
-            return Unauthorized(new { success = false, message = "Chưa đăng nhập." });
-        }
+        // Đọc từ POS session (thay vì User claims)
+        var cashierId = HttpContext.Session.GetString("PosCashierId");
+        var storeId = HttpContext.Session.GetInt32("PosStoreId");
 
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
-        if (user == null || !user.StoreId.HasValue)
+        if (string.IsNullOrEmpty(cashierId) || !storeId.HasValue || storeId.Value == 0)
         {
-            return BadRequest(new { success = false, message = "Nhân viên chưa được gán chi nhánh." });
+            return Unauthorized(new { success = false, message = "Chưa đăng nhập POS (vui lòng nhập PIN)." });
         }
 
         var dateOnly = date;
-        var preview = await _shiftHandoverService.GetPreviewAsync(user.StoreId.Value, shiftId, dateOnly);
+        var preview = await _shiftHandoverService.GetPreviewAsync(storeId.Value, shiftId, dateOnly);
         if (preview == null)
         {
             return BadRequest(new { success = false, message = "Không tìm thấy chi nhánh hoặc ca làm việc." });
@@ -179,26 +176,23 @@ public class PosController : Controller
     [HttpPost]
     public async Task<IActionResult> SubmitShiftHandover([FromBody] PosCloseShiftRequest model)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId))
-        {
-            return Unauthorized(new { success = false, message = "Chưa đăng nhập." });
-        }
+        // Đọc từ POS session (thay vì User claims)
+        var cashierId = HttpContext.Session.GetString("PosCashierId");
+        var storeId = HttpContext.Session.GetInt32("PosStoreId");
 
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
-        if (user == null || !user.StoreId.HasValue)
+        if (string.IsNullOrEmpty(cashierId) || !storeId.HasValue || storeId.Value == 0)
         {
-            return BadRequest(new { success = false, message = "Nhân viên chưa được gán chi nhánh." });
+            return Unauthorized(new { success = false, message = "Chưa đăng nhập POS (vui lòng nhập PIN)." });
         }
 
         var result = await _shiftHandoverService.CloseShiftAsync(
-            user.StoreId.Value,
+            storeId.Value,
             model.ShiftId,
             model.Date,
             model.OpeningCash,
             model.ActualCashCounted,
             model.Note,
-            userId);
+            cashierId); // userId từ session
 
         if (!result.Success)
         {
@@ -228,11 +222,15 @@ public class PosController : Controller
             return BadRequest(new { success = false, message = "Giỏ hàng rỗng" });
         }
 
-        // Nếu request chưa có UserId (từ màn hình khóa chuyển xuống), 
-        // thì mặc định lấy User.FindFirstValue. Nhưng ở Model mới, ta sẽ gửi từ Frontend.
+        // Lấy UserId từ POS session (thay vì User claims)
         if (string.IsNullOrEmpty(request.UserId))
         {
-            request.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            request.UserId = HttpContext.Session.GetString("PosCashierId");
+        }
+
+        if (string.IsNullOrEmpty(request.UserId))
+        {
+            return Unauthorized(new { success = false, message = "Chưa đăng nhập POS (vui lòng nhập PIN)." });
         }
 
         // GỌI SERVICE THẬT
@@ -404,6 +402,11 @@ public class PosController : Controller
 
         if (cashier != null && cashier.IsActive)
         {
+            // Lưu POS session (cookie POS riêng)
+            HttpContext.Session.SetString("PosCashierId", cashier.Id);
+            HttpContext.Session.SetInt32("PosStoreId", cashier.StoreId ?? 0);
+            HttpContext.Session.SetString("PosCashierName", cashier.FullName ?? cashier.UserName ?? "");
+
             return Ok(new {
                 success = true,
                 userId = cashier.Id,
