@@ -139,6 +139,20 @@ public class AppDbContext : IdentityDbContext<AppUser>
             .HasForeignKey(t => t.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // InventoryLog -> AppUser
+        builder.Entity<InventoryLog>()
+            .HasOne(l => l.User)
+            .WithMany()
+            .HasForeignKey(l => l.UserId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // PurchaseOrder -> Supplier
+        builder.Entity<PurchaseOrder>()
+            .HasOne(p => p.Supplier)
+            .WithMany(s => s.PurchaseOrders)
+            .HasForeignKey(p => p.SupplierId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         // Indexes
         builder.Entity<Order>()
             .HasIndex(o => new { o.StoreId, o.OrderDate });
