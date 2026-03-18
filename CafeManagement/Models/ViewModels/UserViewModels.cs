@@ -13,12 +13,6 @@ public class CreateUserViewModel
     [Display(Name = "Email")]
     public string Email { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Vui lòng nhập mật khẩu")]
-    [MinLength(6, ErrorMessage = "Mật khẩu tối thiểu 6 ký tự")]
-    [DataType(DataType.Password)]
-    [Display(Name = "Mật khẩu")]
-    public string Password { get; set; } = string.Empty;
-
     [Display(Name = "Chức vụ")]
     public int? PositionId { get; set; }
 
