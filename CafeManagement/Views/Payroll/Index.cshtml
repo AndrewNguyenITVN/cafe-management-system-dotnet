@@ -1,0 +1,150 @@
+@model CafeManagement.Models.ViewModels.PayrollViewModel
+@{
+    ViewData["Title"] = "Bảng Lương";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+<style>
+    @@media print {
+        .no-print { display: none !important; }
+        .card { border: none !important; box-shadow: none !important; }
+        h4::before { content: "BẢNG LƯƠNG NHÂN VIÊN — "; }
+    }
+</style>
+}
+
+<div class="container-fluid py-3">
+
+    @* Header *@
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">💰 Bảng Lương Nhân Viên</h4>
+        @if (Model.Rows.Any())
+        {
+            <button class="btn btn-success btn-sm no-print" onclick="window.print()">
+                🖨️ In / Xuất PDF
+            </button>
+        }
+    </div>
+
+    @* Bộ lọc *@
+    <div class="card card-body mb-3 no-print">
+        <form method="get">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small">Chi nhánh</label>
+                    <select name="storeId" class="form-select">
+                        <option value="">— Tất cả chi nhánh —</option>
+                        @foreach (var store in Model.Stores)
+                        {
+                            if (store.StoreId == Model.SelectedStoreId)
+                            {
+                                <option value="@store.StoreId" selected="selected">@store.StoreName</option>
+                            }
+                            else
+                            {
+                                <option value="@store.StoreId">@store.StoreName</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small">Từ ngày</label>
+                    <input type="date" name="fromDate" class="form-control"
+                           value="@Model.FromDate.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small">Đến ngày</label>
+                    <input type="date" name="toDate" class="form-control"
+                           value="@Model.ToDate.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">
+                        🔍 Xem bảng lương
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @* Kết quả *@
+    @if (!Model.Rows.Any())
+    {
+        <div class="alert alert-info">
+            📭 Không có dữ liệu chấm công trong khoảng thời gian đã chọn.
+            Vui lòng chọn lại khoảng thời gian hoặc chi nhánh.
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="fw-semibold">
+                    📊 <strong>@Model.Rows.Count</strong> nhân viên |
+                    Từ <strong>@Model.FromDate.ToString("dd/MM/yyyy")</strong>
+                    đến <strong>@Model.ToDate.ToString("dd/MM/yyyy")</strong>
+                </span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered mb-0 align-middle">
+                    <thead class="table-dark text-center">
+                        <tr>
+                            <th style="width:50px">STT</th>
+                            <th class="text-start">Tên nhân viên</th>
+                            <th>Chức vụ</th>
+                            <th>Tổng giờ công</th>
+                            <th>Mức lương/h (TB)</th>
+                            <th>Thành tiền</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model.Rows)
+                        {
+                            <tr>
+                                <td class="text-center text-muted">@row.RowNumber</td>
+                                <td class="fw-semibold">@row.FullName</td>
+                                <td class="text-center">@row.JobPosition</td>
+                                <td class="text-center">
+                                    @row.TotalHours.ToString("F1")
+                                    <span class="text-muted small">h</span>
+                                </td>
+                                <td class="text-end">
+                                    @row.AverageHourlyRate.ToString("N0")
+                                    <span class="text-muted small">đ</span>
+                                </td>
+                                <td class="text-end fw-bold text-success">
+                                    @row.TotalSalary.ToString("N0")
+                                    <span class="small">đ</span>
+                                </td>
+                                <td class="text-center">
+                                    @if (row.TotalHours > 0)
+                                    {
+                                        <span class="badge bg-success">✔ Có công</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Không có công</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot class="table-secondary">
+                        <tr class="fw-bold">
+                            <td colspan="3" class="text-end">TỔNG CỘNG</td>
+                            <td class="text-center">
+                                @Model.GrandTotalHours.ToString("F1") h
+                            </td>
+                            <td></td>
+                            <td class="text-end text-danger">
+                                @Model.GrandTotalSalary.ToString("N0") đ
+                            </td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    }
+</div>

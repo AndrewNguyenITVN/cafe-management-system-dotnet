@@ -1,0 +1,342 @@
+@model CafeManagement.Models.ViewModels.ScheduleWeekViewModel
+@{
+    ViewData["Title"] = "Lịch Làm Việc";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    string[] dayLabels = { "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật" };
+    var prevWeek = Model.WeekStart.AddDays(-7).ToString("yyyy-MM-dd");
+    var nextWeek = Model.WeekStart.AddDays(7).ToString("yyyy-MM-dd");
+}
+
+@section Styles {
+<style>
+    /* ── Tăng font chung toàn trang ── */
+    .schedule-page { font-size: 1rem; }
+
+    .schedule-table th, .schedule-table td {
+        vertical-align: middle;
+    }
+
+    /* ── Header cột ngày: chữ trắng (dark header), riêng hôm nay chữ đen ── */
+    .schedule-table thead th {
+        color: #000;
+        font-size: 1rem;
+    }
+    .schedule-table thead th.today-col {
+        color: #000 !important;
+    }
+
+    /* ── Ô dữ liệu ── */
+    .schedule-cell {
+        min-width: 130px;
+        vertical-align: top !important;
+        padding: 6px 8px !important;
+    }
+
+    /* ── Badge nhân viên: block = xếp dọc ── */
+    .badge-user {
+        display: block;              /* ← mỗi badge 1 dòng, xếp dọc */
+        background: #d1fae5;
+        color: #065f46;
+        border-radius: 6px;
+        padding: 3px 10px;
+        font-size: 0.9rem;           /* ← to hơn chút */
+        margin-bottom: 3px;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 140px;
+    }
+
+    .btn-edit-cell {
+        font-size: 0.82rem;
+        padding: 2px 9px;
+        margin-top: 4px;
+    }
+
+    .shift-label { font-size: 0.85rem; color: #6b7280; }
+
+    /* ── Modal: danh sách nhân viên dạng checkbox cards ── */
+    .user-checkbox-list {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 6px;
+    }
+    .user-checkbox-list .user-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 7px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.95rem;
+        user-select: none;
+        transition: background .15s;
+    }
+    .user-checkbox-list .user-item:hover {
+        background: #f0f9ff;
+    }
+    .user-checkbox-list .user-item.selected {
+        background: #d1fae5;
+        color: #065f46;
+        font-weight: 600;
+    }
+    .user-checkbox-list .user-item .check-icon {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #adb5bd;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 0.75rem;
+        transition: all .15s;
+    }
+    .user-checkbox-list .user-item.selected .check-icon {
+        background: #10b981;
+        border-color: #10b981;
+        color: #fff;
+    }
+
+    /* ── Hidden select thật (gửi lên server) ── */
+    #modal-users { display: none; }
+
+    @@media print { .no-print { display: none !important; } }
+</style>
+}
+
+<div class="container-fluid py-3 schedule-page">
+
+    @* Header *@
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">📅 Lịch Làm Việc</h4>
+    </div>
+
+    @* Toolbar *@
+    <div class="card card-body mb-3 no-print">
+        <div class="row g-2 align-items-center">
+            @* Chọn chi nhánh *@
+            <div class="col-auto">
+                <form method="get" id="storeForm">
+                    <input type="hidden" name="weekStart" value="@Model.WeekStart.ToString("yyyy-MM-dd")" />
+                    <select name="storeId" class="form-select" onchange="document.getElementById('storeForm').submit()">
+                        @foreach (var store in Model.Stores)
+                        {
+                            if (store.StoreId == Model.SelectedStoreId)
+                            {
+                                <option value="@store.StoreId" selected="selected">🏪 @store.StoreName</option>
+                            }
+                            else
+                            {
+                                <option value="@store.StoreId">🏪 @store.StoreName</option>
+                            }
+                        }
+                    </select>
+                </form>
+            </div>
+
+            @* Điều hướng tuần *@
+            <div class="col-auto d-flex gap-2 ms-2">
+                <a href="?storeId=@Model.SelectedStoreId&amp;weekStart=@prevWeek"
+                   class="btn btn-outline-secondary btn-sm">← Tuần trước</a>
+
+                <span class="btn btn-light btn-sm disabled fw-semibold" style="cursor:default">
+                    @Model.WeekStart.ToString("dd/MM") – @Model.WeekEnd.ToString("dd/MM/yyyy")
+                </span>
+
+                <a href="?storeId=@Model.SelectedStoreId&amp;weekStart=@nextWeek"
+                   class="btn btn-outline-secondary btn-sm">Tuần sau →</a>
+            </div>
+
+            @* Về tuần hiện tại *@
+            <div class="col-auto">
+                @{
+                    var today2 = DateOnly.FromDateTime(DateTime.Today);
+                    int diffNow = ((int)today2.DayOfWeek + 6) % 7;
+                    var thisMonday = today2.AddDays(-diffNow).ToString("yyyy-MM-dd");
+                }
+                <a href="?storeId=@Model.SelectedStoreId&amp;weekStart=@thisMonday"
+                   class="btn btn-outline-primary btn-sm">Tuần này</a>
+            </div>
+        </div>
+    </div>
+
+    @* Bảng lịch *@
+    <div class="table-responsive">
+        <table class="table table-bordered schedule-table">
+            <thead class="table-dark text-center">
+                <tr>
+                    <th style="min-width:150px">Ca làm việc</th>
+                    @for (int i = 0; i < Model.WeekDays.Count; i++)
+                    {
+                        var isToday = Model.WeekDays[i] == DateOnly.FromDateTime(DateTime.Today);
+                        @* Hôm nay: nền vàng chữ đen; ngày khác: nền dark chữ trắng (mặc định thead) *@
+                        <th class="@(isToday ? "bg-warning today-col" : "")">
+                            <div>@dayLabels[i]</div>
+                            <div class="fw-normal" style="font-size:0.85rem">
+                                @Model.WeekDays[i].ToString("dd/MM")
+                            </div>
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var shift in Model.Shifts)
+                {
+                    <tr>
+                        <td class="bg-light fw-semibold text-center">
+                            <div style="font-size:1rem">@shift.ShiftName</div>
+                            <div class="shift-label">@shift.TimeRange</div>
+                        </td>
+
+                        @foreach (var day in Model.WeekDays)
+                        {
+                            var cell = Model.GetCell(day, shift.ShiftId);
+                            var isToday2 = day == DateOnly.FromDateTime(DateTime.Today);
+                            <td class="schedule-cell @(isToday2 ? "table-warning" : "")">
+                                @* Danh sách nhân viên — xếp dọc *@
+                                @if (cell.UserNames.Any())
+                                {
+                                    <div class="mb-1">
+                                        @foreach (var name in cell.UserNames)
+                                        {
+                                            <div class="badge-user">@name</div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-muted fst-italic no-print"
+                                         style="font-size:0.88rem">Chưa phân công</div>
+                                }
+
+                                @* Nút sửa *@
+                                <button class="btn btn-outline-primary btn-edit-cell no-print btn-assign"
+                                        data-date="@day.ToString("yyyy-MM-dd")"
+                                        data-shift-id="@shift.ShiftId"
+                                        data-shift-name="@shift.ShiftName"
+                                        data-store-id="@Model.SelectedStoreId"
+                                        data-user-ids="@string.Join(",", cell.UserIds)">
+                                    ✎ Sửa
+                                </button>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@* Modal phân công nhân viên *@
+<div class="modal fade" id="assignModal" tabindex="-1" aria-labelledby="assignModalLabel">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="assignModalLabel">📋 Phân công nhân viên</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" asp-action="Assign" asp-controller="Schedule">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="storeId" id="modal-storeId" />
+                <input type="hidden" name="date"    id="modal-date" />
+                <input type="hidden" name="shiftId" id="modal-shiftId" />
+
+                <div class="modal-body">
+                    <p class="fw-semibold mb-3" id="modal-info"></p>
+
+                    <label class="form-label fw-semibold mb-2">Chọn nhân viên</label>
+                    <div class="form-text mb-2">Bấm vào tên để chọn / bỏ chọn. Không chọn ai → xóa hết phân công ca này.</div>
+
+                    @* Danh sách checkbox cards *@
+                    <div class="user-checkbox-list" id="user-checkbox-list">
+                        @foreach (var user in Model.AllUsers)
+                        {
+                            <div class="user-item" data-user-id="@user.UserId">
+                                <div class="check-icon">✓</div>
+                                <span>@user.FullName</span>
+                            </div>
+                        }
+                    </div>
+
+                    @* Select ẩn — giá trị thật gửi lên server *@
+                    <select name="userIds" id="modal-users" multiple>
+                        @foreach (var user in Model.AllUsers)
+                        {
+                            <option value="@user.UserId">@user.FullName</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">✔ Xác nhận</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const assignModal = new bootstrap.Modal(document.getElementById('assignModal'));
+
+    // ── Mở modal, truyền dữ liệu vào ──────────────────────────────
+    document.querySelectorAll('.btn-assign').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const date      = this.dataset.date;
+            const shiftId   = this.dataset.shiftId;
+            const shiftName = this.dataset.shiftName;
+            const storeId   = this.dataset.storeId;
+            const assignedIds = (this.dataset.userIds || '').split(',').filter(Boolean);
+
+            document.getElementById('modal-storeId').value = storeId;
+            document.getElementById('modal-date').value    = date;
+            document.getElementById('modal-shiftId').value = shiftId;
+
+            const [y, m, d] = date.split('-');
+            document.getElementById('modal-info').textContent =
+                `${shiftName}  —  Ngày ${d}/${m}/${y}`;
+
+            // Reset checkbox cards về trạng thái đã phân công
+            document.querySelectorAll('#user-checkbox-list .user-item').forEach(item => {
+                const uid = item.dataset.userId;
+                if (assignedIds.includes(uid)) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+
+            // Đồng bộ hidden select
+            syncHiddenSelect();
+
+            assignModal.show();
+        });
+    });
+
+    // ── Toggle chọn / bỏ chọn khi bấm vào user-item ──────────────
+    document.querySelectorAll('#user-checkbox-list .user-item').forEach(item => {
+        item.addEventListener('click', function () {
+            this.classList.toggle('selected');
+            syncHiddenSelect();
+        });
+    });
+
+    // ── Đồng bộ hidden <select> với trạng thái checkbox cards ─────
+    function syncHiddenSelect() {
+        const select = document.getElementById('modal-users');
+        const selectedIds = Array.from(
+            document.querySelectorAll('#user-checkbox-list .user-item.selected')
+        ).map(el => el.dataset.userId);
+
+        Array.from(select.options).forEach(opt => {
+            opt.selected = selectedIds.includes(opt.value);
+        });
+    }
+</script>
+}

@@ -44,6 +44,9 @@ builder.Services.AddScoped<JobPositionService>();
 builder.Services.AddScoped<UserService>();
 // TV3: Inventory & Recipe
 builder.Services.AddScoped<RecipeService>();
+// TV4: Schedule & Payroll
+builder.Services.AddScoped<IScheduleService, ScheduleService>();
+builder.Services.AddScoped<IPayrollService, PayrollService>();
 // POS / CRM / Inventory Services (TV2, TV3, TV5 implement)
 builder.Services.AddScoped<IOrderService, OrderService>(); // TV2: POS Order
 builder.Services.AddScoped<InventoryService>();
