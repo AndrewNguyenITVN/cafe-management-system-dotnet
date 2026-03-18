@@ -113,7 +113,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-dark @(ViewContext.RouteData.Values["controller"]?.ToString() == "Inventory" && ViewContext.RouteData.Values["action"]?.ToString() == "Stocktake" ? "active bg-danger rounded fw-bold" : "")"
+                    <a class="nav-link text-dark @(ViewContext.RouteData.Values["controller"]?.ToString() == "Inventory" && ViewContext.RouteData.Values["action"]?.ToString() == "Stocktake" ? "active bg-primary text-white rounded fw-bold" : "")"
                         asp-controller="Inventory" asp-action="Stocktake">
                         ⚠️ Kiểm kê
                     </a>
