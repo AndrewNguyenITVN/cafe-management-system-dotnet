@@ -4,15 +4,25 @@
     border-radius: 4px;
     margin: 1px 8px;
     font-size: 0.9rem;
-    transition: background-color 0.15s;
+    transition: background-color 0.15s, color 0.15s;
 }
 
 .sidebar .nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .sidebar .nav-link.active {
-    background-color: rgba(255, 255, 255, 0.2) !important;
+    font-weight: 600;
+}
+
+/* Ensure readable text on Bootstrap bg utilities */
+.sidebar .nav-link.active.bg-primary,
+.sidebar .nav-link.active.bg-danger,
+.sidebar .nav-link.active.bg-success,
+.sidebar .nav-link.active.bg-warning,
+.sidebar .nav-link.active.bg-info,
+.sidebar .nav-link.active.bg-dark {
+    color: #fff !important;
 }
 
 /* Tables */
