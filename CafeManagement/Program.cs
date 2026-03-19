@@ -33,6 +33,16 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
+// ── POS Session (Cookie riêng cho kiosk POS) ──────────────
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.Cookie.Name = ".PosSession";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.IdleTimeout = TimeSpan.FromHours(8);
+});
+
 // ── Services (DI) ─────────────────────────────────────────
 // Master Data Services (TV1)
 builder.Services.AddScoped<StoreService>();
@@ -77,6 +87,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseSession(); // Bật POS session (đặt trước UseAuthentication)
 app.UseAuthentication();
 app.UseAuthorization();
 
