@@ -6,10 +6,15 @@
 
 @section Styles {
 <style>
+    /* Ép màu chữ thead thành trắng rõ ràng — override Bootstrap table-dark */
+    .payroll-table thead th {
+        background-color: #212529 !important;
+        color: #ffffff !important;
+        font-weight: 600;
+    }
     @@media print {
         .no-print { display: none !important; }
         .card { border: none !important; box-shadow: none !important; }
-        h4::before { content: "BẢNG LƯƠNG NHÂN VIÊN — "; }
     }
 </style>
 }
@@ -86,8 +91,8 @@
                 </span>
             </div>
             <div class="table-responsive">
-                <table class="table table-hover table-bordered mb-0 align-middle">
-                    <thead class="table-dark text-center">
+                <table class="table table-hover table-bordered mb-0 align-middle payroll-table">
+                    <thead class="text-center">
                         <tr>
                             <th style="width:50px">STT</th>
                             <th class="text-start">Tên nhân viên</th>
@@ -118,13 +123,17 @@
                                     <span class="small">đ</span>
                                 </td>
                                 <td class="text-center">
-                                    @if (row.TotalHours > 0)
+                                    @if (row.IsFullAttendance)
                                     {
-                                        <span class="badge bg-success">✔ Có công</span>
+                                        <span class="badge bg-success">
+                                            ✅ Đủ ca (@row.AttendedShifts/@row.AssignedShifts)
+                                        </span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-secondary">Không có công</span>
+                                        <span class="badge bg-warning text-dark">
+                                            ⚠️ Thiếu ca (@row.AttendedShifts/@row.AssignedShifts)
+                                        </span>
                                     }
                                 </td>
                             </tr>

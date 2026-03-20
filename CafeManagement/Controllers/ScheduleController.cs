@@ -4,7 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CafeManagement.Controllers;
 
-[Authorize(Roles = "Admin,Manager")]
+// Tất cả role đều xem được lịch
+[Authorize]
 public class ScheduleController : Controller
 {
     private readonly IScheduleService _scheduleService;
@@ -12,7 +13,7 @@ public class ScheduleController : Controller
     public ScheduleController(IScheduleService scheduleService)
         => _scheduleService = scheduleService;
 
-    // GET: /Schedule?storeId=1&weekStart=2025-06-09
+    // GET: /Schedule?storeId=1&weekStart=2026-03-16
     public async Task<IActionResult> Index(int? storeId, string? weekStart)
     {
         var stores = await _scheduleService.GetStoresAsync();
@@ -24,7 +25,7 @@ public class ScheduleController : Controller
 
         var selectedStore = storeId ?? stores.First().StoreId;
 
-        // Tính đầu tuần (Thứ 2) — dùng DateOnly xuyên suốt
+        // Tính đầu tuần (Thứ 2)
         DateOnly monday;
         if (!string.IsNullOrEmpty(weekStart) && DateOnly.TryParse(weekStart, out var parsed))
         {
@@ -33,8 +34,7 @@ public class ScheduleController : Controller
         else
         {
             var today = DateOnly.FromDateTime(DateTime.Today);
-            // DayOfWeek: Monday=1 ... Sunday=0; tính về thứ 2 gần nhất
-            int diff = ((int)today.DayOfWeek + 6) % 7; // 0=Mon,1=Tue,...,6=Sun
+            int diff = ((int)today.DayOfWeek + 6) % 7;
             monday = today.AddDays(-diff);
         }
 
@@ -42,8 +42,9 @@ public class ScheduleController : Controller
         return View(vm);
     }
 
-    // POST: /Schedule/Assign
+    // POST: /Schedule/Assign — chỉ Admin/Manager
     [HttpPost, ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> Assign(
         int storeId, string date, int shiftId, List<string> userIds)
     {
@@ -53,18 +54,30 @@ public class ScheduleController : Controller
         await _scheduleService.AssignShiftAsync(storeId, parsedDate, shiftId, userIds);
 
         TempData["Success"] = "Đã cập nhật lịch làm việc thành công.";
-        // Quay về tuần chứa ngày vừa assign
-        int diff = ((int)parsedDate.DayOfWeek + 6) % 7;
-        var weekMonday = parsedDate.AddDays(-diff);
         return RedirectToAction(nameof(Index),
-            new { storeId, weekStart = weekMonday.ToString("yyyy-MM-dd") });
+            new { storeId, weekStart = GetMondayOf(parsedDate) });
     }
 
-    // GET: /Schedule/GetUsers?storeId=1  (dùng cho AJAX reload danh sách user khi đổi store)
-    [HttpGet]
-    public async Task<IActionResult> GetUsers(int storeId)
+    // POST: /Schedule/Attend — chỉ Admin/Manager
+    [HttpPost, ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> Attend(
+        int storeId, string date, int shiftId, List<string> attendedUserIds)
     {
-        var users = await _scheduleService.GetUsersByStoreAsync(storeId);
-        return Json(users);
+        if (!DateOnly.TryParse(date, out var parsedDate))
+            return BadRequest("Ngày không hợp lệ.");
+
+        await _scheduleService.AttendShiftAsync(storeId, parsedDate, shiftId, attendedUserIds);
+
+        TempData["Success"] = "Đã cập nhật chấm công thành công.";
+        return RedirectToAction(nameof(Index),
+            new { storeId, weekStart = GetMondayOf(parsedDate) });
+    }
+
+    // Helper: lấy ngày thứ 2 của tuần chứa ngày đó
+    private static string GetMondayOf(DateOnly date)
+    {
+        int diff = ((int)date.DayOfWeek + 6) % 7;
+        return date.AddDays(-diff).ToString("yyyy-MM-dd");
     }
 }

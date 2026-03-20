@@ -21,6 +21,7 @@ public class ShiftInfo
     public int ShiftId { get; set; }
     public string ShiftName { get; set; } = string.Empty;
     public string TimeRange { get; set; } = string.Empty;
+    public decimal Hours { get; set; }
 }
 
 public class ScheduleCellViewModel
@@ -29,6 +30,7 @@ public class ScheduleCellViewModel
     public int ShiftId { get; set; }
     public List<string> UserIds { get; set; } = new();
     public List<string> UserNames { get; set; } = new();
+    public List<string> AttendedUserIds { get; set; } = new();
 }
 
 public class ScheduleWeekViewModel
@@ -39,8 +41,6 @@ public class ScheduleWeekViewModel
 
     public List<DateOnly> WeekDays { get; set; } = new();
     public List<ShiftInfo> Shifts { get; set; } = new();
-
-    // Key: "yyyy-MM-dd_shiftId"
     public Dictionary<string, ScheduleCellViewModel> Cells { get; set; } = new();
 
     public List<StoreSelectItem> Stores { get; set; } = new();
@@ -67,12 +67,19 @@ public class PayrollRowViewModel
     public decimal TotalHours { get; set; }
     public decimal AverageHourlyRate { get; set; }
     public decimal TotalSalary { get; set; }
+
+    // Số ca được phân công vs số ca đã chấm công thực tế
+    public int AssignedShifts { get; set; }
+    public int AttendedShifts { get; set; }
+
+    // Đủ ca = đã chấm công đủ tất cả ca được phân công (và có ít nhất 1 ca)
+    public bool IsFullAttendance =>
+        AssignedShifts > 0 && AttendedShifts >= AssignedShifts;
 }
 
 public class PayrollViewModel
 {
     public int? SelectedStoreId { get; set; }
-    // Dùng string để binding form date dễ hơn, convert trong controller
     public DateOnly FromDate { get; set; } = DateOnly.FromDateTime(
         new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1));
     public DateOnly ToDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);

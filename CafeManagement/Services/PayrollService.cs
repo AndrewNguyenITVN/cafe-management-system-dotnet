@@ -12,44 +12,69 @@ public class PayrollService : IPayrollService
     public async Task<List<PayrollRowViewModel>> GetPayrollAsync(
         int? storeId, DateOnly fromDate, DateOnly toDate)
     {
-        // Query Timekeeping trong khoảng ngày, kèm User và Position
-        // NOTE: DateOnly so sánh trực tiếp được với EF Core 6+
-        var query = _db.Timekeepings
+        // ── 1. Timekeeping trong kỳ ─────────────────────────────────
+        var tkQuery = _db.Timekeepings
             .Include(t => t.User)
-                .ThenInclude(u => u.Position)   // AppUser.Position -> JobPosition
+                .ThenInclude(u => u.Position)
             .Where(t => t.Date >= fromDate && t.Date <= toDate);
 
         if (storeId.HasValue)
-            query = query.Where(t => t.StoreId == storeId.Value);
+            tkQuery = tkQuery.Where(t => t.StoreId == storeId.Value);
 
-        var timekeepings = await query.ToListAsync();
+        var timekeepings = await tkQuery.ToListAsync();
 
-        // Group theo UserId bằng LINQ
-        var rows = timekeepings
-            .GroupBy(t => t.UserId)
-            .Select(g =>
+        // ── 2. Schedule (ca phân công) trong kỳ ────────────────────
+        var schQuery = _db.Schedules
+            .Where(s => s.WorkDate >= fromDate && s.WorkDate <= toDate);
+
+        if (storeId.HasValue)
+            schQuery = schQuery.Where(s => s.StoreId == storeId.Value);
+
+        var schedules = await schQuery.ToListAsync();
+
+        // ── 3. Gộp danh sách userId từ cả 2 nguồn ──────────────────
+        var allUserIds = timekeepings.Select(t => t.UserId)
+            .Union(schedules.Select(s => s.UserId))
+            .Distinct().ToList();
+
+        // ── 4. Tính lương từng người ────────────────────────────────
+        var rows = new List<PayrollRowViewModel>();
+
+        foreach (var userId in allUserIds)
+        {
+            var userTks = timekeepings.Where(t => t.UserId == userId).ToList();
+            var user = userTks.FirstOrDefault()?.User;
+
+            // User chỉ có trong Schedule chưa có timekeeping → lấy từ DB
+            if (user == null)
             {
-                var user = g.First().User;
+                user = await _db.Users
+                    .Include(u => u.Position)
+                    .FirstOrDefaultAsync(u => u.Id == userId);
+            }
 
-                // TotalHours và HourlyRateAtTime đều là decimal? → dùng ?? 0
-                var totalHours  = g.Sum(t => t.TotalHours ?? 0m);
-                var totalSalary = g.Sum(t => (t.TotalHours ?? 0m) * (t.HourlyRateAtTime ?? 0m));
-                var avgRate     = totalHours > 0 ? totalSalary / totalHours : 0m;
+            var totalHours = userTks.Sum(t => t.TotalHours ?? 0m);
+            var totalSalary = userTks.Sum(t => (t.TotalHours ?? 0m) * (t.HourlyRateAtTime ?? 0m));
+            var avgRate = totalHours > 0 ? totalSalary / totalHours : 0m;
 
-                return new PayrollRowViewModel
-                {
-                    UserId           = g.Key,
-                    FullName         = user?.FullName ?? user?.Email ?? "?",
-                    JobPosition      = user?.Position?.PositionName ?? "—",
-                    TotalHours       = Math.Round(totalHours,  2),
-                    AverageHourlyRate = Math.Round(avgRate,    0),
-                    TotalSalary      = Math.Round(totalSalary, 0)
-                };
-            })
-            .OrderBy(r => r.FullName)
-            .ToList();
+            // Số ca được phân công vs số ca đã chấm công
+            int assignedShifts = schedules.Count(s => s.UserId == userId);
+            int attendedShifts = userTks.Count; // mỗi Timekeeping = 1 ca
 
-        // Đánh số thứ tự
+            rows.Add(new PayrollRowViewModel
+            {
+                UserId = userId,
+                FullName = user?.FullName ?? user?.Email ?? "?",
+                JobPosition = user?.Position?.PositionName ?? "—",
+                TotalHours = Math.Round(totalHours, 2),
+                AverageHourlyRate = Math.Round(avgRate, 0),
+                TotalSalary = Math.Round(totalSalary, 0),
+                AssignedShifts = assignedShifts,
+                AttendedShifts = attendedShifts
+            });
+        }
+
+        rows = rows.OrderBy(r => r.FullName).ToList();
         for (int i = 0; i < rows.Count; i++)
             rows[i].RowNumber = i + 1;
 
@@ -60,10 +85,6 @@ public class PayrollService : IPayrollService
         await _db.Stores
             .Where(s => s.IsActive)
             .OrderBy(s => s.Name)
-            .Select(s => new StoreSelectItem
-            {
-                StoreId   = s.Id,
-                StoreName = s.Name
-            })
+            .Select(s => new StoreSelectItem { StoreId = s.Id, StoreName = s.Name })
             .ToListAsync();
 }
