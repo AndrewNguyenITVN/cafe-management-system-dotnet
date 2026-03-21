@@ -11,11 +11,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
         @@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap');
-        body { background-color: #1a120b; color: #f7e6c4; padding: 20px; font-family: 'Outfit', sans-serif; }
-        h1 { color: #d4a373; font-weight: 700; letter-spacing: 1px; }
+        body { background-color: #f8f9fa; color: #212529; padding: 20px; font-family: 'Outfit', sans-serif; }
+        h1 { color: #0d6efd; font-weight: 700; letter-spacing: 1px; }
         .order-card { 
-            background: linear-gradient(145deg, #2b1f14, #1a120b); 
-            border: 2px solid #5c3a21; 
+            background: #ffffff; 
+            border: 2px solid #dee2e6; 
             border-radius: 16px; 
             padding: 20px; 
             box-shadow: 0 8px 20px rgba(0,0,0,0.3);
@@ -23,28 +23,60 @@
         }
         .order-card.blink { 
             animation: blinker 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite; 
-            border-color: #e07a5f; 
+            border-color: #dc3545; 
             box-shadow: 0 0 15px rgba(224, 122, 95, 0.4);
         }
-        .queue-number { font-size: 2.5rem; font-weight: bold; color: #d4a373; }
-        .list-group-item.bg-dark { background-color: #3d2a1c !important; color: #f7e6c4 !important; border-color: #5c3a21; }
+        .queue-number { font-size: 2.5rem; font-weight: bold; color: #0d6efd; }
+        .list-group-item.bg-dark { background-color: #ffffff !important; color: #212529 !important; border-color: #dee2e6; }
         .badge.bg-danger { background-color: #e07a5f !important; }
-        .btn-success { background-color: #6c584c; border: none; color: #f7e6c4; font-size: 1.1rem; transition: background 0.3s; }
-        .btn-success:hover { background-color: #4a3422; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .btn-warning { background-color: #d4a373; border: none; color: #1a120b; font-size: 1.1rem; transition: background 0.3s; }
-        .btn-warning:hover { background-color: #b07d4b; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        @@keyframes blinker { 50% { opacity: 0.8; border-color: #8d3a24; } }
+        .btn-success { background-color: #198754; border: none; color: #f7e6c4; font-size: 1.1rem; transition: background 0.3s; }
+        .btn-success:hover { background-color: #157347; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .btn-warning { background-color: #0d6efd; border: none; color: #000; font-size: 1.1rem; transition: background 0.3s; }
+        #store-picker { position:fixed; inset:0; background:rgba(255,255,255,0.96); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:32px; }
+        #store-picker h2 { color:#0d6efd; font-size:2rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; }
+        .store-btn { background:#ffffff; border:2px solid #dee2e6; color:#212529; border-radius:14px; padding:22px 48px; font-size:1.4rem; font-weight:700; cursor:pointer; transition:all .25s; min-width:260px; text-align:center; }
+        .store-btn:hover { border-color:#0d6efd; color:#0d6efd; box-shadow:0 0 18px rgba(13,110,253,.35); transform:scale(1.04); }
     </style>
 </head>
 <body>
-    
+
+    <!-- Overlay chọn chi nhánh (chỉ hiện khi chưa có storeId trong URL) -->
+    <div id="store-picker">
+        <h2>Chọn Chi Nhánh</h2>
+        <div id="store-btn-list" style="display:flex;flex-direction:column;gap:16px;"></div>
+    </div>
+
     <div class="d-flex justify-content-between mb-4">
-        <h1>👨‍🍳 KITCHEN DISPLAY (CHI NHÁNH <span id="storeNameId">1</span>)</h1>
-        <div><span id="conn-status" class="badge bg-danger">Đang ngắt kết nối</span></div>
+        <h1>KITCHEN DISPLAY (<span id="storeNameId"></span>)</h1>
+        <div>
+            <button onclick="changeBranch()" class="btn btn-outline-warning btn-sm me-3">🔄 Đổi chi nhánh</button>
+            <span id="conn-status" class="badge bg-danger">Đang ngắt kết nối</span>
+        </div>
     </div>
 
     <div class="row g-4" id="kds-board">
         <!-- Danh sách thẻ Order sẽ được render bằng JS ở đây -->
+    </div>
+
+    <!-- Hộp thoại Xác nhận Hủy Đơn -->
+    <div id="cancel-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-none align-items-center justify-content-center" style="background: rgba(0,0,0,0.85); z-index: 10000;">
+        <div class="bg-white border rounded-4 shadow-lg p-4" style="max-width: 400px; width: 100%; border-color: #e07a5f !important;">
+            <h4 class="text-danger mb-3 fw-bold text-center">❌ HỦY ĐƠN #<span id="cancel-queue-number"></span></h4>
+            <p class="text-secondary mb-3 text-center">Chọn lý do hủy để báo máy Thu Ngân:</p>
+            
+            <div class="d-grid gap-2 mb-3">
+                <button class="btn btn-outline-warning text-start fw-bold" onclick="setCancelReason('Hết nguyên liệu')">Hết nguyên liệu</button>
+                <button class="btn btn-outline-warning text-start fw-bold" onclick="setCancelReason('Khách đổi ý / Đổi món')">Khách đổi ý / Đổi món</button>
+                <button class="btn btn-outline-warning text-start fw-bold" onclick="setCancelReason('Máy hỏng / Trục trặc kỹ thuật')">Máy hỏng / Trục trặc kỹ thuật</button>
+                <button class="btn btn-outline-warning text-start fw-bold" onclick="setCancelReason('Lý do khác')">Lý do khác...</button>
+            </div>
+            
+            <input type="text" id="cancel-reason-input" class="form-control mb-4 bg-white text-dark border-secondary d-none" placeholder="Nhập lý do cụ thể..." />
+            
+            <div class="d-flex gap-2">
+                <button class="btn btn-danger flex-grow-1 fw-bold py-2" onclick="submitCancelOrder()">XÁC NHẬN HỦY</button>
+            </div>
+        </div>
     </div>
 
     <!-- 1. Thẻ Audio để phát tiếng báo đơn mới -->
@@ -55,8 +87,47 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const storeId = urlParams.get('storeId') || "1";
-        document.getElementById('storeNameId').textContent = storeId;
+        let storeId = urlParams.get('storeId');
+        let storeName = '';
+
+        async function loadStorePicker() {
+            try {
+                const res = await fetch('/Pos/GetStores');
+                const stores = await res.json();
+                const btnList = document.getElementById('store-btn-list');
+                btnList.innerHTML = '';
+                stores.forEach(s => {
+                    const btn = document.createElement('button');
+                    btn.className = 'store-btn';
+                    btn.textContent =  s.name;
+                    btn.onclick = () => {
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('storeId', s.id);
+                        window.location.href = url.toString();
+                    };
+                    btnList.appendChild(btn);
+                });
+            } catch(e) {
+                document.getElementById('store-btn-list').innerHTML = '<p style="color:#f87171">Lỗi tải danh sách chi nhánh</p>';
+            }
+        }
+
+        function changeBranch() {
+            document.getElementById('store-picker').style.display = 'flex';
+            loadStorePicker();
+        }
+
+        // Nếu chưa chọn chi nhánh → hiện overlay, ngược lại → ẩn overlay và load tên
+        if (!storeId) {
+            loadStorePicker();
+        } else {
+            document.getElementById('store-picker').style.display = 'none';
+            // Lấy tên chi nhánh từ API để hiển thị đẹp hơn số ID
+            fetch('/Pos/GetStores').then(r => r.json()).then(stores => {
+                const found = stores.find(s => String(s.id) === String(storeId));
+                document.getElementById('storeNameId').textContent = found ? found.name : 'Chi nhánh ' + storeId;
+            });
+        }
         const board = document.getElementById('kds-board');
         const statusBadge = document.getElementById('conn-status');
 
@@ -68,8 +139,10 @@
             let itemsHtml = '<ul class="list-group list-group-flush mb-3 rounded">';
             if (data.items && data.items.length > 0) {
                 data.items.forEach(item => {
-                    itemsHtml += `<li class="list-group-item bg-dark text-light border-secondary">
-                        <span class="fw-bold" style="color: yellow;">${item.quantity}x</span> ${item.name}
+                    let noteHtml = item.note ? `<div class="small mt-1" style="color: #f4a261;"><em>* Ghi chú: ${item.note}</em></div>` : '';
+                    itemsHtml += `<li class="list-group-item bg-white text-dark border-light">
+                        <span class="fw-bold" style="color: #dc3545;">${item.quantity}x</span> ${item.name}
+                        ${noteHtml}
                     </li>`;
                 });
             }
@@ -84,7 +157,7 @@
             
             // Nút chính
             const btnClass = isProcessing ? 'btn btn-success' : 'btn btn-warning';
-            const btnText = isProcessing ? '🛎️ XONG ĐƠN' : '👨‍🍳 BẮT ĐẦU NẤU';
+            const btnText = isProcessing ? 'XONG ĐƠN' : 'BẮT ĐẦU NẤU';
             const nextStatus = isProcessing ? 2 : 1;
 
             const cardHtml = `
@@ -101,7 +174,7 @@
                         <button class="${btnClass} w-100 fw-bold py-2 shadow mb-2" id="btn-status-${data.orderId}" onclick="updateOrderStatus(${data.orderId}, ${nextStatus}, this)">
                             ${btnText}
                         </button>
-                        <button class="btn btn-outline-danger w-100 fw-bold py-1" onclick="cancelOrder(${data.orderId})">
+                        <button class="btn btn-outline-danger w-100 fw-bold py-1" onclick="openCancelModal(${data.orderId}, ${data.queueNumber})">
                             ❌ HỦY ĐƠN
                         </button>
                     </div>
@@ -152,7 +225,7 @@
                 if(data.success) {
                     if (status === 1) {
                         btnElement.className = "btn btn-success w-100 fw-bold py-2 shadow mb-2";
-                        btnElement.innerHTML = "🛎️ XONG ĐƠN";
+                        btnElement.innerHTML = "XONG ĐƠN";
                         btnElement.onclick = function() { updateOrderStatus(orderId, 2, this); };
                         btnElement.disabled = false;
                         
@@ -183,16 +256,62 @@
             });
         }
 
-        // 4. HỦY ĐƠN HÀNG
-        function cancelOrder(orderId) {
-            if (!confirm('Bạn có chắc chắn muốn HỦY đơn #' + orderId + '?')) return;
+        // 4. HỦY ĐƠN HÀNG (Sử dụng Popup)
+        let currentCancelOrderId = null;
+        let currentCancelReason = "";
 
-            fetch('/Pos/CancelOrder?orderId=' + orderId, { method: 'POST' })
+        function openCancelModal(orderId, queueNumber) {
+            currentCancelOrderId = orderId;
+            currentCancelReason = "";
+            document.getElementById('cancel-queue-number').textContent = queueNumber;
+            document.getElementById('cancel-reason-input').value = '';
+            document.getElementById('cancel-reason-input').classList.add('d-none');
+            
+            const overlay = document.getElementById('cancel-overlay');
+            overlay.classList.remove('d-none');
+            overlay.classList.add('d-flex');
+        }
+
+        function closeCancelModal() {
+            const overlay = document.getElementById('cancel-overlay');
+            overlay.classList.add('d-none');
+            overlay.classList.remove('d-flex');
+            currentCancelOrderId = null;
+        }
+
+        function setCancelReason(reason) {
+            currentCancelReason = reason;
+            const input = document.getElementById('cancel-reason-input');
+            if (reason === 'Lý do khác') {
+                input.classList.remove('d-none');
+                input.focus();
+                currentCancelReason = ""; // user will type
+            } else {
+                input.classList.add('d-none');
+                input.value = reason; 
+            }
+        }
+
+        function submitCancelOrder() {
+            if (!currentCancelOrderId) return;
+            
+            let finalReason = currentCancelReason;
+            const inputVal = document.getElementById('cancel-reason-input').value.trim();
+            if (!finalReason || document.getElementById('cancel-reason-input').classList.contains('d-none') === false) {
+                if (!inputVal) {
+                    alert("Vui lòng chọn hoặc nhập lý do hủy đơn!");
+                    return;
+                }
+                finalReason = inputVal;
+            }
+
+            fetch('/Pos/CancelOrder?orderId=' + currentCancelOrderId + '&reason=' + encodeURIComponent(finalReason), { method: 'POST' })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    const cardOuter = document.getElementById('order-card-' + orderId);
+                    const cardOuter = document.getElementById('order-card-' + currentCancelOrderId);
                     if (cardOuter) cardOuter.remove();
+                    closeCancelModal();
                 } else {
                     alert(data.message);
                 }

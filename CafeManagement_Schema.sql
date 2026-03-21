@@ -402,21 +402,24 @@ CREATE TABLE InventoryLogs (
     ChangeQuantity DECIMAL(10,4) NOT NULL,
     Type           NVARCHAR(30)  NOT NULL,   -- Purchase | Sale | Adjustment | Waste
     ReferenceId    INT           NULL,
+    UserId         NVARCHAR(450) NULL,
     CreatedAt      DATETIME2     NOT NULL DEFAULT GETDATE(),
     CONSTRAINT FK_InventoryLogs_Stores      FOREIGN KEY (StoreId)      REFERENCES Stores(Id),
-    CONSTRAINT FK_InventoryLogs_Ingredients FOREIGN KEY (IngredientId) REFERENCES Ingredients(Id)
+    CONSTRAINT FK_InventoryLogs_Ingredients FOREIGN KEY (IngredientId) REFERENCES Ingredients(Id),
+    CONSTRAINT FK_InventoryLogs_AspNetUsers FOREIGN KEY (UserId) REFERENCES AspNetUsers(Id) ON DELETE SET NULL
 );
 GO
 
 CREATE INDEX IX_InventoryLogs_StoreId_CreatedAt ON InventoryLogs (StoreId, CreatedAt);
 CREATE INDEX IX_InventoryLogs_IngredientId      ON InventoryLogs (IngredientId);
+CREATE INDEX IX_InventoryLogs_UserId            ON InventoryLogs (UserId);
 GO
 
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='PurchaseOrders' AND xtype='U')
 CREATE TABLE PurchaseOrders (
     Id         INT IDENTITY NOT NULL PRIMARY KEY,
     StoreId    INT       NOT NULL,
-    SupplierId INT       NOT NULL,
+    SupplierId INT       NULL,
     OrderDate  DATETIME2 NOT NULL DEFAULT GETDATE(),
     Status     NVARCHAR(20) NOT NULL DEFAULT 'Received',
     CONSTRAINT FK_PurchaseOrders_Stores    FOREIGN KEY (StoreId)    REFERENCES Stores(Id),
@@ -493,6 +496,24 @@ GO
 
 CREATE INDEX IX_Timekeepings_UserId_Date ON Timekeepings (UserId, Date);
 CREATE INDEX IX_Timekeepings_StoreId     ON Timekeepings (StoreId);
+GO
+
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='ShiftHandovers' AND xtype='U')
+CREATE TABLE ShiftHandovers (
+    Id                INT IDENTITY NOT NULL PRIMARY KEY,
+    StoreId           INT           NOT NULL,
+    ShiftId           INT           NOT NULL,
+    HandoverDate      DATE          NOT NULL,
+    OpeningCash       DECIMAL(12,0) NOT NULL DEFAULT 0,
+    ExpectedCash      DECIMAL(12,0) NOT NULL DEFAULT 0,
+    ActualCashCounted DECIMAL(12,0) NOT NULL DEFAULT 0,
+    Difference        DECIMAL(12,0) NOT NULL DEFAULT 0,
+    Note              NVARCHAR(500) NULL,
+    ConfirmedAt       DATETIME2     NOT NULL DEFAULT GETDATE(),
+    ConfirmedByUserId NVARCHAR(450) NULL,
+    CONSTRAINT FK_ShiftHandovers_Stores FOREIGN KEY (StoreId) REFERENCES Stores(Id),
+    CONSTRAINT FK_ShiftHandovers_Shifts FOREIGN KEY (ShiftId) REFERENCES Shifts(Id)
+);
 GO
 
 PRINT 'Schema created successfully. Run CafeManagement_SeedData.sql next.';

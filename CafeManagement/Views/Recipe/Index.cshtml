@@ -1,0 +1,143 @@
+@model List<CafeManagement.Models.Domain.Recipe>
+@using System.Globalization
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Thiết lập Công thức";
+    var menuItems = ViewBag.MenuItems as List<CafeManagement.Models.Domain.MenuItem> ?? new List<CafeManagement.Models.Domain.MenuItem>();
+    var ingredients = ViewBag.Ingredients as List<CafeManagement.Models.Domain.Ingredient> ?? new List<CafeManagement.Models.Domain.Ingredient>();
+    int? selectedMenuItemId = ViewBag.SelectedMenuItemId as int?;
+    bool hasRecipe = Model != null && Model.Any();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">🍸 Tạo / Sửa Công thức</h4>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row">
+    <!-- Danh sách món -->
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white fw-bold">📋 Chọn Món</div>
+            <div class="list-group list-group-flush" style="max-height:600px;overflow-y:auto;">
+                @foreach (var item in menuItems)
+                {
+                    string activeClass = (item.Id == selectedMenuItemId) ? "active" : "";
+                    <a href="@Url.Action("Index", new { menuItemId = item.Id })"
+                       class="list-group-item list-group-item-action @activeClass">
+                        <div class="fw-semibold">@item.Name</div>
+                        <small>@item.Category?.Name</small>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Cấu hình công thức -->
+    <div class="col-md-8">
+        @if (selectedMenuItemId.HasValue)
+        {
+            var selectedItem = menuItems.FirstOrDefault(m => m.Id == selectedMenuItemId);
+            <div class="card shadow-sm">
+                <div class="card-header @(hasRecipe ? "bg-success" : "bg-warning") text-white fw-bold">
+                    @if (hasRecipe)
+                    {
+                        <span>✅ Công thức của: @selectedItem?.Name (@Model.Count nguyên liệu)</span>
+                    }
+                    else
+                    {
+                        <span>⚠️ Chưa có công thức cho: @selectedItem?.Name — Thêm mới bên dưới</span>
+                    }
+                </div>
+                <div class="card-body">
+                    <form asp-action="Save" method="post">
+                        <input type="hidden" name="menuItemId" value="@selectedMenuItemId" />
+
+                        <table class="table table-bordered" id="recipeTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nguyên liệu</th>
+                                    <th width="130">Số lượng</th>
+                                    <th width="130">Hao hụt (%)</th>
+                                    <th width="50"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (hasRecipe)
+                                {
+                                    foreach (var r in Model)
+                                    {
+                                        // Dùng InvariantCulture để tránh lỗi dấu phẩy thập phân locale VN
+                                        string qtyVal = r.Quantity.ToString("0.####", CultureInfo.InvariantCulture);
+                                        string wasteVal = r.WastePercent.ToString("0.####", CultureInfo.InvariantCulture);
+                                        <tr>
+                                            <td>
+                                                <select name="ingredientIds" class="form-select form-select-sm">
+                                                    @foreach (var ing in ingredients)
+                                                    {
+                                                        if (ing.Id == r.IngredientId)
+                                                        {
+                                                            <option value="@ing.Id" selected>@ing.Name (@ing.Unit)</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@ing.Id">@ing.Name (@ing.Unit)</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </td>
+                                            <td><input type="number" name="quantities" value="@qtyVal" class="form-control form-control-sm" step="0.01" min="0" /></td>
+                                            <td><input type="number" name="wastePercents" value="@wasteVal" class="form-control form-control-sm" step="0.1" min="0" max="100" /></td>
+                                            <td><button type="button" class="btn btn-sm btn-outline-danger btn-remove-row">✕</button></td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="btnAddRow">+ Thêm nguyên liệu</button>
+                        </div>
+
+                        <button type="submit" class="btn btn-success px-4">💾 Lưu Công Thức</button>
+                    </form>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">← Chọn một món ở danh sách bên trái để xem và chỉnh sửa công thức.</div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Tạo danh sách option nguyên liệu cho dòng mới
+        var ingredientOptions = '@Html.Raw(string.Join("", ingredients.Select(ing => $"<option value=\\'{ing.Id}\\'>{ing.Name} ({ing.Unit})</option>")))';
+
+        document.getElementById('btnAddRow')?.addEventListener('click', function () {
+            var tbody = document.querySelector('#recipeTable tbody');
+            var row = document.createElement('tr');
+            row.innerHTML =
+                '<td><select name="ingredientIds" class="form-select form-select-sm">' + ingredientOptions + '</select></td>' +
+                '<td><input type="number" name="quantities" value="0" class="form-control form-control-sm" step="0.01" min="0" /></td>' +
+                '<td><input type="number" name="wastePercents" value="0" class="form-control form-control-sm" step="0.1" min="0" max="100" /></td>' +
+                '<td><button type="button" class="btn btn-sm btn-outline-danger btn-remove-row">✕</button></td>';
+            tbody.appendChild(row);
+        });
+
+        document.addEventListener('click', function (e) {
+            if (e.target.classList.contains('btn-remove-row')) {
+                e.target.closest('tr').remove();
+            }
+        });
+    </script>
+}

@@ -1,3 +1,5 @@
+@model CafeManagement.Models.ViewModels.DashboardViewModel
+@using System.Text.Json
 @{
     Layout = "_AdminLayout";
     ViewData["Title"] = "Dashboard";
@@ -9,35 +11,91 @@
     <div class="col-md-3">
         <div class="card stat-card revenue p-3">
             <div class="text-muted small">Doanh thu hôm nay</div>
-            <div class="fs-4 fw-bold text-success">--,---,---đ</div>
+            <div class="fs-4 fw-bold text-success">
+                @Model.RevenueToday.ToString("N0") đ
+            </div>
             <div class="text-muted small">Toàn hệ thống</div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card stat-card orders p-3">
             <div class="text-muted small">Đơn hàng hôm nay</div>
-            <div class="fs-4 fw-bold text-primary">---</div>
+            <div class="fs-4 fw-bold text-primary">@Model.OrdersToday</div>
             <div class="text-muted small">Tất cả chi nhánh</div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card stat-card staff p-3">
             <div class="text-muted small">Nhân viên đang làm</div>
-            <div class="fs-4 fw-bold text-warning">---</div>
+            <div class="fs-4 fw-bold text-warning">@Model.StaffWorkingToday</div>
             <div class="text-muted small">Hôm nay</div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card stat-card warning p-3">
             <div class="text-muted small">Cảnh báo tồn kho</div>
-            <div class="fs-4 fw-bold text-danger">---</div>
+            <div class="fs-4 fw-bold text-danger">@Model.LowStockCount</div>
             <div class="text-muted small">Nguyên liệu sắp hết</div>
         </div>
     </div>
 </div>
 
 <div class="card p-4">
-    <p class="text-muted text-center py-3">
-        📈 Biểu đồ doanh thu sẽ được TV5 tích hợp tại đây.
-    </p>
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="mb-0 fw-bold">📈 Doanh thu 30 ngày gần nhất</h6>
+        <small class="text-muted">
+            @Model.ChartFromDate.ToString("dd/MM/yyyy") - @Model.ChartToDate.ToString("dd/MM/yyyy")
+        </small>
+    </div>
+    <canvas id="revenueChart" style="max-height:320px;"></canvas>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Chuẩn bị dữ liệu cho biểu đồ từ ViewModel
+        const revenueLabels = @Html.Raw(JsonSerializer.Serialize(
+            Model.RevenueSeries.Select(p => p.Date.ToString("dd/MM"))
+        ));
+        const revenueData = @Html.Raw(JsonSerializer.Serialize(
+            Model.RevenueSeries.Select(p => p.Amount)
+        ));
+
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        const revenueChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: revenueLabels,
+                datasets: [{
+                    label: 'Doanh thu (đ)',
+                    data: revenueData,
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40,167,69,0.15)',
+                    borderWidth: 2,
+                    tension: 0.2,
+                    pointRadius: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ctx.parsed.y.toLocaleString('vi-VN') + ' đ'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: value => value.toLocaleString('vi-VN') + ' đ'
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+}

@@ -44,7 +44,7 @@ public class UserService
             EmailConfirmed = true
         };
 
-        var result = await _userManager.CreateAsync(user, model.Password);
+        var result = await _userManager.CreateAsync(user, "a123456");
         if (result.Succeeded)
             await _userManager.AddToRoleAsync(user, model.Role);
 

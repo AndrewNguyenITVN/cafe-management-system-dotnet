@@ -10,7 +10,7 @@ using System.Security.Claims;
 
 namespace CafeManagement.Controllers;
 
-[Authorize]
+[AllowAnonymous]
 public class PosController : Controller
 {
     // Dependency Injection
@@ -20,19 +20,22 @@ public class PosController : Controller
     private readonly IOrderService _orderService;  
     private readonly IHubContext<OrderHub> _hubContext;
     private readonly AppDbContext _db;
+    private readonly ShiftHandoverService _shiftHandoverService;
 
     public PosController(
         CategoryService categoryService,
         MenuItemService menuItemService,
         IOrderService orderService,
         IHubContext<OrderHub> hubContext,
-        AppDbContext db)
+        AppDbContext db,
+        ShiftHandoverService shiftHandoverService)
     {
         _categoryService = categoryService;
         _menuItemService = menuItemService;
         _orderService = orderService;      
         _hubContext = hubContext;
         _db = db;
+        _shiftHandoverService = shiftHandoverService;
     }
 
 
@@ -52,7 +55,6 @@ public class PosController : Controller
 
     // Giao diện Customer Display
     [HttpGet]
-    [AllowAnonymous] // Cho phép mở màn hình khách hàng mà không cần đăng nhập
     public IActionResult CustomerDisplay()
     {
         return View();
@@ -91,6 +93,125 @@ public class PosController : Controller
         return Ok(result);
     }
 
+    // Lấy danh sách nhân viên đang active để hiển thị trên màn PIN
+    [HttpGet]
+    public async Task<IActionResult> GetCashiers()
+    {
+        var users = await _db.Users
+            .Where(u => u.IsActive)
+            .Select(u => new {
+                id = u.Id,
+                name = u.FullName ?? u.UserName ?? "",
+                storeId = u.StoreId
+            })
+            .ToListAsync();
+
+        return Ok(users);
+    }
+
+    // API: Lấy danh sách chi nhánh đang hoạt động (dùng cho KDS / Customer Display)
+    [HttpGet]
+    public async Task<IActionResult> GetStores()
+    {
+        var stores = await _db.Stores
+            .Where(s => s.IsActive)
+            .Select(s => new { id = s.Id, name = s.Name })
+            .ToListAsync();
+        return Ok(stores);
+    }
+
+    // API: Lấy danh sách phương thức thanh toán (cho dropdown POS)
+    [HttpGet]
+    public async Task<IActionResult> GetPaymentMethods()
+    {
+        var list = await _db.PaymentMethods
+            .Where(p => p.IsActive)
+            .Select(p => new { id = p.Id, name = p.MethodName })
+            .ToListAsync();
+        return Ok(list);
+    }
+
+    // API: Preview kết ca cho POS (dựa trên ca + ngày của chi nhánh hiện tại)
+    [HttpGet]
+    public async Task<IActionResult> GetShiftHandoverPreview(int shiftId, DateOnly date)
+    {
+        // Đọc từ POS session (thay vì User claims)
+        var cashierId = HttpContext.Session.GetString("PosCashierId");
+        var storeId = HttpContext.Session.GetInt32("PosStoreId");
+
+        if (string.IsNullOrEmpty(cashierId) || !storeId.HasValue || storeId.Value == 0)
+        {
+            return Unauthorized(new { success = false, message = "Chưa đăng nhập POS (vui lòng nhập PIN)." });
+        }
+
+        var dateOnly = date;
+        var preview = await _shiftHandoverService.GetPreviewAsync(storeId.Value, shiftId, dateOnly);
+        if (preview == null)
+        {
+            return BadRequest(new { success = false, message = "Không tìm thấy chi nhánh hoặc ca làm việc." });
+        }
+
+        return Ok(new
+        {
+            success = true,
+            storeId = preview.StoreId,
+            storeName = preview.StoreName,
+            shiftId = preview.ShiftId,
+            shiftName = preview.ShiftName,
+            date = preview.Date,
+            totalRevenue = preview.TotalRevenue,
+            totalCash = preview.TotalCash
+        });
+    }
+
+    public class PosCloseShiftRequest
+    {
+        public int ShiftId { get; set; }
+        public DateOnly Date { get; set; }
+        public decimal OpeningCash { get; set; }
+        public decimal ActualCashCounted { get; set; }
+        public string? Note { get; set; }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SubmitShiftHandover([FromBody] PosCloseShiftRequest model)
+    {
+        // Đọc từ POS session (thay vì User claims)
+        var cashierId = HttpContext.Session.GetString("PosCashierId");
+        var storeId = HttpContext.Session.GetInt32("PosStoreId");
+
+        if (string.IsNullOrEmpty(cashierId) || !storeId.HasValue || storeId.Value == 0)
+        {
+            return Unauthorized(new { success = false, message = "Chưa đăng nhập POS (vui lòng nhập PIN)." });
+        }
+
+        var result = await _shiftHandoverService.CloseShiftAsync(
+            storeId.Value,
+            model.ShiftId,
+            model.Date,
+            model.OpeningCash,
+            model.ActualCashCounted,
+            model.Note,
+            cashierId); // userId từ session
+
+        if (!result.Success)
+        {
+            return BadRequest(new { success = false, message = result.Message });
+        }
+
+        return Ok(new
+        {
+            success = true,
+            storeId = result.StoreId,
+            shiftId = result.ShiftId,
+            date = result.Date,
+            openingCash = result.OpeningCash,
+            totalCash = result.TotalCash,
+            expectedCash = result.ExpectedCash,
+            actualCash = result.ActualCashCounted,
+            difference = result.Difference
+        });
+    }
 
     // API: Tạo đơn hàng
     [HttpPost]
@@ -101,11 +222,15 @@ public class PosController : Controller
             return BadRequest(new { success = false, message = "Giỏ hàng rỗng" });
         }
 
-        // Nếu request chưa có UserId (từ màn hình khóa chuyển xuống), 
-        // thì mặc định lấy User.FindFirstValue. Nhưng ở Model mới, ta sẽ gửi từ Frontend.
+        // Lấy UserId từ POS session (thay vì User claims)
         if (string.IsNullOrEmpty(request.UserId))
         {
-            request.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            request.UserId = HttpContext.Session.GetString("PosCashierId");
+        }
+
+        if (string.IsNullOrEmpty(request.UserId))
+        {
+            return Unauthorized(new { success = false, message = "Chưa đăng nhập POS (vui lòng nhập PIN)." });
         }
 
         // GỌI SERVICE THẬT
@@ -158,7 +283,6 @@ public class PosController : Controller
 
     // API: Lấy danh sách đơn hàng đang hoạt động (Pending + Processing) theo Chi nhánh
     [HttpGet]
-    [AllowAnonymous]
     public IActionResult GetActiveOrders(int storeId)
     {
         var today = DateTime.Today;
@@ -168,7 +292,7 @@ public class PosController : Controller
                 .ThenInclude(d => d.MenuItem)
             .Where(o => o.StoreId == storeId
                      && o.OrderDate.Date == today
-                     && o.Status < 2) // 0 = Pending, 1 = Processing
+                     && (o.Status == 0 || o.Status == 1)) // 0 = Pending, 1 = Processing
             .OrderBy(o => o.OrderDate)
             .Select(o => new {
                 orderId = o.Id,
@@ -187,7 +311,7 @@ public class PosController : Controller
 
     // API: Hủy đơn hàng (Dành cho KDS khi bếp không thể thực hiện)
     [HttpPost]
-    public async Task<IActionResult> CancelOrder(int orderId)
+    public async Task<IActionResult> CancelOrder(int orderId, string reason = "")
     {
         var order = await _db.Orders.FindAsync(orderId);
         if (order == null)
@@ -199,6 +323,13 @@ public class PosController : Controller
         order.Status = -1; // -1 = Cancelled
 
         await _db.SaveChangesAsync();
+
+        // Bắn tín hiệu SignalR báo hủy đơn để Customer Display và POS có thể tự xóa / nghe
+        string storeGroup = $"Store_{order.StoreId}";
+        await _hubContext.Clients.Group(storeGroup).SendAsync("OrderCancelled", new {
+            queueNumber = order.QueueNumber,
+            reason = string.IsNullOrWhiteSpace(reason) ? "Không có lý do" : reason
+        });
 
         return Ok(new { success = true, storeId = order.StoreId, queueNumber = order.QueueNumber });
     }
@@ -223,32 +354,67 @@ public class PosController : Controller
         return Ok(new { success = false });
     }
 
+    // public class PinRequest
+    // {
+    //     public string PinCode { get; set; } = string.Empty;
+    // }
+
+    // // API: Xác thực mã PIN của nhân viên
+    // [HttpPost]
+    // public IActionResult VerifyPin([FromBody] PinRequest request)
+    // {
+    //     var pinCode = request?.PinCode;
+    //     if (string.IsNullOrEmpty(pinCode)) return BadRequest(new { success = false, message = "Mã PIN rỗng!" });
+
+    //     // Trong các hệ thống POS, nhân viên dùng chung 1 máy và khóa màn hình bằng mã PIN.
+    //     // Ta sẽ dò trực tiếp người dùng có mã PIN này.
+    //     var cashier = _db.Users.FirstOrDefault(u => u.PinCode == pinCode);
+        
+    //     if (cashier != null && cashier.IsActive)
+    //     {
+    //         return Ok(new { 
+    //             success = true, 
+    //             userId = cashier.Id,
+    //             cashierName = cashier.FullName ?? cashier.UserName,
+    //             storeId = cashier.StoreId ?? 1 // Lấy ID Chi nhánh của Nhân viên này, mặc định 1 nếu chưa gán
+    //         });
+    //     }
+
+    //     return BadRequest(new { success = false, message = "Mã PIN không đúng hoặc đã bị khóa!" });
+    // }
     public class PinRequest
     {
         public string PinCode { get; set; } = string.Empty;
+        public string UserId { get; set; } = string.Empty; // THÊM
     }
 
-    // API: Xác thực mã PIN của nhân viên
     [HttpPost]
     public IActionResult VerifyPin([FromBody] PinRequest request)
     {
         var pinCode = request?.PinCode;
-        if (string.IsNullOrEmpty(pinCode)) return BadRequest(new { success = false, message = "Mã PIN rỗng!" });
+        var userId  = request?.UserId;
 
-        // Trong các hệ thống POS, nhân viên dùng chung 1 máy và khóa màn hình bằng mã PIN.
-        // Ta sẽ dò trực tiếp người dùng có mã PIN này.
-        var cashier = _db.Users.FirstOrDefault(u => u.PinCode == pinCode);
-        
+        if (string.IsNullOrEmpty(pinCode) || string.IsNullOrEmpty(userId))
+            return BadRequest(new { success = false, message = "Thiếu thông tin nhân viên hoặc PIN!" });
+
+        // Chỉ tìm đúng nhân viên đã chọn
+        var cashier = _db.Users.FirstOrDefault(u => u.Id == userId && u.PinCode == pinCode);
+
         if (cashier != null && cashier.IsActive)
         {
-            return Ok(new { 
-                success = true, 
+            // Lưu POS session (cookie POS riêng)
+            HttpContext.Session.SetString("PosCashierId", cashier.Id);
+            HttpContext.Session.SetInt32("PosStoreId", cashier.StoreId ?? 0);
+            HttpContext.Session.SetString("PosCashierName", cashier.FullName ?? cashier.UserName ?? "");
+
+            return Ok(new {
+                success = true,
                 userId = cashier.Id,
                 cashierName = cashier.FullName ?? cashier.UserName,
-                storeId = cashier.StoreId ?? 1 // Lấy ID Chi nhánh của Nhân viên này, mặc định 1 nếu chưa gán
+                storeId = cashier.StoreId ?? 1
             });
         }
 
-        return BadRequest(new { success = false, message = "Mã PIN không đúng hoặc đã bị khóa!" });
+        return BadRequest(new { success = false, message = "Mã PIN không đúng hoặc nhân viên đã bị khóa!" });
     }
 }

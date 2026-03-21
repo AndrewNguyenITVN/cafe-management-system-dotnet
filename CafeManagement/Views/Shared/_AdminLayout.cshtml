@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,113 +9,167 @@
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
+
 <body>
 
-<!-- Top Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-    <div class="container-fluid">
-        <a class="navbar-brand fw-bold" asp-controller="Dashboard" asp-action="Index">
-            ☕ Cafe Management
-        </a>
-        <div class="navbar-nav ms-auto">
-            <span class="navbar-text text-light me-3">
-                Xin chào, <strong>@User.Identity?.Name</strong>
-            </span>
-            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                @Html.AntiForgeryToken()
-                <button type="submit" class="btn btn-outline-light btn-sm">Đăng xuất</button>
-            </form>
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom fixed-top">
+        <div class="container-fluid">
+            @if (User.IsInRole("Admin"))
+            {
+                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">☕ Cafe Management</a>
+            }
+            else
+            {
+                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">☕ Cafe Management</a>
+            }
+            <div class="navbar-nav ms-auto align-items-center">
+                <span class="navbar-text text-dark me-3">
+                    Xin chào, <strong>@User.Identity?.Name</strong>
+                </span>
+                <!-- @if (User.IsInRole("Manager"))
+                {
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-warning btn-sm me-2">← Trang chủ</a>
+                } -->
+                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-dark btn-sm">Đăng xuất</button>
+                </form>
+            </div>
         </div>
-    </div>
-</nav>
-
-<div class="d-flex" style="margin-top: 56px;">
-
-    <!-- Sidebar -->
-    <nav class="sidebar bg-dark text-white" style="min-width:220px; min-height:calc(100vh - 56px); padding:1rem 0;">
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active bg-secondary rounded" : "")"
-                   asp-controller="Dashboard" asp-action="Index">
-                    📊 Dashboard
-                </a>
-            </li>
-
-            <li class="nav-item mt-2">
-                <small class="text-muted px-3 text-uppercase fw-bold" style="font-size:.7rem;">Danh mục</small>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Store" ? "active bg-secondary rounded" : "")"
-                   asp-controller="Store" asp-action="Index">
-                    🏪 Chi nhánh
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Category" ? "active bg-secondary rounded" : "")"
-                   asp-controller="Category" asp-action="Index">
-                    📂 Danh mục món
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "MenuItem" ? "active bg-secondary rounded" : "")"
-                   asp-controller="MenuItem" asp-action="Index">
-                    🍵 Thực đơn
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Topping" ? "active bg-secondary rounded" : "")"
-                   asp-controller="Topping" asp-action="Index">
-                    ✨ Topping
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Supplier" ? "active bg-secondary rounded" : "")"
-                   asp-controller="Supplier" asp-action="Index">
-                    🚚 Nhà cung cấp
-                </a>
-            </li>
-
-            <li class="nav-item mt-2">
-                <small class="text-muted px-3 text-uppercase fw-bold" style="font-size:.7rem;">Nhân sự</small>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "UserManagement" ? "active bg-secondary rounded" : "")"
-                   asp-controller="UserManagement" asp-action="Index">
-                    👤 Nhân viên
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "JobPosition" ? "active bg-secondary rounded" : "")"
-                   asp-controller="JobPosition" asp-action="Index">
-                    💼 Chức vụ & Lương
-                </a>
-            </li>
-        </ul>
     </nav>
 
-    <!-- Main Content -->
-    <main class="flex-grow-1 p-4">
-        @if (TempData["Success"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                @TempData["Success"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                @TempData["Error"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
+    <div class="d-flex" style="margin-top: 56px;">
 
-        @RenderBody()
-    </main>
-</div>
+        <!-- Sidebar -->
+        <nav class="sidebar bg-white text-dark border-end" style="min-width:220px; min-height:calc(100vh - 56px); padding:1rem 0;">
+            <ul class="nav flex-column">
+                @if (User.IsInRole("Admin"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-dark @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active bg-primary text-white rounded" : "")"
+                            asp-controller="Dashboard" asp-action="Index">
+                            📊 Dashboard
+                        </a>
+                    </li>
 
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-@await RenderSectionAsync("Scripts", required: false)
+                    <li class="nav-item mt-2">
+                        <small class="text-muted px-3 text-uppercase fw-bold" style="font-size:.7rem;">Danh mục</small>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark @(ViewContext.RouteData.Values["controller"]?.ToString() == "Store" ? "active bg-primary text-white rounded" : "")"
+                            asp-controller="Store" asp-action="Index">
+                            🏪 Chi nhánh
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark @(ViewContext.RouteData.Values["controller"]?.ToString() == "Category" ? "active bg-primary text-white rounded" : "")"
+                            asp-controller="Category" asp-action="Index">
+                            📂 Danh mục món
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark @(ViewContext.RouteData.Values["controller"]?.ToString() == "MenuItem" ? "active bg-primary text-white rounded" : "")"
+                            asp-controller="MenuItem" asp-action="Index">
+                            🍵 Thực đơn
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark @(ViewContext.RouteData.Values["controller"]?.ToString() == "Topping" ? "active bg-primary text-white rounded" : "")"
+                            asp-controller="Topping" asp-action="Index">
+                            ✨ Topping
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark @(ViewContext.RouteData.Values["controller"]?.ToString() == "Supplier" ? "active bg-primary text-white rounded" : "")"
+                            asp-controller="Supplier" asp-action="Index">
+                            🚚 Nhà cung cấp
+                        </a>
+                    </li>
+                }
+
+                <li class="nav-item mt-2">
+                    <small class="text-muted px-3 text-uppercase fw-bold" style="font-size:.7rem;">Kho & Công thức</small>
+                </li>
+                @if (User.IsInRole("Admin"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-dark @(ViewContext.RouteData.Values["controller"]?.ToString() == "Recipe" ? "active bg-primary text-white rounded" : "")"
+                            asp-controller="Recipe" asp-action="Index">
+                            🍸 Công thức
+                        </a>
+                    </li>
+                }
+                <li class="nav-item">
+                    <a class="nav-link text-dark @(ViewContext.RouteData.Values["controller"]?.ToString() == "Inventory" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active bg-primary text-white rounded" : "")"
+                        asp-controller="Inventory" asp-action="Index">
+                        📦 Tồn kho
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark @(ViewContext.RouteData.Values["controller"]?.ToString() == "Inventory" && ViewContext.RouteData.Values["action"]?.ToString() == "Purchase" ? "active bg-primary text-white rounded" : "")"
+                        asp-controller="Inventory" asp-action="Purchase">
+                        📥 Nhập kho
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark @(ViewContext.RouteData.Values["controller"]?.ToString() == "Inventory" && ViewContext.RouteData.Values["action"]?.ToString() == "Stocktake" ? "active bg-primary text-white rounded fw-bold" : "")"
+                        asp-controller="Inventory" asp-action="Stocktake">
+                        ⚠️ Kiểm kê
+                    </a>
+                </li>
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <li class="nav-item mt-2">
+                        <small class="text-muted px-3 text-uppercase fw-bold" style="font-size:.7rem;">Nhân sự</small>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark @(ViewContext.RouteData.Values["controller"]?.ToString() == "UserManagement" ? "active bg-primary text-white rounded" : "")"
+                            asp-controller="UserManagement" asp-action="Index">
+                            👤 Nhân viên
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark @(ViewContext.RouteData.Values["controller"]?.ToString() == "JobPosition" ? "active bg-primary text-white rounded" : "")"
+                            asp-controller="JobPosition" asp-action="Index">
+                            💼 Chức vụ & Lương
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark @(ViewContext.RouteData.Values["controller"]?.ToString() == "ShiftHandover" ? "active bg-primary text-white rounded" : "")"
+                            asp-controller="ShiftHandover" asp-action="Index">
+                            💰 Kết ca
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-grow-1 p-4">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
+
 </html>

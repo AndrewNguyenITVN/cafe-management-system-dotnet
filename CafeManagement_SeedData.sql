@@ -115,3 +115,77 @@ INSERT INTO InventoryStocks (StoreId, IngredientId, CurrentQuantity) VALUES
     (1, 8, 500),    -- 500g bột matcha
     (1, 9, 800),    -- 800g bột socola
     (1, 10, 2000);  -- 2 lít kem tươi
+
+-- -------------------------------------------------------------
+-- CRM: Customers
+-- TotalPoints khớp với tổng PointHistories bên dưới
+-- -------------------------------------------------------------
+INSERT INTO Customers (FullName, Phone, TotalPoints, CreatedAt) VALUES
+    (N'Nguyễn Văn An',   '0901234567', 1700, DATEADD(day, -30, GETDATE())),
+    (N'Trần Thị Bình',   '0912345678', 1300, DATEADD(day, -20, GETDATE())),
+    (N'Lê Văn Cường',    '0923456789', 2000, DATEADD(day, -10, GETDATE())),
+    (N'Phạm Thị Dung',   '0934567890', 4000, DATEADD(day, -45, GETDATE())),
+    (N'Hoàng Văn Em',    '0945678901', 5000, DATEADD(day,  -5, GETDATE()));
+
+
+INSERT INTO InventoryStocks (StoreId, IngredientId, CurrentQuantity) VALUES
+    (2, 1,  1500),
+    (2, 2,  3000),
+    (2, 3,  8000),
+    (2, 4,  2000),
+    (2, 5, 15000),
+    (2, 6,   300),
+    (2, 7,  2000),
+    (2, 8,   300),
+    (2, 9,   600),
+    (2, 10, 1500);
+
+-- -------------------------------------------------------------
+-- Inventory: InventoryLogs
+-- Type: Purchase | Sale | Adjustment | Waste
+-- -------------------------------------------------------------
+INSERT INTO InventoryLogs (StoreId, IngredientId, ChangeQuantity, Type, ReferenceId, CreatedAt) VALUES
+-- Nhập hàng tuần trước
+    (1,  1,  2000, 'Purchase', 1, DATEADD(day, -7, GETDATE())),
+    (1,  2,  5000, 'Purchase', 1, DATEADD(day, -7, GETDATE())),
+    (1,  3, 10000, 'Purchase', 1, DATEADD(day, -7, GETDATE())),
+    (1,  5, 20000, 'Purchase', 1, DATEADD(day, -7, GETDATE())),
+    (1,  6,   500, 'Purchase', 2, DATEADD(day, -5, GETDATE())),
+    (1,  7,  3000, 'Purchase', 2, DATEADD(day, -5, GETDATE())),
+    (1,  8,   500, 'Purchase', 2, DATEADD(day, -5, GETDATE())),
+-- Xuất bán 2 ngày trước
+    (1,  1,  -500, 'Sale',  NULL, DATEADD(day, -2, GETDATE())),
+    (1,  2,  -200, 'Sale',  NULL, DATEADD(day, -2, GETDATE())),
+    (1,  5, -3000, 'Sale',  NULL, DATEADD(day, -2, GETDATE())),
+-- Hao hụt + xuất bán hôm qua
+    (1,  7,  -500, 'Waste', NULL, DATEADD(day, -1, GETDATE())),
+    (1,  1,  -300, 'Sale',  NULL, DATEADD(day, -1, GETDATE())),
+    (1,  5, -2000, 'Sale',  NULL, DATEADD(day, -1, GETDATE())),
+-- Điều chỉnh tồn kho
+    (1,  9,   200, 'Adjustment', NULL, DATEADD(day, -3, GETDATE()));
+
+-- -------------------------------------------------------------
+-- Inventory: PurchaseOrders + PurchaseOrderDetails
+-- -------------------------------------------------------------
+INSERT INTO PurchaseOrders (StoreId, SupplierId, OrderDate, Status) VALUES
+    (1, 1, DATEADD(day, -7, GETDATE()), 'Received'),  -- CN1 nhập cà phê từ Trung Nguyên
+    (1, 2, DATEADD(day, -5, GETDATE()), 'Received'),  -- CN1 nhập sữa từ Vinamilk
+    (2, 1, DATEADD(day, -4, GETDATE()), 'Received'),  -- CN2 nhập cà phê từ Trung Nguyên
+    (1, 3, DATEADD(day, -2, GETDATE()), 'Received');  -- CN1 nhập trà từ Phương Nam
+
+INSERT INTO PurchaseOrderDetails (PurchaseOrderId, IngredientId, Quantity, CostPrice) VALUES
+-- PO 1: Cà phê + đường
+    (1, 1, 2000,  120),
+    (1, 4, 5000,   20),
+-- PO 2: Sữa đặc + sữa tươi
+    (2, 2, 5000,   45),
+    (2, 3, 10000,  25),
+-- PO 3: Chi nhánh 2
+    (3, 1, 1500,  120),
+    (3, 2, 3000,   45),
+-- PO 4: Trà + đào + matcha
+    (4, 6,  500,  180),
+    (4, 7, 3000,   30),
+    (4, 8,  500,  350);
+
+PRINT 'Seed data bổ sung đã chạy thành công.';

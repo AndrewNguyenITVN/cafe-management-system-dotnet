@@ -19,30 +19,30 @@
 
         /* ===== TOÀN TRANG ===== */
         body {
-            background-color: #1a120b;  /* Nền nâu cà phê rất tối */
-            color: #f7e6c4;             /* Chữ trắng kem sáng */
+            background-color: #f8f9fa;  /* Nền sáng */
+            color: #212529;             /* Chữ đen */
             font-family: 'Outfit', sans-serif;
-            overflow: hidden;           /* Tắt cuộn trang (POS cố định 1 màn hình) */
+            overflow: hidden;           /* Giữ layout POS 1 màn hình, không cuộn toàn trang */
             height: 100vh;              /* Chiếm hết chiều cao màn hình */
         }
 
         /* ===== CỘT TRÁI - DANH MỤC ===== */
         .category-panel {
-            background-color: #2b1f14;  /* Nền nâu đậm */
+            background-color: #ffffff;  /* Nền trắng */
             height: 100vh;
             padding: 20px 15px;
             overflow-y: auto;           /* Cuộn được nếu danh mục nhiều */
-            border-right: 1px solid #3d2a1c;
+            border-right: 1px solid #dee2e6;
         }
         .category-btn {
             display: block;
             width: 100%;
             padding: 16px;
             margin-bottom: 12px;
-            border: 1px solid #3d2a1c;
+            border: 1px solid #dee2e6;
             border-radius: 12px;
-            background-color: #3d2a1c;
-            color: #f7e6c4;
+            background-color: #ffffff;
+            color: #212529;
             font-size: 16px;
             font-weight: 600;
             text-align: left;
@@ -55,18 +55,18 @@
             content: '';
             position: absolute;
             top: 0; left: 0; width: 4px; height: 100%;
-            background-color: #d4a373; /* Caramel highlight */
+            background-color: #0d6efd; /* Caramel highlight */
             transform: scaleY(0);
             transition: transform 0.3s;
         }
         .category-btn:hover {
-            background-color: #4a3422;  /* Sáng hơn khi rê chuột */
+            background-color: #e9ecef;
             transform: translateX(4px);
         }
         .category-btn.active {
-            background-color: #4a3422;  
-            color: #fff;
-            box-shadow: 0 4px 15px rgba(212, 163, 115, 0.2);
+            background-color: #e9ecef;  
+            color: #000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         .category-btn.active::before {
             transform: scaleY(1);
@@ -77,17 +77,17 @@
             height: 100vh;
             padding: 24px;
             overflow-y: auto;
-            background-image: radial-gradient(circle at center, #231810 0%, #1a120b 100%);
+            background-color: #f8f9fa;
         }
         .product-card {
-            background: linear-gradient(145deg, #2b1f14, #1a120b);
-            border: 1px solid #3d2a1c;
+            background: #ffffff;
+            border: 1px solid #dee2e6;
             border-radius: 16px;
             padding: 20px 16px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             position: relative;
             overflow: hidden;
         }
@@ -95,14 +95,14 @@
             content: '';
             position: absolute;
             bottom: 0; left: 0; width: 100%; height: 2px;
-            background: #d4a373;
+            background: #0d6efd;
             transform: scaleX(0);
             transition: transform 0.3s ease;
         }
         .product-card:hover {
             transform: translateY(-5px);      
-            border-color: #d4a373;
-            box-shadow: 0 12px 25px rgba(212, 163, 115, 0.15);
+            border-color: #0d6efd;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
         }
         .product-card:hover::after {
             transform: scaleX(1);
@@ -114,7 +114,7 @@
             letter-spacing: 0.5px;
         }
         .product-card .price {
-            color: #d4a373;
+            color: #0d6efd;
             font-weight: bold;
             font-size: 18px;
             margin-top: 6px;
@@ -122,29 +122,28 @@
 
         /* ===== CỘT PHẢI - GIỎ HÀNG ===== */
         .cart-panel {
-            background-color: #2b1f14;
+            background-color: #ffffff;
             height: 100vh;
             padding: 20px 24px;
-            display: flex;
-            flex-direction: column;      /* Xếp các phần tử theo chiều dọc */
-            border-left: 1px solid #3d2a1c;
-            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+            border-left: 1px solid #dee2e6;
+            box-shadow: -4px 0 15px rgba(0,0,0,0.05);
+            overflow-y: auto;            /* Chỉ riêng cột phải được cuộn */
         }
         .cart-item {
-            background-color: #3d2a1c;
+            background-color: #ffffff;
             border-radius: 12px;
             padding: 12px 16px;
             margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-left: 3px solid #6c584c;
+            border-left: 3px solid #0d6efd;
             transition: background 0.2s;
         }
-        .cart-item:hover { background-color: #4a3422; }
+        .cart-item:hover { background-color: #e9ecef; }
         .cart-item .qty-btn {
-            background: #6c584c;
-            color: #f7e6c4;
+            background: #e9ecef;
+            color: #212529;
             border: none;
             border-radius: 6px;
             width: 28px;
@@ -155,23 +154,23 @@
             transition: all 0.2s;
         }
         .cart-item .qty-btn:hover {
-            background: #d4a373;
-            color: #1a120b;
+            background: #0d6efd;
+            color: #ffffff;
         }
         .cart-item .item-details { flex-grow: 1; margin: 0 10px; }
         .cart-item .name { font-weight: 600; font-size: 15px; }
-        .cart-item .price { color: #d4a373; font-size: 14px; margin-top: 2px; }
+        .cart-item .price { color: #0d6efd; font-size: 14px; margin-top: 2px; }
 
         .cart-summary {
             margin-top: auto;  /* Đẩy phần tổng tiền xuống cuối cột */
-            background-color: #1a120b;
+            background-color: #ffffff;
             padding: 20px;
             border-radius: 16px;
-            border: 1px solid #3d2a1c;
+            border: 1px solid #dee2e6;
         }
         .btn-checkout {
-            background: linear-gradient(135deg, #d4a373, #b07d4b);
-            color: #1a120b;
+            background: #0d6efd;
+            color: #ffffff;
             width: 100%;
             padding: 16px;
             border: none;
@@ -183,23 +182,100 @@
             cursor: pointer;
             text-transform: uppercase;
             transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(212, 163, 115, 0.3);
+            box-shadow: 0 4px 15px rgba(13,110,253,0.3);
         }
         .btn-checkout:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(212, 163, 115, 0.4);
+            box-shadow: 0 6px 20px rgba(13,110,253,0.4);
+        }
+
+        /* Nút chọn phương thức thanh toán */
+        .payment-method-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .payment-method-btn {
+            flex: 1 1 45%;
+            padding: 10px 12px;
+            border-radius: 999px;
+            border: 1px solid #dee2e6;
+            background-color: #ffffff;
+            color: #212529;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .payment-method-btn:hover {
+            background-color: #e9ecef;
+        }
+        .payment-method-btn.active {
+            background: #0d6efd;
+            color: #ffffff;
+            border-color: #0d6efd;
+            box-shadow: 0 0 10px rgba(13,110,253,0.5);
+        }
+
+        /* ETC button and overlay */
+        .etc-button {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1030;
+            background-color: #ffffff;
+            border: 1px solid #0d6efd;
+            color: #212529;
+            border-radius: 999px;
+            padding: 8px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .etc-button:hover {
+            background-color: #e9ecef;
+        }
+        #etc-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1040;
+        }
+        .etc-panel {
+            max-width: 520px;
+            background-color: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #0d6efd;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+            padding: 24px 24px 18px;
+        }
+        .etc-action-btn {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
+            background-color: #ffffff;
+            color: #212529;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+        .etc-action-btn:hover {
+            background-color: #e9ecef;
         }
         
         /* Tùy chỉnh thanh cuộn dải mỏng */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #1a120b; }
         ::-webkit-scrollbar-thumb { background: #3d2a1c; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #d4a373; }
+        ::-webkit-scrollbar-thumb:hover { background: #0d6efd; }
         
         /* Tùy chỉnh input cho đẹp */
         .form-control.bg-dark {
             background-color: #1a120b !important;
-            border-color: #3d2a1c !important;
+            border-color: #dee2e6 !important;
             color: #f7e6c4 !important;
             padding: 12px;
             border-radius: 8px;
@@ -209,8 +285,26 @@
             border-color: #d4a373 !important;
         }
         .form-check-input:checked {
-            background-color: #d4a373;
-            border-color: #d4a373;
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+        #cashier-list-box .cashier-item {
+            padding: 12px 14px;
+            border-bottom: 1px solid #dee2e6;
+            cursor: pointer;
+            color: #212529;
+            transition: background 0.2s;
+        }
+        #cashier-list-box .cashier-item:hover {
+            background-color: #ffffff;
+        }
+        #cashier-list-box .cashier-item.selected {
+            background-color: #e9ecef;
+            border-left: 4px solid #0d6efd;
+        }
+        #cashier-list-box .cashier-item:last-child {
+            border-bottom: none;
         }
     </style>
 </head>
@@ -218,24 +312,84 @@
 <body>
 
 @* ══════════ MÀN HÌNH KHÓA PIN ══════════ *@
-<div id="pin-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center" style="background-color: #1a120b; z-index: 9999;">
-    <h2 class="mb-4 fw-bold" style="color: #d4a373;">🔒 MỞ CA LÀM VIỆC</h2>
-    <input type="password" id="pin-input" class="form-control bg-dark text-center text-light fs-3 mb-4 rounded-3 border-secondary" style="width: 250px; letter-spacing: 10px; height: 60px;" readonly />
+<div id="pin-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center" style="background-color: #ffffff; z-index: 9999;">
+    <h2 class="mb-4 fw-bold" style="color: #0d6efd;">🔒 MỞ CA LÀM VIỆC</h2>
+    <!-- Chọn nhân viên -->
+    <div class="mb-3" style="width: 280px;">
+        <label class="form-label small text-secondary mb-1">Chọn nhân viên</label>
+        <div id="cashier-list-box" class="border rounded overflow-y-auto bg-light"
+            style="max-height: 200px; border-color: #dee2e6 !important;">
+            <p class="text-secondary text-center small py-3 mb-0">Đang tải...</p>
+        </div>
+    </div>
+    <input type="password" id="pin-input" class="form-control bg-white text-center text-dark fs-3 mb-4 rounded-3 border-secondary" style="width: 250px; letter-spacing: 10px; height: 60px;" readonly />
     <div class="d-grid gap-2" style="grid-template-columns: repeat(3, 1fr); width: 250px;">
-        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('1')">1</button>
-        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('2')">2</button>
-        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('3')">3</button>
-        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('4')">4</button>
-        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('5')">5</button>
-        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('6')">6</button>
-        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('7')">7</button>
-        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('8')">8</button>
-        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('9')">9</button>
-        <button class="btn btn-danger fs-4 py-2 fw-bold" onclick="clearPin()">C</button>
-        <button class="btn btn-outline-light fs-4 py-2" onclick="addPin('0')">0</button>
-        <button class="btn btn-success fs-4 py-2 fw-bold" onclick="submitPin()" style="background-color: #6c584c; border:none;">OK</button>
+        <button class="btn btn-outline-dark fs-4 py-2" onclick="addPin('1')">1</button>
+        <button class="btn btn-outline-dark fs-4 py-2" onclick="addPin('2')">2</button>
+        <button class="btn btn-outline-dark fs-4 py-2" onclick="addPin('3')">3</button>
+        <button class="btn btn-outline-dark fs-4 py-2" onclick="addPin('4')">4</button>
+        <button class="btn btn-outline-dark fs-4 py-2" onclick="addPin('5')">5</button>
+        <button class="btn btn-outline-dark fs-4 py-2" onclick="addPin('6')">6</button>
+        <button class="btn btn-outline-dark fs-4 py-2" onclick="addPin('7')">7</button>
+        <button class="btn btn-outline-dark fs-4 py-2" onclick="addPin('8')">8</button>
+        <button class="btn btn-outline-dark fs-4 py-2" onclick="addPin('9')">9</button>
+        <button class="btn btn-danger fs-4 py-2 fw-bold text-white" onclick="clearPin()">C</button>
+        <button class="btn btn-outline-dark fs-4 py-2" onclick="addPin('0')">0</button>
+        <button class="btn btn-success fs-4 py-2 fw-bold text-white" onclick="submitPin()">OK</button>
     </div>
     <span id="pin-error" class="text-danger mt-3 d-none fw-bold fs-5">Mã PIN không đúng!</span>
+
+    @* Box thông báo khi nhập sai PIN *@
+    <div id="pin-error-box" class="position-fixed top-0 start-0 w-100 h-100 d-none align-items-center justify-content-center" style="background: rgba(0,0,0,0.6); z-index: 10000;">
+        <div class="bg-white border rounded-3 shadow-lg p-4 text-center" style="max-width: 320px; border-color: #dee2e6 !important;">
+            <div class="mb-3 fs-1">⚠️</div>
+            <h5 class="text-primary mb-2">Mã PIN không đúng</h5>
+            <p id="pin-error-box-message" class="text-secondary small mb-4">Vui lòng kiểm tra lại mã PIN và thử lại.</p>
+            <button type="button" class="btn btn-outline-dark px-4" onclick="closePinErrorBox()">Đóng</button>
+        </div>
+    </div>
+</div>
+
+@* Box thông báo Đặt Hàng Thành Công Popup *@
+<div id="order-success-box" class="position-fixed top-0 start-0 w-100 h-100 d-none align-items-center justify-content-center" style="background: rgba(0,0,0,0.5); z-index: 10000;">
+    <div class="bg-white border rounded-4 shadow-lg p-5 text-center" style="max-width: 450px; border-color: #dee2e6 !important; position: relative;">
+        <!-- Icon Success Animation -->
+        <div class="mb-3 d-flex justify-content-center">
+            <div class="rounded-circle d-flex align-items-center justify-content-center text-success" 
+                 style="width: 110px; height: 110px; background: rgba(13, 110, 253, 0.2); border: 4px solid #0d6efd; font-size: 5rem; animation: bounceIn 0.5s ease;">
+                ✓
+            </div>
+        </div>
+        <h3 class="text-dark mb-2 fw-bold" style="color: #212529 !important;">ĐẶT HÀNG THÀNH CÔNG!</h3>
+        <p class="text-secondary fs-5 mb-4">Số thứ tự của khách: <span id="success-queue-number" class="text-primary fw-bold fs-2 ms-2">#0</span></p>
+        
+        <button type="button" class="btn w-100 fs-4 py-3 fw-bold shadow" 
+                style="background: #0d6efd; color:#ffffff; border-radius: 12px; transition: transform 0.2s;"
+                onclick="closeOrderSuccessBox()">
+            Tiếp Tục Bán Hàng ❯
+        </button>
+    </div>
+</div>
+
+@* Box Cảnh báo Bếp HỦY ĐƠN *@
+<div id="order-cancelled-box" class="position-fixed top-0 start-0 w-100 h-100 d-none align-items-center justify-content-center" style="background: rgba(0,0,0,0.5); z-index: 10000;">
+    <div class="bg-white border rounded-4 shadow-lg p-5 text-center" style="max-width: 450px; border-color: #e07a5f !important; position: relative;">
+        <!-- Icon Alert Animation -->
+        <div class="mb-3 d-flex justify-content-center">
+            <div class="rounded-circle d-flex align-items-center justify-content-center text-danger" 
+                 style="width: 110px; height: 110px; background: rgba(224, 122, 95, 0.2); border: 4px solid #e07a5f; font-size: 5rem; animation: bounceIn 0.5s ease;">
+                !
+            </div>
+        </div>
+        <h3 class="text-danger mb-2 fw-bold">BẾP VỪA HỦY ĐƠN</h3>
+        <p class="text-secondary fs-5 mb-2">Đơn STT: <span id="cancelled-queue-number" class="text-primary fw-bold fs-3 ms-2">#0</span></p>
+        <p class="text-dark fs-5 mb-4 bg-light p-3 rounded" style="background-color: #ffffff !important;">Lý do: <br><strong id="cancelled-reason" style="color: #0d6efd;">Nguyên liệu</strong></p>
+        
+        <button type="button" class="btn btn-outline-danger w-100 fs-5 py-2 fw-bold" 
+                onclick="closeOrderCancelledBox()">
+            Đã rõ
+        </button>
+    </div>
 </div>
 
 @* Layout 3 cột (Grid Bootstrap) *@
@@ -264,24 +418,57 @@
 
             @* --- Khu vực nhập SĐT Khách hàng --- *@
             <h5 class="mb-2">👤 Khách hàng</h5>
-            <div class="mb-3">
-                <input type="text" id="customer-phone" class="form-control bg-dark text-light border-secondary" 
+            <!-- <div class="mb-3">
+                <input type="text" id="customer-phone" class="form-control bg-white text-dark border-secondary" 
                        placeholder="Nhập SĐT khách hàng..." oninput="checkCustomerPhone()" maxlength="10" />
                 
-                <div id="customer-info-box" class="d-none mt-2 p-2 rounded" style="background-color: #3d2a1c;">
+                <div id="customer-info-box" class="d-none mt-2 p-2 rounded" style="background-color: #ffffff;">
                     <div class="d-flex justify-content-between align-items-center">
-                        <span id="customer-info" class="text-light fw-bold fs-6"></span>
-                        <span class="text-secondary small">Điểm: <span id="customer-points" class="text-warning fw-bold fs-6">0</span></span>
+                        <span id="customer-info" class="text-dark fw-bold fs-6"></span>
+                        <span class="text-secondary small">Điểm: <span id="customer-points" class="text-primary fw-bold fs-6">0</span></span>
                     </div>
                     <div class="mt-2 input-group input-group-sm">
-                        <span class="input-group-text bg-secondary text-light border-secondary px-2">Dùng điểm</span>
-                        <input type="number" id="use-points" class="form-control bg-dark text-light border-secondary text-end" placeholder="0" min="0" oninput="updateTotal()">
-                        <span class="input-group-text bg-secondary text-light border-secondary px-2">₫</span>
+                        <span class="input-group-text bg-light text-dark border-secondary px-2">Dùng điểm</span>
+                        <input type="number" id="use-points" class="form-control bg-white text-dark border-secondary text-end" placeholder="0" min="0" oninput="updateTotal()">
+                        <span class="input-group-text bg-light text-dark border-secondary px-2">₫</span>
                     </div>
                 </div>
 
                 <small id="customer-not-found" class="text-secondary mt-1 d-block">
                     Nhập đủ 10 số để tìm khách hàng
+                </small>
+            </div> -->
+            <div class="mb-3">
+                <div class="input-group">
+                    <input type="text"
+                        id="customer-phone"
+                        class="form-control bg-white text-dark border-secondary"
+                        placeholder="Nhập SĐT khách hàng..."
+                        maxlength="10" />
+                    <button class="btn btn-outline-dark"
+                            type="button"
+                            onclick="checkCustomerPhone()">
+                        Kiểm tra
+                    </button>
+                </div>
+
+                <div id="customer-info-box" class="d-none mt-2 p-2 rounded" style="background-color: #ffffff;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span id="customer-info" class="text-dark fw-bold fs-6"></span>
+                        <span class="text-secondary small">Điểm: <span id="customer-points" class="text-primary fw-bold fs-6">0</span></span>
+                    </div>
+                    <div class="mt-2 input-group input-group-sm">
+                        <span class="input-group-text bg-light text-dark border-secondary px-2">Dùng điểm</span>
+                        <input type="number" id="use-points"
+                            class="form-control bg-white text-dark border-secondary text-end"
+                            placeholder="0" min="0"
+                            oninput="updateTotal()">
+                        <span class="input-group-text bg-light text-dark border-secondary px-2">₫</span>
+                    </div>
+                </div>
+
+                <small id="customer-not-found" class="text-secondary mt-1 d-block">
+                    Nhập SĐT và bấm "Kiểm tra" để tìm khách hàng
                 </small>
             </div>
 
@@ -303,7 +490,7 @@
                 <h5 class="mb-0">🛒 Giỏ hàng</h5>
                 <button class="btn btn-sm btn-outline-danger" onclick="clearCart()">🗑 Xóa hết</button>
             </div>
-            <div id="cart-items" style="flex: 1; overflow-y: auto;">
+            <div id="cart-items">
                 <p class="text-secondary text-center mt-4">Chưa có món nào</p>
             </div>
 
@@ -321,8 +508,21 @@
                     <span class="fw-bold fs-5">Thành tiền:</span>
                     <span id="final-amount" class="fw-bold fs-5" style="color: #e94560;">0 ₫</span>
                 </div>
+                @* --- Phương thức thanh toán (Branch 3 - TV5) --- *@
+                <h5 class="mb-2 mt-3">💳 Phương thức thanh toán</h5>
+                <div id="payment-method-group" class="payment-method-group mb-2">
+                    @* JavaScript sẽ render các nút phương thức thanh toán tại đây *@
+                </div>
+                <div id="cash-tendered-row" class="mb-2 d-none">
+                    <label class="form-label small text-secondary mb-0">Tiền khách đưa</label>
+                    <input type="number" id="amount-tendered" class="form-control bg-white text-dark border-secondary text-end" placeholder="0" min="0" value="0" oninput="updateChangeDisplay()">
+                </div>
+                <div id="change-row" class="d-flex justify-content-between mb-3 d-none">
+                    <span>Tiền thối:</span>
+                    <span id="change-amount" class="fw-bold" style="color: #0d6efd;">0 ₫</span>
+                </div>
                 <button class="btn-checkout" onclick="checkout()">
-                    💳 THANH TOÁN
+                    💳 HOÀN TẤT THANH TOÁN
                 </button>
             </div>
         </div>
@@ -330,7 +530,96 @@
     </div>
 </div>
 
+<button type="button" class="etc-button" onclick="openEtcOverlay()">
+    ⚙️ ETC
+</button>
+
+<div id="etc-overlay" class="d-none align-items-center justify-content-center">
+    <div class="etc-panel">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0 fw-bold" style="color:#d4a373;">⚙️ Tùy chọn nâng cao</h5>
+            <button type="button" class="btn btn-sm btn-outline-dark" onclick="closeEtcOverlay()">Đóng</button>
+        </div>
+
+        <div id="etc-main-menu">
+            <button type="button" class="etc-action-btn" onclick="openCloseShiftPanel()">
+                💰 Kết ca thu ngân
+            </button>
+            <button type="button" class="etc-action-btn" onclick="showFeatureWip('Báo cáo nhanh')">
+                📊 Báo cáo nhanh (đang phát triển)
+            </button>
+            <button type="button" class="etc-action-btn" onclick="showFeatureWip('Cấu hình máy')">
+                🛠️ Cấu hình máy (đang phát triển)
+            </button>
+        </div>
+
+        <div id="etc-close-shift-panel" class="d-none">
+            <h6 class="fw-bold mb-2" style="color:#d4a373;">💰 Kết ca thu ngân</h6>
+            <div class="small text-secondary mb-2" id="close-shift-store-label"></div>
+            <div class="row g-2 mb-2">
+                <div class="col-6">
+                    <label class="form-label form-label-sm">Ca làm việc</label>
+                    <select id="cs-shiftId" class="form-select form-select-sm">
+                        <option value="1">Ca Sáng (06:00 - 12:00)</option>
+                        <option value="2">Ca Chiều (12:00 - 18:00)</option>
+                        <option value="3">Ca Tối (18:00 - 00:00)</option>
+                    </select>
+                </div>
+                <div class="col-6">
+                    <label class="form-label form-label-sm">Ngày</label>
+                    <input id="cs-date" type="date" class="form-control form-control-sm" />
+                </div>
+            </div>
+
+            <div class="row g-2 mb-2">
+                <div class="col-6">
+                    <label class="form-label form-label-sm">Doanh thu ca</label>
+                    <input id="cs-totalRevenue" class="form-control form-control-sm" readonly value="0 ₫" />
+                </div>
+                <div class="col-6">
+                    <label class="form-label form-label-sm">Tiền mặt (máy)</label>
+                    <input id="cs-totalCash" class="form-control form-control-sm" readonly value="0 ₫" />
+                </div>
+            </div>
+
+            <div class="row g-2 mb-2">
+                <div class="col-4">
+                    <label class="form-label form-label-sm">Tiền đầu ca</label>
+                    <input id="cs-openingCash" type="number" class="form-control form-control-sm" value="0" min="0" />
+                </div>
+                <div class="col-4">
+                    <label class="form-label form-label-sm">Thực tế</label>
+                    <input id="cs-actualCash" type="number" class="form-control form-control-sm" value="0" min="0" />
+                </div>
+                <div class="col-4">
+                    <label class="form-label form-label-sm">Lý thuyết</label>
+                    <input id="cs-expectedCash" class="form-control form-control-sm" readonly value="0 ₫" />
+                </div>
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label form-label-sm">Chênh lệch</label>
+                <input id="cs-difference" class="form-control form-control-sm fw-bold" readonly value="0 ₫" />
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label form-label-sm">Ghi chú (bắt buộc nếu có chênh lệch)</label>
+                <textarea id="cs-note" class="form-control form-control-sm" rows="2"></textarea>
+            </div>
+
+            <div class="d-flex justify-content-between mt-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="backToEtcMenu()">⬅ Quay lại</button>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="loadCloseShiftPreview()">🔄 Tính lại</button>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="submitCloseShift()">✅ Kết ca</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @* JAVASCRIPT LOGIC *@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 
 <script>
 
@@ -341,6 +630,13 @@
     let cart = [];         
     let maxPoints = 0;     // Số điểm tối đa khách có thể dùng
 
+    let currentPin = "";
+    let activeCashierId = "";
+    let activeCashierName = "";
+    let currentStoreId = 1;
+    let selectedCashierId = "";      // id nhân viên đang chọn (để gửi kèm PIN)
+    let paymentMethods = [];         // Danh sách phương thức thanh toán (id, name)
+    let selectedPaymentMethodId = 0; // Id phương thức thanh toán đang chọn
 
     // 2. Fetch dữ liệu API
 
@@ -359,6 +655,7 @@
                 document.querySelector('.category-btn').classList.add('active');
                 loadProducts(categories[0].id);
             }
+            loadPaymentMethods();
         } catch (error) {
             console.error('❌ Lỗi load danh mục:', error);
             // NẾU LỖI (VD: DB chưa có dữ liệu) → dùng dữ liệu mẫu tạm
@@ -368,7 +665,276 @@
             ];
             renderCategories();
             document.querySelector('.category-btn')?.classList.add('active');
+            loadPaymentMethods();
         }
+    }
+
+    // Hàm load phương thức thanh toán (Tiền mặt, Chuyển khoản...)
+    async function loadPaymentMethods() {
+        try {
+            const res = await fetch('/Pos/GetPaymentMethods');
+            paymentMethods = await res.json();
+            const group = document.getElementById('payment-method-group');
+            if (!group) return;
+            group.innerHTML = '';
+            paymentMethods.forEach(p => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'payment-method-btn';
+                btn.dataset.id = p.id;
+                btn.textContent = p.name;
+                btn.onclick = () => selectPaymentMethod(p.id);
+                group.appendChild(btn);
+            });
+        } catch (e) {
+            console.error('Lỗi load phương thức thanh toán:', e);
+        }
+    }
+
+    // ETC overlay logic
+    function openEtcOverlay() {
+        const overlay = document.getElementById('etc-overlay');
+        if (!overlay) return;
+        overlay.classList.remove('d-none');
+        overlay.classList.add('d-flex');
+
+        document.getElementById('etc-main-menu').classList.remove('d-none');
+        document.getElementById('etc-close-shift-panel').classList.add('d-none');
+
+        const dateInput = document.getElementById('cs-date');
+        if (dateInput) {
+            const today = new Date().toISOString().slice(0, 10);
+            dateInput.value = today;
+        }
+    }
+
+    function closeEtcOverlay() {
+        const overlay = document.getElementById('etc-overlay');
+        if (!overlay) return;
+        overlay.classList.add('d-none');
+        overlay.classList.remove('d-flex');
+    }
+
+    function showFeatureWip(name) {
+        alert('Tính năng "' + name + '" đang được triển khai.');
+    }
+
+    function openCloseShiftPanel() {
+        document.getElementById('etc-main-menu').classList.add('d-none');
+        document.getElementById('etc-close-shift-panel').classList.remove('d-none');
+        document.getElementById('close-shift-store-label').textContent =
+            'Chi nhánh hiện tại sẽ được dùng để tính ca (theo tài khoản đăng nhập).';
+        loadCloseShiftPreview();
+    }
+
+    function backToEtcMenu() {
+        document.getElementById('etc-main-menu').classList.remove('d-none');
+        document.getElementById('etc-close-shift-panel').classList.add('d-none');
+    }
+
+    // Parse chuỗi tiền VN: "129.600 ₫" → 129600 (dấu chấm là phân cách hàng nghìn, không phải thập phân).
+    function parseMoneyInput(value) {
+        const s = (value || '0').toString().trim().replace(/\s*₫\s*/g, '');
+        if (!s) return 0;
+        // Có dấu phẩy → coi là thập phân (VN: 129,5)
+        if (s.includes(',')) {
+            const normalized = s.replace(/\./g, '').replace(',', '.');
+            return parseFloat(normalized) || 0;
+        }
+        // Chỉ có dấu chấm: nếu phần sau dấu chấm cuối có 3 chữ số → dấu chấm là nghìn (129.600 → 129600).
+        const parts = s.split('.');
+        if (parts.length > 1 && parts[parts.length - 1].length === 3 && /^\d+$/.test(parts[parts.length - 1])) {
+            return parseFloat(s.replace(/\./g, '')) || 0;
+        }
+        return parseFloat(s) || 0;
+    }
+
+    async function loadCloseShiftPreview() {
+        const shiftId = parseInt(document.getElementById('cs-shiftId').value || '1', 10);
+        const dateStr = document.getElementById('cs-date').value;
+        if (!dateStr) return;
+
+        const url = `/Pos/GetShiftHandoverPreview?shiftId=${shiftId}&date=${dateStr}`;
+        const res = await fetch(url);
+        if (!res.ok) {
+            const text = await res.text();
+            console.error('Preview error:', text);
+            alert('Không thể tải dữ liệu kết ca (mã ' + res.status + ').');
+            return;
+        }
+        const data = await res.json();
+        if (!data.success) {
+            alert(data.message || 'Không thể tải dữ liệu kết ca.');
+            return;
+        }
+
+        document.getElementById('cs-totalRevenue').value = formatMoney(parseMoneyInput(data.totalRevenue));
+        document.getElementById('cs-totalCash').value = formatMoney(parseMoneyInput(data.totalCash));
+
+        recalcCloseShiftExpectedAndDiff();
+    }
+
+    function recalcCloseShiftExpectedAndDiff() {
+        const totalCash = parseMoneyInput(document.getElementById('cs-totalCash').value);
+        const openingCash = parseFloat(document.getElementById('cs-openingCash').value || '0');
+        const actualCash = parseFloat(document.getElementById('cs-actualCash').value || '0');
+
+        const expected = openingCash + totalCash;
+        const diff = actualCash - expected;
+
+        document.getElementById('cs-expectedCash').value = formatMoney(expected);
+
+        const diffInput = document.getElementById('cs-difference');
+        diffInput.value = formatMoney(diff);
+        diffInput.classList.remove('text-danger', 'text-success');
+        if (diff < 0) diffInput.classList.add('text-danger');
+        if (diff > 0) diffInput.classList.add('text-success');
+    }
+
+    document.getElementById('cs-openingCash').addEventListener('input', recalcCloseShiftExpectedAndDiff);
+    document.getElementById('cs-actualCash').addEventListener('input', recalcCloseShiftExpectedAndDiff);
+
+    async function submitCloseShift() {
+        const shiftId = parseInt(document.getElementById('cs-shiftId').value || '1', 10);
+        const dateStr = document.getElementById('cs-date').value;
+        if (!dateStr) {
+            alert('Vui lòng chọn ngày kết ca.');
+            return;
+        }
+
+        const openingCash = parseFloat(document.getElementById('cs-openingCash').value || '0');
+        const actualCash = parseFloat(document.getElementById('cs-actualCash').value || '0');
+        const totalCash = parseMoneyInput(document.getElementById('cs-totalCash').value);
+        const expected = openingCash + totalCash;
+        const diff = actualCash - expected;
+
+        const note = (document.getElementById('cs-note').value || '').trim();
+        if (diff !== 0 && !note) {
+            alert('Có chênh lệch tiền mặt, vui lòng nhập ghi chú lý do.');
+            return;
+        }
+
+        if (!confirm('Xác nhận kết ca cho ngày ' + dateStr + ' ?')) {
+            return;
+        }
+
+        const payload = {
+            shiftId,
+            date: dateStr,
+            openingCash,
+            actualCashCounted: actualCash,
+            note
+        };
+
+        const res = await fetch('/Pos/SubmitShiftHandover', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (!res.ok) {
+            const text = await res.text();
+            console.error('Submit close shift error:', text);
+            alert('Kết ca thất bại (mã ' + res.status + ').');
+            return;
+        }
+        const data = await res.json();
+        if (!data.success) {
+            alert(data.message || 'Kết ca thất bại.');
+            return;
+        }
+
+        alert('✅ Đã kết ca thành công.\nChênh lệch: ' + formatMoney(data.difference));
+        // Reload về màn hình PIN
+        window.location.reload();
+    }
+
+    function isCashMethod(id) {
+        const method = paymentMethods.find(p => p.id === id);
+        if (!method) return false;
+        const name = (method.name || '').toLowerCase();
+        return id === 1 || name.includes('tiền mặt');
+    }
+
+    function selectPaymentMethod(id) {
+        selectedPaymentMethodId = id;
+        const group = document.getElementById('payment-method-group');
+        if (group) {
+            group.querySelectorAll('.payment-method-btn').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.id, 10) === id);
+            });
+        }
+
+        const cashRow = document.getElementById('cash-tendered-row');
+        const changeRow = document.getElementById('change-row');
+        const amountInput = document.getElementById('amount-tendered');
+        if (isCashMethod(id)) {
+            cashRow.classList.remove('d-none');
+            changeRow.classList.remove('d-none');
+            amountInput.value = '';
+            updateChangeDisplay();
+        } else {
+            cashRow.classList.add('d-none');
+            changeRow.classList.add('d-none');
+            amountInput.value = '0';
+        }
+    }
+
+    function updateChangeDisplay() {
+        const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const usedPoints = parseInt(document.getElementById('use-points')?.value || 0, 10);
+        const finalAmount = Math.max(total - Math.min(usedPoints, maxPoints), 0);
+        const amountInput = document.getElementById('amount-tendered');
+        const changeLabel = document.getElementById('change-amount');
+        if (!amountInput || !changeLabel || !isCashMethod(selectedPaymentMethodId)) {
+            if (changeLabel) changeLabel.textContent = formatMoney(0);
+            return;
+        }
+        const tendered = parseFloat(amountInput.value || 0, 10) || 0;
+        const change = Math.max(tendered - finalAmount, 0);
+        changeLabel.textContent = formatMoney(change);
+    }
+
+    function resetAfterOrder() {
+        // Reset giỏ hàng
+        cart = [];
+        renderCart();
+
+        // Reset thông tin khách hàng
+        const phoneInput = document.getElementById('customer-phone');
+        if (phoneInput) phoneInput.value = '';
+
+        const infoBox = document.getElementById('customer-info-box');
+        const notFoundText = document.getElementById('customer-not-found');
+        if (infoBox) infoBox.classList.add('d-none');
+        if (notFoundText) {
+            notFoundText.classList.remove('d-none');
+            notFoundText.textContent = 'Nhập SĐT và bấm \"Kiểm tra\" để tìm khách hàng';
+            notFoundText.style.color = '';
+        }
+
+        const usePointsInput = document.getElementById('use-points');
+        if (usePointsInput) usePointsInput.value = 0;
+        maxPoints = 0;
+
+        // Reset phương thức thanh toán
+        selectedPaymentMethodId = 0;
+        const group = document.getElementById('payment-method-group');
+        if (group) {
+            group.querySelectorAll('.payment-method-btn').forEach(btn => btn.classList.remove('active'));
+        }
+
+        const amountInput = document.getElementById('amount-tendered');
+        if (amountInput) amountInput.value = 0;
+        const changeLabel = document.getElementById('change-amount');
+        if (changeLabel) changeLabel.textContent = formatMoney(0);
+
+        const cashRow = document.getElementById('cash-tendered-row');
+        const changeRow = document.getElementById('change-row');
+        if (cashRow) cashRow.classList.add('d-none');
+        if (changeRow) changeRow.classList.add('d-none');
+
+        // Tính lại tổng tiền (0) để đồng bộ UI
+        updateTotal();
     }
 
     // Hàm load sản phẩm từ Database
@@ -453,7 +1019,8 @@
                 id: product.id,
                 name: product.name,
                 price: product.price,
-                quantity: 1
+                quantity: 1,
+                note: ''
             });
         }
 
@@ -471,19 +1038,27 @@
 
         let html = '';
         cart.forEach(function (item, index) {
+            const safeNote = (item.note || '').replace(/"/g, '&quot;');
             html += `
-                <div class="cart-item">
+                <div class="cart-item mb-2">
                     <div class="item-details">
                         <div class="name">${item.name}</div>
                         <div class="price">${formatMoney(item.price)}</div>
                     </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <button class="qty-btn" onclick="changeQty(${index}, -1)">−</button>
-                        <span class="fw-bold mx-1">${item.quantity}</span>
-                        <button class="qty-btn" onclick="changeQty(${index}, +1)">+</button>
-                        <span class="ms-2 price text-end" style="min-width: 80px;">
-                            ${formatMoney(item.price * item.quantity)}
-                        </span>
+                    <div class="d-flex flex-column align-items-end gap-2" style="min-width: 140px;">
+                        <div class="d-flex align-items-center gap-2">
+                            <button class="qty-btn" onclick="changeQty(${index}, -1)">−</button>
+                            <span class="fw-bold mx-1">${item.quantity}</span>
+                            <button class="qty-btn" onclick="changeQty(${index}, +1)">+</button>
+                            <span class="ms-2 price text-end" style="min-width: 80px;">
+                                ${formatMoney(item.price * item.quantity)}
+                            </span>
+                        </div>
+                        <input type="text"
+                               class="form-control form-control-sm bg-white text-dark border-secondary"
+                               placeholder="Ghi chú món này..."
+                               value="${safeNote}"
+                               oninput="updateItemNote(${index}, this.value)" />
                     </div>
                 </div>
             `;
@@ -508,6 +1083,11 @@
         renderCart();
     }
 
+    function updateItemNote(index, value) {
+        if (!cart[index]) return;
+        cart[index].note = value;
+    }
+
     function updateTotal() {
         const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
         
@@ -530,6 +1110,7 @@
         document.getElementById('total-amount').textContent = formatMoney(total);
         document.getElementById('points-used').textContent = "-" + formatMoney(usedPoints);
         document.getElementById('final-amount').textContent = formatMoney(finalAmount);
+        updateChangeDisplay();
     }
 
 
@@ -541,18 +1122,38 @@
             return;
         }
 
+        const paymentMethodId = selectedPaymentMethodId;
+        if (!paymentMethodId) {
+            alert('Vui lòng chọn phương thức thanh toán.');
+            return;
+        }
+
+        const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const usedPoints = parseInt(document.getElementById('use-points')?.value || 0, 10);
+        const finalAmount = Math.max(total - Math.min(usedPoints, maxPoints), 0);
+        let amountTendered = finalAmount;
+        if (paymentMethodId === 1) {
+            amountTendered = parseFloat(document.getElementById('amount-tendered')?.value || 0, 10) || 0;
+            if (amountTendered < finalAmount) {
+                alert('Tiền khách đưa không đủ. Thành tiền: ' + formatMoney(finalAmount));
+                return;
+            }
+        }
+
         const orderData = {
-            storeId: currentStoreId, // <--- Đã được lấy tự động theo Chi nhánh của nhân viên
-            userId: activeCashierId, // <--- ID nhân viên vừa nhập PIN
+            storeId: currentStoreId,
+            userId: activeCashierId,
             customerPhone: document.getElementById('customer-phone').value,
             customerName: null,
-            pointsUsed: parseInt(document.getElementById('use-points')?.value || 0, 10),
+            pointsUsed: usedPoints,
             orderType: document.querySelector('input[name="orderType"]:checked').value,
+            paymentMethodId: paymentMethodId,
+            amountTendered: amountTendered,
             orderItems: cart.map(item => ({
                 menuItemId: item.id,
                 quantity: item.quantity,
                 unitPrice: item.price,
-                note: null
+                note: item.note || null
             }))
         };
 
@@ -564,9 +1165,17 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('✅ Đặt hàng thành công!\nSố thứ tự: ' + data.queueNumber);
-                cart = [];
-                renderCart();
+                // Hiển thị Popup Đặt Hàng Thành Công
+                const msgEl = document.getElementById('success-queue-number');
+                if (msgEl) msgEl.textContent = data.queueNumber;
+                
+                const box = document.getElementById('order-success-box');
+                if (box) {
+                    box.classList.remove('d-none');
+                    box.classList.add('d-flex');
+                }
+                
+                resetAfterOrder();
             } else {
                 alert('❌ Lỗi: ' + data.message);
             }
@@ -625,11 +1234,7 @@
         }
     }
 
-    // 9. Logic PIN Code Thu Ngân
-    let currentPin = "";
-    let activeCashierId = "";
-    let activeCashierName = "";
-    let currentStoreId = 1; // Chi nhánh mặc định nếu NV chưa được gán
+    // 9. Logic PIN Code Thu Ngân (biến currentPin, activeCashierId, ... đã khai báo ở đầu script)
 
     function addPin(num) {
         if(currentPin.length < 6) {
@@ -644,7 +1249,49 @@
         document.getElementById('pin-input').value = currentPin;
     }
 
+    // function submitPin() {
+    //     if (currentPin.length < 4) {
+    //         alert("Mã PIN phải ít nhất 4 số!");
+    //         return;
+    //     }
+
+    //     fetch('/Pos/VerifyPin', {
+    //         method: 'POST',
+    //         headers: { 'Content-Type': 'application/json' },
+    //         body: JSON.stringify({ pinCode: currentPin })
+    //     })
+    //     .then(res => res.json())
+    //     .then(data => {
+    //         if (data.success) {
+    //             // Lưu lại Session Cashier và StoreId từ DB để chèn vào đơn hàng
+    //             activeCashierId = data.userId;
+    //             activeCashierName = data.cashierName;
+    //             currentStoreId = data.storeId || 1; 
+                
+    //             // ĐÚNG PIN -> TẮT OVERLAY
+    //             const overlay = document.getElementById('pin-overlay');
+    //             overlay.classList.remove('d-flex');
+    //             overlay.classList.add('d-none');
+                
+    //             // Nạp data POS
+    //             loadCategories();
+                
+    //             // (Tùy chọn) Hiện thông báo trên màn hình
+    //             // document.getElementById('cashier-name-header').textContent = data.cashierName;
+    //         } else {
+    //             document.getElementById('pin-error').textContent = data.message || "Mã PIN không đúng!";
+    //             document.getElementById('pin-error').classList.remove('d-none');
+    //             clearPin();
+    //         }
+    //     });
+    // }
+
     function submitPin() {
+        if (!selectedCashierId) {
+            alert("Vui lòng chọn nhân viên trong danh sách trước khi nhập PIN.");
+            return;
+        }
+
         if (currentPin.length < 4) {
             alert("Mã PIN phải ít nhất 4 số!");
             return;
@@ -653,36 +1300,143 @@
         fetch('/Pos/VerifyPin', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pinCode: currentPin })
+            body: JSON.stringify({
+                pinCode: currentPin,
+                userId: selectedCashierId
+            })
         })
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                // Lưu lại Session Cashier và StoreId từ DB để chèn vào đơn hàng
                 activeCashierId = data.userId;
                 activeCashierName = data.cashierName;
-                currentStoreId = data.storeId || 1; 
-                
-                // ĐÚNG PIN -> TẮT OVERLAY
+                currentStoreId = data.storeId || 1;
+
                 const overlay = document.getElementById('pin-overlay');
                 overlay.classList.remove('d-flex');
                 overlay.classList.add('d-none');
-                
-                // Nạp data POS
+
+                // Sau khi đăng nhập ca thành công mới load menu POS
                 loadCategories();
                 
-                // (Tùy chọn) Hiện thông báo trên màn hình
-                // document.getElementById('cashier-name-header').textContent = data.cashierName;
+                // Thu Ngân tham gia vào Hub Group của chi nhánh sau khi có StoreId
+                connection.start().then(() => {
+                    connection.invoke("JoinGroup", currentStoreId.toString())
+                        .catch(err => console.error("SignalR JoinGroup Error: ", err));
+                }).catch(err => console.error("SignalR Start Error: ", err));
             } else {
-                document.getElementById('pin-error').textContent = data.message || "Mã PIN không đúng!";
-                document.getElementById('pin-error').classList.remove('d-none');
+                const msg = data.message || "Vui lòng kiểm tra lại mã PIN và thử lại.";
+                const box = document.getElementById('pin-error-box');
+                const msgEl = document.getElementById('pin-error-box-message');
+                if (box && msgEl) {
+                    msgEl.textContent = msg;
+                    box.classList.remove('d-none');
+                    box.classList.add('d-flex');
+                }
                 clearPin();
             }
         });
     }
 
+    function closePinErrorBox() {
+        const box = document.getElementById('pin-error-box');
+        if (box) {
+            box.classList.add('d-none');
+            box.classList.remove('d-flex');
+        }
+    }
 
-    // Không gọi tự động loadCategories nữa, chờ bấm PIN xong mới nạp.
+    function closeOrderSuccessBox() {
+        const box = document.getElementById('order-success-box');
+        if (box) {
+            box.classList.add('d-none');
+            box.classList.remove('d-flex');
+        }
+    }
+
+    function closeOrderCancelledBox() {
+        const box = document.getElementById('order-cancelled-box');
+        if (box) {
+            box.classList.add('d-none');
+            box.classList.remove('d-flex');
+        }
+    }
+
+    //Hàm load nhân viên
+    async function loadCashiers() {
+        const box = document.getElementById('cashier-list-box');
+        if (!box) return;
+        try {
+            const res = await fetch('/Pos/GetCashiers', { credentials: 'same-origin' });
+            if (!res.ok) {
+                box.innerHTML = '<p class="text-danger text-center small py-3 mb-0">Lỗi tải danh sách (HTTP ' + res.status + ')</p>';
+                return;
+            }
+            const data = await res.json();
+
+            // Backend có thể trả array hoặc object có property (tương thích cả PascalCase/camelCase)
+            const list = Array.isArray(data) ? data : (data.data || data.items || []);
+            if (list.length === 0) {
+                box.innerHTML = '<p class="text-secondary text-center small py-3 mb-0">Chưa có nhân viên</p>';
+                return;
+            }
+
+            box.innerHTML = '';
+            list.forEach(c => {
+                const id = c.id ?? c.Id ?? '';
+                const name = (c.name ?? c.Name ?? '').trim() || 'Nhân viên';
+                const div = document.createElement('div');
+                div.className = 'cashier-item px-3 py-2 text-dark border-bottom';
+                div.style.cursor = 'pointer';
+                div.dataset.id = id;
+                div.dataset.name = name;
+                div.textContent = name;
+
+                div.onclick = function () {
+                    document.querySelectorAll('#cashier-list-box .cashier-item').forEach(el => {
+                        el.classList.remove('selected', 'bg-primary', 'text-white');
+                        el.classList.add('text-dark');
+                    });
+                    this.classList.add('selected', 'bg-primary', 'text-white');
+                    this.classList.remove('text-dark');
+                    selectedCashierId = this.dataset.id;
+                };
+
+                box.appendChild(div);
+            });
+        } catch (e) {
+            console.error('Lỗi load danh sách nhân viên:', e);
+            box.innerHTML = '<p class="text-danger text-center small py-3 mb-0">Lỗi tải danh sách</p>';
+        }
+    }
+
+    // Cài đặt SignalR cho Màn hình Thu Ngân để nhận thông báo Hủy đơn
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/orderHub")
+        .withAutomaticReconnect()
+        .build();
+
+    connection.on("OrderCancelled", function (data) {
+        // Mở popup Cảnh báo Hủy Đơn
+        const box = document.getElementById('order-cancelled-box');
+        if (box) {
+            document.getElementById('cancelled-queue-number').textContent = "#" + data.queueNumber;
+            document.getElementById('cancelled-reason').textContent = data.reason;
+            
+            box.classList.remove('d-none');
+            box.classList.add('d-flex');
+        }
+    });
+
+    // Gọi hàm load nhân viên ngay khi DOM bắt đầu
+    function initPos() {
+        loadCashiers();
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPos);
+    } else {
+        initPos();
+    }
 
 </script>
 

@@ -11,45 +11,45 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
         @@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap');
-        body { background-color: #1a120b; color: #f7e6c4; font-family: 'Outfit', sans-serif; overflow: hidden; margin: 0; }
-        .header { background: linear-gradient(90deg, #1a120b, #2b1f14, #1a120b); padding: 25px; text-align: center; border-bottom: 3px solid #d4a373; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        .header h1 { margin: 0; color: #d4a373; font-weight: 800; font-size: 3.5rem; text-transform: uppercase; letter-spacing: 3px; }
+        body { background-color: #f8f9fa; color: #212529; font-family: 'Outfit', sans-serif; overflow: hidden; margin: 0; }
+        .header { background: #ffffff; padding: 25px; text-align: center; border-bottom: 3px solid #0d6efd; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .header h1 { margin: 0; color: #0d6efd; font-weight: 800; font-size: 3.5rem; text-transform: uppercase; letter-spacing: 3px; }
         
-        .board-container { display: flex; height: calc(100vh - 100px); background-image: radial-gradient(circle at center, #231810 0%, #1a120b 100%); }
+        .board-container { display: flex; height: calc(100vh - 100px); background-color: #f8f9fa; }
         .col-half { width: 50%; padding: 40px; display: flex; flex-direction: column; }
-        .col-preparing { border-right: 2px dashed #4a3422; background-color: rgba(43, 31, 20, 0.4); }
+        .col-preparing { border-right: 2px dashed #dee2e6; background-color: rgba(255, 255, 255, 0.4); }
         
-        .column-title { text-align: center; font-size: 2.8rem; font-weight: 800; margin-bottom: 40px; padding-bottom: 15px; border-bottom: 2px solid #3d2a1c; text-transform: uppercase; letter-spacing: 2px; }
-        .title-preparing { color: #f7e6c4; opacity: 0.8; }
-        .title-ready { color: #d4a373; text-shadow: 0 0 15px rgba(212, 163, 115, 0.4); }
+        .column-title { text-align: center; font-size: 2.8rem; font-weight: 800; margin-bottom: 40px; padding-bottom: 15px; border-bottom: 2px solid #dee2e6; text-transform: uppercase; letter-spacing: 2px; }
+        .title-preparing { color: #212529; opacity: 0.8; }
+        .title-ready { color: #0d6efd; text-shadow: 0 0 15px rgba(13, 110, 253, 0.2); }
         
         .number-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 25px; align-content: start; }
         
         .queue-box { 
-            background: linear-gradient(145deg, #2b1f14, #1a120b); 
+            background: #ffffff; 
             border-radius: 16px; 
             text-align: center; 
             padding: 30px 10px; 
             font-size: 4rem; 
             font-weight: 800;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         
-        .box-preparing { color: #f7e6c4; border: 2px solid #5c3a21; }
+        .box-preparing { color: #212529; border: 2px solid #dee2e6; }
         .box-ready { 
-            color: #1a120b; 
-            background: linear-gradient(135deg, #d4a373, #b07d4b); 
+            color: #ffffff; 
+            background: #198754; 
             border: none; 
             animation: bounceIn 0.6s ease; 
-            box-shadow: 0 10px 25px rgba(212, 163, 115, 0.4);
+            box-shadow: 0 5px 15px rgba(25, 135, 84, 0.3);
         }
         
         .blink-ready { animation: blinkReady 1.5s ease-in-out 3; }
         
         @@keyframes blinkReady { 
-            0%, 100% { transform: scale(1); background: linear-gradient(135deg, #d4a373, #b07d4b); }
-            50% { transform: scale(1.1); background: linear-gradient(135deg, #faedcd, #d4a373); box-shadow: 0 0 30px rgba(250, 237, 205, 0.6); }
+            0%, 100% { transform: scale(1); background: #198754; }
+            50% { transform: scale(1.1); background: #20c997; box-shadow: 0 0 20px rgba(32, 201, 151, 0.4); }
         }
         
         @@keyframes bounceIn {
@@ -58,12 +58,23 @@
             70% { transform: scale(0.9); }
             100% { transform: scale(1); }
         }
+        /* Store picker overlay */
+        #store-picker { position:fixed; inset:0; background:rgba(255,255,255,0.97); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:32px; }
+        #store-picker h2 { color:#0d6efd; font-size:2.2rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; }
+        .store-btn { background:#ffffff; border:2px solid #dee2e6; color:#212529; border-radius:14px; padding:24px 56px; font-size:1.5rem; font-weight:700; cursor:pointer; transition:all .25s; min-width:280px; text-align:center; }
+        .store-btn:hover { border-color:#0d6efd; color:#0d6efd; box-shadow:0 0 20px rgba(13,110,253,.2); transform:scale(1.04); }
     </style>
 </head>
 <body>
 
+    <!-- Overlay chọn chi nhánh -->
+    <div id="store-picker">
+        <h2>Chọn Chi Nhánh</h2>
+        <div id="store-btn-list" style="display:flex;flex-direction:column;gap:16px;"></div>
+    </div>
+
     <div class="header">
-        <h1>BẢNG GỌI MÓN (CHI NHÁNH <span id="storeNameId">1</span>)</h1>
+        <h1>BẢNG GỌI MÓN (<span id="storeNameId"></span>)</h1>
     </div>
 
     <!-- 1. Thẻ Audio báo đơn xong -->
@@ -90,8 +101,39 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const storeId = urlParams.get('storeId') || "1";
-        document.getElementById('storeNameId').textContent = storeId;
+        let storeId = urlParams.get('storeId');
+
+        async function loadStorePicker() {
+            try {
+                const res = await fetch('/Pos/GetStores');
+                const stores = await res.json();
+                const btnList = document.getElementById('store-btn-list');
+                btnList.innerHTML = '';
+                stores.forEach(s => {
+                    const btn = document.createElement('button');
+                    btn.className = 'store-btn';
+                    btn.textContent = s.name;
+                    btn.onclick = () => {
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('storeId', s.id);
+                        window.location.href = url.toString();
+                    };
+                    btnList.appendChild(btn);
+                });
+            } catch(e) {
+                document.getElementById('store-btn-list').innerHTML = '<p style="color:#f87171">Lỗi tải danh sách chi nhánh</p>';
+            }
+        }
+
+        if (!storeId) {
+            loadStorePicker();
+        } else {
+            document.getElementById('store-picker').style.display = 'none';
+            fetch('/Pos/GetStores').then(r => r.json()).then(stores => {
+                const found = stores.find(s => String(s.id) === String(storeId));
+                document.getElementById('storeNameId').textContent = found ? found.name : 'Chi nhánh ' + storeId;
+            });
+        }
         
         const preparingList = document.getElementById('preparing-list');
         const readyList = document.getElementById('ready-list');
@@ -123,6 +165,11 @@
             const readyHtml = `<div class="queue-box box-ready blink-ready" id="ready-box-${queueNum}">${queueNum}</div>`;
             readyList.insertAdjacentHTML('afterbegin', readyHtml);
 
+            // Giới hạn hiển thị 12 đơn mới nhất để không tràn màn hình Mời Nhận Món
+            while (readyList.children.length > 12) {
+                readyList.removeChild(readyList.lastChild);
+            }
+
             try {
                 document.getElementById('ready-sound').play();
             } catch(e) {
@@ -133,6 +180,15 @@
                 const boxToRemove = document.getElementById('ready-box-' + queueNum);
                 if (boxToRemove) boxToRemove.remove();
             }, 120000);
+        });
+
+        // Xử lý 3: Khách hàng/Bếp hủy đơn hàng
+        connection.on("OrderCancelled", function (data) {
+            const arr = ['queue-box-', 'ready-box-'];
+            arr.forEach(prefix => {
+                const box = document.getElementById(prefix + data.queueNumber);
+                if (box) box.remove();
+            });
         });
 
         // LOAD LẠI ĐƠN TỪ DATABASE KHI F5 / MỞ TRANG
