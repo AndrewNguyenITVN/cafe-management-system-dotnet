@@ -16,10 +16,11 @@ public class PayrollService : IPayrollService
         var tkQuery = _db.Timekeepings
             .Include(t => t.User)
                 .ThenInclude(u => u.Position)
-            .Where(t => t.Date >= fromDate && t.Date <= toDate);
+            .Where(t => t.Date >= fromDate && t.Date <= toDate
+                     && t.User.StoreId != null);
 
         if (storeId.HasValue)
-            tkQuery = tkQuery.Where(t => t.StoreId == storeId.Value);
+            tkQuery = tkQuery.Where(t => t.User.StoreId == storeId.Value);
 
         var timekeepings = await tkQuery.ToListAsync();
 
@@ -33,9 +34,24 @@ public class PayrollService : IPayrollService
         var schedules = await schQuery.ToListAsync();
 
         // ── 3. Gộp danh sách userId từ cả 2 nguồn ──────────────────
+        var validUserIds = await _db.Users
+            .Where(u => u.IsActive
+                     && u.StoreId != null
+                     && (!storeId.HasValue || u.StoreId == storeId.Value))
+            .Select(u => u.Id)
+            .ToListAsync();
+
         var allUserIds = timekeepings.Select(t => t.UserId)
             .Union(schedules.Select(s => s.UserId))
-            .Distinct().ToList();
+            .Distinct()
+            .Where(uid => validUserIds.Contains(uid))
+            .ToList();
+
+        var adminIds = await _db.Users
+            .Where(u => u.StoreId == null)
+            .Select(u => u.Id)
+            .ToListAsync();
+        allUserIds = allUserIds.Where(uid => !adminIds.Contains(uid)).ToList();
 
         // ── 4. Tính lương từng người ────────────────────────────────
         var rows = new List<PayrollRowViewModel>();

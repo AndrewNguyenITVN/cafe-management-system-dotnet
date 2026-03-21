@@ -189,7 +189,7 @@ public class ScheduleService : IScheduleService
 
     public async Task<List<UserSelectItem>> GetUsersByStoreAsync(int storeId) =>
         await _db.Users
-            .Where(u => u.IsActive)
+            .Where(u => u.IsActive && u.StoreId == storeId)
             .OrderBy(u => u.FullName)
             .Select(u => new UserSelectItem { UserId = u.Id, FullName = u.FullName })
             .ToListAsync();
