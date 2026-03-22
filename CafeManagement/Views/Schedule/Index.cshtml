@@ -115,25 +115,36 @@
     <div class="card card-body mb-3 no-print">
         <div class="row g-2 align-items-center flex-wrap">
 
-            @* Chọn chi nhánh *@
+            @* Chọn chi nhánh — Manager chỉ thấy chi nhánh của mình *@
             <div class="col-auto">
-                <form method="get" id="storeForm">
-                    <input type="hidden" name="weekStart" value="@Model.WeekStart.ToString("yyyy-MM-dd")" />
-                    <select name="storeId" class="form-select"
-                            onchange="document.getElementById('storeForm').submit()">
-                        @foreach (var store in Model.Stores)
-                        {
-                            if (store.StoreId == Model.SelectedStoreId)
+                @if (User.IsInRole("Admin"))
+                {
+                    <form method="get" id="storeForm">
+                        <input type="hidden" name="weekStart" value="@Model.WeekStart.ToString("yyyy-MM-dd")" />
+                        <select name="storeId" class="form-select"
+                                onchange="document.getElementById('storeForm').submit()">
+                            @foreach (var store in Model.Stores)
                             {
-                                <option value="@store.StoreId" selected="selected">🏪 @store.StoreName</option>
+                                if (store.StoreId == Model.SelectedStoreId)
+                                {
+                                    <option value="@store.StoreId" selected="selected">🏪 @store.StoreName</option>
+                                }
+                                else
+                                {
+                                    <option value="@store.StoreId">🏪 @store.StoreName</option>
+                                }
                             }
-                            else
-                            {
-                                <option value="@store.StoreId">🏪 @store.StoreName</option>
-                            }
-                        }
-                    </select>
-                </form>
+                        </select>
+                    </form>
+                }
+                else
+                {
+                    @* Manager: hiển thị tên chi nhánh cố định, không cho chọn *@
+                    var managerStore = Model.Stores.FirstOrDefault(s => s.StoreId == Model.SelectedStoreId);
+                    <span class="form-control-plaintext fw-semibold">
+                        🏪 @(managerStore?.StoreName ?? "Chi nhánh của bạn")
+                    </span>
+                }
             </div>
 
             @* Điều hướng tuần *@

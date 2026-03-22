@@ -8,7 +8,7 @@ namespace CafeManagement.Controllers;
 /// <summary>
 /// Dashboard admin – hiển thị số liệu tổng quan và biểu đồ doanh thu.
 /// </summary>
-[Authorize]
+[Authorize(Roles = "Admin")]
 public class DashboardController : Controller
 {
     private readonly ReportingService _reportingService;
