@@ -73,6 +73,30 @@ public class MenuItemService
         return true;
     }
 
+    public async Task<(bool Success, string? Error)> DeleteAsync(int id)
+    {
+        var item = await _db.MenuItems.FindAsync(id);
+        if (item == null) return (false, "Món không tồn tại.");
+
+        bool hasOrders = await _db.OrderDetails.AnyAsync(od => od.MenuItemId == id);
+        if (hasOrders)
+            return (false, "Không thể xóa: món này đã có trong đơn hàng.");
+
+        var recipes = await _db.Recipes.Where(r => r.MenuItemId == id).ToListAsync();
+        if (recipes.Count > 0)
+            _db.Recipes.RemoveRange(recipes);
+
+        if (!string.IsNullOrEmpty(item.ImageUrl))
+        {
+            var filePath = Path.Combine(_env.WebRootPath, item.ImageUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+            if (File.Exists(filePath)) File.Delete(filePath);
+        }
+
+        _db.MenuItems.Remove(item);
+        await _db.SaveChangesAsync();
+        return (true, null);
+    }
+
     private async Task<string> SaveImageAsync(IFormFile file)
     {
         var dir = Path.Combine(_env.WebRootPath, "images", "menu");
