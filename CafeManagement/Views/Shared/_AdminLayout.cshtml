@@ -142,6 +142,18 @@
                             💰 Kết ca
                         </a>
                     </li>
+				    <li class="nav-item">
+                        <a class="nav-link text-dark @(ViewContext.RouteData.Values["controller"]?.ToString() == "Schedule" ? "active bg-primary text-white rounded" : "")"
+                            asp-controller="Schedule" asp-action="Index">
+                            📅 Lịch làm việc
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark @(ViewContext.RouteData.Values["controller"]?.ToString() == "Payroll" ? "active bg-primary text-white rounded" : "")"
+                            asp-controller="Payroll" asp-action="Index">
+                            💵 Bảng lương
+                        </a>
+                    </li>
                 }
             </ul>
         </nav>
