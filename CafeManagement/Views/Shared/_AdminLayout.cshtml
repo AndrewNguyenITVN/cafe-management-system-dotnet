@@ -142,7 +142,18 @@
                             💰 Kết ca
                         </a>
                     </li>
-				    <li class="nav-item">
+                }
+
+                @* Schedule + Payroll: Admin và Manager đều truy cập được *@
+                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                {
+                    @if (User.IsInRole("Manager") && !User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item mt-2">
+                            <small class="text-muted px-3 text-uppercase fw-bold" style="font-size:.7rem;">Nhân sự</small>
+                        </li>
+                    }
+                    <li class="nav-item">
                         <a class="nav-link text-dark @(ViewContext.RouteData.Values["controller"]?.ToString() == "Schedule" ? "active bg-primary text-white rounded" : "")"
                             asp-controller="Schedule" asp-action="Index">
                             📅 Lịch làm việc
