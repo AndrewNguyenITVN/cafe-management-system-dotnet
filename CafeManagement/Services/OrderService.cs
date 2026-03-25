@@ -12,7 +12,7 @@ public class OrderService : IOrderService
     private readonly PointService _pointService;
     private readonly TransactionService _transactionService;
 
-    // Constructor: ASP.NET tự truyền AppDbContext thông qua DI
+    // Nhận các service phụ trách: DB, kho, loyalty, transaction.
     public OrderService(AppDbContext db, InventoryService inventoryService, PointService pointService, TransactionService transactionService)
     {
         _db = db;
@@ -23,13 +23,13 @@ public class OrderService : IOrderService
 
     public async Task<OrderResultDto> CreateOrderAsync(PosOrderRequestDto request)
     {
-        // BƯỚC 1: Mở Transaction
+        // BƯỚC 1: Mở DB transaction để giữ dữ liệu đơn hàng nhất quán.
         await using var transaction = await _db.Database
             .BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
 
         try
         {
-            // BƯỚC 2: Xử lý Khách hàng
+            // BƯỚC 2: Gắn khách theo SĐT; nếu chưa có thì tạo mới.
             int? customerId = null;
 
             if (!string.IsNullOrWhiteSpace(request.CustomerPhone))
@@ -56,7 +56,7 @@ public class OrderService : IOrderService
             }
 
 
-            // BƯỚC 3: Sinh QueueNumber an toàn (Serializable level)
+            // BƯỚC 3: Sinh số thứ tự theo ngày/chi nhánh, tránh trùng số.
             var today = DateTime.Today;
 
             // Lấy số QueueNumber lớn nhất trong ngày hôm nay của chi nhánh này
@@ -69,7 +69,7 @@ public class OrderService : IOrderService
             int nextQueue = maxQueue + 1;
 
 
-            // BƯỚC 4: Tính toán tiền
+            // BƯỚC 4: Tính tổng tiền, giảm giá điểm, và thành tiền cuối.
             decimal totalAmount = 0;
 
             // Duyệt từng món trong giỏ hàng, cộng dồn
@@ -104,7 +104,7 @@ public class OrderService : IOrderService
             await _db.SaveChangesAsync();  // Lưu để Order có Id
 
 
-            // BƯỚC 6: Tạo chi tiết đơn hàng (OrderDetails)
+            // BƯỚC 5: Lưu chi tiết từng món trong đơn.
             var itemDtos = new List<OrderResultItemDto>(); // Lưu danh sách cho KDS
 
             foreach (var item in request.OrderItems)
@@ -133,14 +133,15 @@ public class OrderService : IOrderService
             await _db.SaveChangesAsync();  // Lưu tất cả OrderDetails
 
 
-            // BƯỚC 7: Hoàn tất Transaction
+            // BƯỚC 6: Commit transaction cho phần Order + OrderDetails.
             await transaction.CommitAsync();
 
-            // GỌI DỊCH VỤ TRỪ KHO, TÍNH ĐIỂM VÀ GHI GIAO DỊCH THANH TOÁN
+            // BƯỚC 7: Chạy hậu xử lý: trừ kho, loyalty, và ghi giao dịch thanh toán.
             await _inventoryService.DeductStockAsync(order.Id);
             await _pointService.ProcessOrderPointsAsync(order.Id, order.PointsUsed);
             if (request.PaymentMethodId > 0)
             {
+                // Nếu frontend chưa gửi tiền khách đưa, mặc định bằng thành tiền.
                 decimal amountTendered = request.AmountTendered > 0 ? request.AmountTendered : order.FinalAmount;
                 await _transactionService.RecordPaymentAsync(order.Id, request.PaymentMethodId, order.FinalAmount, amountTendered);
             }
