@@ -10,10 +10,11 @@ using System.Security.Claims;
 
 namespace CafeManagement.Controllers;
 
+// POS cho phép truy cập màn hình PIN khi chưa login hệ thống.
 [AllowAnonymous]
 public class PosController : Controller
 {
-    // Dependency Injection
+    // DI: gom toàn bộ service POS/KDS/ShiftHandover cần dùng trong controller.
 
     private readonly CategoryService _categoryService;
     private readonly MenuItemService _menuItemService;
@@ -131,11 +132,11 @@ public class PosController : Controller
         return Ok(list);
     }
 
-    // API: Preview kết ca cho POS (dựa trên ca + ngày của chi nhánh hiện tại)
+    // API preview kết ca: chỉ đọc số liệu để hiển thị nháp ở POS.
     [HttpGet]
     public async Task<IActionResult> GetShiftHandoverPreview(int shiftId, DateOnly date)
     {
-        // Đọc từ POS session (thay vì User claims)
+        // Lấy cashier/store từ POS session (đăng nhập bằng PIN).
         var cashierId = HttpContext.Session.GetString("PosCashierId");
         var storeId = HttpContext.Session.GetInt32("PosStoreId");
 
@@ -173,10 +174,11 @@ public class PosController : Controller
         public string? Note { get; set; }
     }
 
+    // API chốt kết ca: nhận dữ liệu đếm thực tế từ POS và ghi DB.
     [HttpPost]
     public async Task<IActionResult> SubmitShiftHandover([FromBody] PosCloseShiftRequest model)
     {
-        // Đọc từ POS session (thay vì User claims)
+        // Lấy cashier/store từ POS session để xác định người và chi nhánh kết ca.
         var cashierId = HttpContext.Session.GetString("PosCashierId");
         var storeId = HttpContext.Session.GetInt32("PosStoreId");
 
@@ -192,7 +194,7 @@ public class PosController : Controller
             model.OpeningCash,
             model.ActualCashCounted,
             model.Note,
-            cashierId); // userId từ session
+            cashierId); // Người xác nhận kết ca.
 
         if (!result.Success)
         {
@@ -222,7 +224,7 @@ public class PosController : Controller
             return BadRequest(new { success = false, message = "Giỏ hàng rỗng" });
         }
 
-        // Lấy UserId từ POS session (thay vì User claims)
+        // Nếu payload chưa có userId thì bù từ session PIN hiện tại.
         if (string.IsNullOrEmpty(request.UserId))
         {
             request.UserId = HttpContext.Session.GetString("PosCashierId");
@@ -233,12 +235,12 @@ public class PosController : Controller
             return Unauthorized(new { success = false, message = "Chưa đăng nhập POS (vui lòng nhập PIN)." });
         }
 
-        // GỌI SERVICE THẬT
+        // Gọi nghiệp vụ tạo đơn hàng (OrderService).
         var result = await _orderService.CreateOrderAsync(request);
 
         if (result.Success)
         {
-            // Phát sóng SignalR
+            // Phát realtime sang KDS theo group chi nhánh.
             string storeGroup = $"Store_{request.StoreId}";
             await _hubContext.Clients.Group(storeGroup).SendAsync("NewOrderReceived", new {
                 orderId = result.OrderId,
@@ -334,7 +336,7 @@ public class PosController : Controller
         return Ok(new { success = true, storeId = order.StoreId, queueNumber = order.QueueNumber });
     }
 
-    // API: Lấy thông tin khách hàng từ SĐT
+    // API lookup khách hàng theo SĐT để hiện tên/điểm ở POS.
     [HttpGet]
     public IActionResult GetCustomerInfo(string phone)
     {
@@ -385,7 +387,7 @@ public class PosController : Controller
     public class PinRequest
     {
         public string PinCode { get; set; } = string.Empty;
-        public string UserId { get; set; } = string.Empty; // THÊM
+        public string UserId { get; set; } = string.Empty; // Nhân viên đã chọn trên màn PIN.
     }
 
     [HttpPost]
@@ -397,12 +399,12 @@ public class PosController : Controller
         if (string.IsNullOrEmpty(pinCode) || string.IsNullOrEmpty(userId))
             return BadRequest(new { success = false, message = "Thiếu thông tin nhân viên hoặc PIN!" });
 
-        // Chỉ tìm đúng nhân viên đã chọn
+        // Chỉ xác thực PIN cho đúng nhân viên đã chọn.
         var cashier = _db.Users.FirstOrDefault(u => u.Id == userId && u.PinCode == pinCode);
 
         if (cashier != null && cashier.IsActive)
         {
-            // Lưu POS session (cookie POS riêng)
+            // Lưu session POS để các API sau đọc cashier/store mà không cần account login.
             HttpContext.Session.SetString("PosCashierId", cashier.Id);
             HttpContext.Session.SetInt32("PosStoreId", cashier.StoreId ?? 0);
             HttpContext.Session.SetString("PosCashierName", cashier.FullName ?? cashier.UserName ?? "");
