@@ -750,11 +750,13 @@
     }
 
     async function loadCloseShiftPreview() {
+        // Đọc ca/ngày từ form để gọi API preview.
         const shiftId = parseInt(document.getElementById('cs-shiftId').value || '1', 10);
         const dateStr = document.getElementById('cs-date').value;
         if (!dateStr) return;
 
         const url = `/Pos/GetShiftHandoverPreview?shiftId=${shiftId}&date=${dateStr}`;
+        // API chỉ trả dữ liệu nháp, chưa ghi DB.
         const res = await fetch(url);
         if (!res.ok) {
             const text = await res.text();
@@ -775,6 +777,7 @@
     }
 
     function recalcCloseShiftExpectedAndDiff() {
+        // Tính ngay trên UI để thu ngân thấy chênh lệch theo thời gian thực.
         const totalCash = parseMoneyInput(document.getElementById('cs-totalCash').value);
         const openingCash = parseFloat(document.getElementById('cs-openingCash').value || '0');
         const actualCash = parseFloat(document.getElementById('cs-actualCash').value || '0');
@@ -795,6 +798,7 @@
     document.getElementById('cs-actualCash').addEventListener('input', recalcCloseShiftExpectedAndDiff);
 
     async function submitCloseShift() {
+        // Nút chốt kết ca: validate trước khi gửi về backend.
         const shiftId = parseInt(document.getElementById('cs-shiftId').value || '1', 10);
         const dateStr = document.getElementById('cs-date').value;
         if (!dateStr) {
@@ -818,6 +822,7 @@
             return;
         }
 
+        // Payload đủ dữ liệu để backend tự tính expected/difference và lưu biên bản.
         const payload = {
             shiftId,
             date: dateStr,
