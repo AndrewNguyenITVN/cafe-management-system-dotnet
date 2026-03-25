@@ -90,9 +90,12 @@
                 scales: {
                     y: {
                         ticks: {
+                            precision: 0,
+                            stepSize: 100000,
                             callback: value => value.toLocaleString('vi-VN') + ' đ'
                         },
-                        beginAtZero: true
+                        beginAtZero: true,
+                        suggestedMax: 10000000
                     }
                 }
             }
