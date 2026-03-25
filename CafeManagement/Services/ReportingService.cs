@@ -34,8 +34,8 @@ public class ReportingService
             .CountAsync();
 
         // Nhân viên đang làm việc: timekeeping có CheckOutTime = null trong ngày
-        var staffWorkingToday = await _db.Timekeepings
-            .Where(t => t.Date == today && t.CheckOutTime == null)
+        var staffWorkingToday = await _db.Schedules
+            .Where(t => t.WorkDate == today)
             .Select(t => t.UserId)
             .Distinct()
             .CountAsync();
