@@ -12,6 +12,7 @@
 </div>
 
 <form method="get" class="row g-3 mb-3">
+    @* Bộ lọc theo ngày/chi nhánh cho danh sách kết ca *@
     <div class="col-md-4">
         <label class="form-label">Ngày</label>
         <input type="date" name="date" class="form-control" value="@date.ToDateTime(TimeOnly.MinValue).ToString("yyyy-MM-dd")" />
@@ -65,6 +66,7 @@
                     foreach (var h in Model)
                     {
                         i++;
+                        @* Đổi màu cột chênh lệch để dễ phát hiện ca lệch tiền *@
                         var diffClass = h.Difference < 0 ? "text-danger" : (h.Difference > 0 ? "text-success" : "");
                         <tr>
                             <td>@i</td>

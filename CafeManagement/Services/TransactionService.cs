@@ -9,8 +9,8 @@ public class TransactionService
     public TransactionService(AppDbContext db) => _db = db;
 
     /// <summary>
-    /// Ghi nhận giao dịch thanh toán vào bảng Transactions.
-    /// amountTendered = tiền khách đưa (tiền mặt). Nếu chuyển khoản có thể = amount.
+    /// Ghi bản ghi thanh toán cho 1 order (phục vụ đối soát/kết ca).
+    /// amountTendered = tiền khách đưa; chuyển khoản thường bằng amount.
     /// </summary>
     public async Task RecordPaymentAsync(
         int orderId,
@@ -18,6 +18,7 @@ public class TransactionService
         decimal amount,
         decimal amountTendered)
     {
+        // Tạo giao dịch: amount là thành tiền, change = tiền thối.
         var tx = new Transaction
         {
             OrderId = orderId,
@@ -28,6 +29,7 @@ public class TransactionService
             TransactionDate = DateTime.Now
         };
 
+        // Lưu ngay vì cần dữ liệu transaction cho các nghiệp vụ sau (vd: kết ca).
         _db.Transactions.Add(tx);
         await _db.SaveChangesAsync();
     }
