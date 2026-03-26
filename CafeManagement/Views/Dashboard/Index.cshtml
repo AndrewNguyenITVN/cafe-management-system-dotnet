@@ -7,7 +7,8 @@
 
 <h4 class="mb-4 fw-bold">📊 Dashboard</h4>
 
-<div class="row g-3 mb-4">
+<div class="row g-4 mb-4">
+    @* 4 KPI card tổng quan trong ngày *@
     <div class="col-md-3">
         <div class="card stat-card revenue p-3">
             <div class="text-muted small">Doanh thu hôm nay</div>
@@ -26,7 +27,7 @@
     </div>
     <div class="col-md-3">
         <div class="card stat-card staff p-3">
-            <div class="text-muted small">Nhân viên đang làm</div>
+            <div class="text-muted small">Số nhân viên đi làm</div>
             <div class="fs-4 fw-bold text-warning">@Model.StaffWorkingToday</div>
             <div class="text-muted small">Hôm nay</div>
         </div>
@@ -53,7 +54,7 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Chuẩn bị dữ liệu cho biểu đồ từ ViewModel
+        // Convert RevenueSeries từ C# sang mảng JS để vẽ Chart.js.
         const revenueLabels = @Html.Raw(JsonSerializer.Serialize(
             Model.RevenueSeries.Select(p => p.Date.ToString("dd/MM"))
         ));
@@ -62,6 +63,7 @@
         ));
 
         const ctx = document.getElementById('revenueChart').getContext('2d');
+        // Line chart doanh thu theo ngày.
         const revenueChart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -90,9 +92,12 @@
                 scales: {
                     y: {
                         ticks: {
+                            precision: 0,
+                            stepSize: 100000,
                             callback: value => value.toLocaleString('vi-VN') + ' đ'
                         },
-                        beginAtZero: true
+                        beginAtZero: true,
+                        suggestedMax: 1000000
                     }
                 }
             }

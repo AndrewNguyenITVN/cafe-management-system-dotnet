@@ -72,6 +72,17 @@ public class MenuItemController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var (success, error) = await _menuItemService.DeleteAsync(id);
+        if (success)
+            TempData["Success"] = "Đã xóa món thành công.";
+        else
+            TempData["Error"] = error;
+        return RedirectToAction(nameof(Index));
+    }
+
     private async Task PopulateCategoriesAsync()
     {
         var categories = await _menuItemService.GetActiveCategoriesAsync();

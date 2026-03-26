@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CafeManagement.Services;
 
-/// <summary>TV5: xử lý tích / tiêu điểm + log lịch sử.</summary>
+/// <summary>Xử lý loyalty theo đơn: trừ điểm dùng + cộng điểm mới + ghi lịch sử.</summary>
 public class PointService
 {
     private readonly AppDbContext _db;
@@ -12,7 +12,7 @@ public class PointService
 
     public async Task ProcessOrderPointsAsync(int orderId, int pointsUsed)
     {
-        // Lấy order kèm Customer
+        // Lấy order kèm khách hàng để thao tác trực tiếp trên số điểm hiện tại.
         var order = await _db.Orders
             .Include(o => o.Customer)
             .FirstOrDefaultAsync(o => o.Id == orderId);
@@ -22,15 +22,15 @@ public class PointService
 
         var customer = order.Customer;
 
-        // 1. Xác định điểm được cộng (Earn)
+        // B1: Tính điểm cộng mới (1% FinalAmount, làm tròn xuống).
         int pointsEarned = (int)Math.Floor(order.FinalAmount * 0.01m);
 
-        // 2. Xử lý Redeem (dùng điểm)
+        // B2: Xử lý Redeem (trừ điểm khách muốn dùng).
         int pointsActuallyUsed = 0;
 
         if (pointsUsed > 0)
         {
-            // Bảo vệ: không cho âm điểm
+            // Không cho TotalPoints âm.
             if (customer.TotalPoints >= pointsUsed)
             {
                 customer.TotalPoints -= pointsUsed;
@@ -38,7 +38,7 @@ public class PointService
             }
             else
             {
-                // Không đủ điểm: chỉ trừ phần hợp lệ
+                // Không đủ điểm thì trừ hết phần đang có.
                 pointsActuallyUsed = customer.TotalPoints;
                 customer.TotalPoints = 0;
             }
@@ -56,7 +56,7 @@ public class PointService
             }
         }
 
-        // 3. Xử lý Earn (tích điểm)
+        // B3: Cộng điểm Earn sau khi đơn hoàn tất.
         if (pointsEarned > 0)
         {
             customer.TotalPoints += pointsEarned;
@@ -72,6 +72,7 @@ public class PointService
         }
 
         await _db.SaveChangesAsync();
+        // Log nhanh để theo dõi khi debug local.
         Console.WriteLine(
             $"[PointService] {customer.FullName}: Redeem {pointsActuallyUsed}, Earn {pointsEarned} -> Total {customer.TotalPoints}");
     }

@@ -38,20 +38,32 @@
             <div class="row g-2 align-items-end">
                 <div class="col-md-3">
                     <label class="form-label fw-semibold small">Chi nhánh</label>
-                    <select name="storeId" class="form-select">
-                        <option value="">— Tất cả chi nhánh —</option>
-                        @foreach (var store in Model.Stores)
-                        {
-                            if (store.StoreId == Model.SelectedStoreId)
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <select name="storeId" class="form-select">
+                            <option value="">— Tất cả chi nhánh —</option>
+                            @foreach (var store in Model.Stores)
                             {
-                                <option value="@store.StoreId" selected="selected">@store.StoreName</option>
+                                if (store.StoreId == Model.SelectedStoreId)
+                                {
+                                    <option value="@store.StoreId" selected="selected">@store.StoreName</option>
+                                }
+                                else
+                                {
+                                    <option value="@store.StoreId">@store.StoreName</option>
+                                }
                             }
-                            else
-                            {
-                                <option value="@store.StoreId">@store.StoreName</option>
-                            }
-                        }
-                    </select>
+                        </select>
+                    }
+                    else
+                    {
+                        @* Manager: cố định chi nhánh, truyền ẩn để giữ storeId khi submit *@
+                        var managerStore = Model.Stores.FirstOrDefault(s => s.StoreId == Model.SelectedStoreId);
+                        <input type="hidden" name="storeId" value="@Model.SelectedStoreId" />
+                        <p class="form-control-plaintext fw-semibold mb-0">
+                            🏪 @(managerStore?.StoreName ?? "Chi nhánh của bạn")
+                        </p>
+                    }
                 </div>
                 <div class="col-md-3">
                     <label class="form-label fw-semibold small">Từ ngày</label>

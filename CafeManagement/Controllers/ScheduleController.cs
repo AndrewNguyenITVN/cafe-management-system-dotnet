@@ -1,17 +1,22 @@
+using CafeManagement.Models.Domain;
 using CafeManagement.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CafeManagement.Controllers;
 
-// Tất cả role đều xem được lịch
-[Authorize]
+[Authorize(Roles = "Admin,Manager")]
 public class ScheduleController : Controller
 {
     private readonly IScheduleService _scheduleService;
+    private readonly UserManager<AppUser> _userManager;
 
-    public ScheduleController(IScheduleService scheduleService)
-        => _scheduleService = scheduleService;
+    public ScheduleController(IScheduleService scheduleService, UserManager<AppUser> userManager)
+    {
+        _scheduleService = scheduleService;
+        _userManager = userManager;
+    }
 
     // GET: /Schedule?storeId=1&weekStart=2026-03-16
     public async Task<IActionResult> Index(int? storeId, string? weekStart)
@@ -21,6 +26,18 @@ public class ScheduleController : Controller
         {
             TempData["Error"] = "Chưa có chi nhánh nào trong hệ thống.";
             return View(null);
+        }
+
+        // Manager chỉ được xem chi nhánh của mình
+        if (User.IsInRole("Manager") && !User.IsInRole("Admin"))
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser?.StoreId == null)
+            {
+                TempData["Error"] = "Tài khoản quản lý chưa được gán chi nhánh.";
+                return View(null);
+            }
+            storeId = currentUser.StoreId;
         }
 
         var selectedStore = storeId ?? stores.First().StoreId;
@@ -42,14 +59,21 @@ public class ScheduleController : Controller
         return View(vm);
     }
 
-    // POST: /Schedule/Assign — chỉ Admin/Manager
+    // POST: /Schedule/Assign
     [HttpPost, ValidateAntiForgeryToken]
-    [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> Assign(
         int storeId, string date, int shiftId, List<string> userIds)
     {
         if (!DateOnly.TryParse(date, out var parsedDate))
             return BadRequest("Ngày không hợp lệ.");
+
+        // Manager chỉ được lên lịch cho chi nhánh của mình
+        if (User.IsInRole("Manager") && !User.IsInRole("Admin"))
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser?.StoreId != storeId)
+                return Forbid();
+        }
 
         await _scheduleService.AssignShiftAsync(storeId, parsedDate, shiftId, userIds);
 
@@ -58,14 +82,21 @@ public class ScheduleController : Controller
             new { storeId, weekStart = GetMondayOf(parsedDate) });
     }
 
-    // POST: /Schedule/Attend — chỉ Admin/Manager
+    // POST: /Schedule/Attend
     [HttpPost, ValidateAntiForgeryToken]
-    [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> Attend(
         int storeId, string date, int shiftId, List<string> attendedUserIds)
     {
         if (!DateOnly.TryParse(date, out var parsedDate))
             return BadRequest("Ngày không hợp lệ.");
+
+        // Manager chỉ được chấm công cho chi nhánh của mình
+        if (User.IsInRole("Manager") && !User.IsInRole("Admin"))
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser?.StoreId != storeId)
+                return Forbid();
+        }
 
         await _scheduleService.AttendShiftAsync(storeId, parsedDate, shiftId, attendedUserIds);
 
