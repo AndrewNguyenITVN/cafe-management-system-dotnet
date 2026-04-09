@@ -1,154 +1,106 @@
 # CafeManagement
 
-Hệ thống quản lý chuỗi quán cafe — ASP.NET Core 8 MVC + Service Layer + SQL Server.
+> A full-featured cafe chain management system built on ASP.NET Core 8 MVC
+
+[![Demo](https://img.shields.io/badge/▶%20Watch%20Demo-YouTube-red?style=for-the-badge&logo=youtube)](https://youtu.be/Eg-ARTI8crY)
 
 ---
 
+## Overview
 
-## Yêu cầu môi trường
+**CafeManagement** is a web-based management application for cafe businesses, built with the **MVC** pattern and a clean **Service Layer** architecture. The system covers all real-world operations — from point-of-sale ordering, inventory tracking, and staff scheduling, to payroll calculation and revenue reporting.
 
-| Công cụ | Phiên bản |
+---
+
+## Features
+
+### Point of Sale (POS)
+- Intuitive order interface with real-time item and topping selection
+- Billing, loyalty point redemption, and receipt generation
+
+### Menu Management
+- Full CRUD for categories, food/drink items, and toppings
+- Recipe management — link ingredients to each menu item
+
+### Inventory
+- Track raw material stock levels and suppliers
+- Low-stock alerts and import/export logging
+
+### Staff Management
+- Role-based access control (Admin / Staff)
+- Manage job positions, work shifts, and schedules
+- Shift handover records with incident notes
+
+### Payroll
+- Automatic salary calculation based on hours worked and position coefficient
+- Monthly payroll history per employee
+
+### Reports & Dashboard
+- Daily and monthly revenue and order statistics
+- Visual charts on the dashboard overview page
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
 |---|---|
-| .NET SDK | 8.x |
-| SQL Server | 2019+ (hoặc Docker) |
-| Visual Studio / VS Code / Rider | Bất kỳ |
-| Git | Bất kỳ |
+| Backend | ASP.NET Core 8 MVC |
+| ORM | Entity Framework Core 8 |
+| Database | SQL Server |
+| Frontend | Razor Views, Bootstrap, jQuery |
+| Authentication | ASP.NET Core Identity |
+| Architecture | Service Layer Pattern |
 
 ---
 
-## Hướng dẫn cài đặt
+## Project Structure
 
-### Bước 1 — Clone dự án
+```
+CafeManagement/
+├── Controllers/        # MVC Controllers per business domain
+├── Services/           # Business logic decoupled from Controllers
+├── Models/
+│   ├── Domain/         # Entity classes mapped to database tables
+│   └── ViewModels/     # View-specific models per screen
+├── Views/              # Razor Views + Shared Layout
+├── Data/
+│   └── AppDbContext.cs # EF Core DbContext
+└── wwwroot/            # Static assets (CSS, JS, images)
+
+CafeManagement_Schema.sql    # Database creation script
+CafeManagement_SeedData.sql  # Sample data seed script
+```
+
+---
+
+## Quick Start
 
 ```bash
+# 1. Clone the repository
 git clone https://github.com/AndrewNguyenITVN/cafe-management-system-dotnet.git
 cd CafeManagement
+
+# 2. Run the two SQL scripts in SSMS (in order)
+#    CafeManagement_Schema.sql → CafeManagement_SeedData.sql
+
+# 3. Start the application (F5 or dotnet run)
 ```
 
-### Bước 2 — Cấu hình Connection String
+Navigate to `http://localhost:7190` and sign in with the default account:
 
-Mở file `CafeManagement/appsettings.json` và chỉnh lại thông tin kết nối SQL Server cho phù hợp với máy của bạn:
-
-```json
-"ConnectionStrings": {
-  "DefaultConnection": "Server=localhost,1433;Database=CafeManagement;User Id=sa;Password=StrongPass!123;TrustServerCertificate=True;"
-}
-```
-
-> Nếu dùng **SQL Server Docker**, giữ nguyên mặc định.
-> Nếu dùng **SQL Server local (Windows Auth)**, đổi thành:
-> `Server=.\SQLEXPRESS;Database=CafeManagement;Trusted_Connection=True;TrustServerCertificate=True;`
-
-### Bước 3 — Tạo Database
-
-Mở **SSMS** kết nối vào SQL Server và chạy lần lượt 2 file sau (theo thứ tự):
-
-```
-1. CafeManagement_Schema.sql    ← Tạo database + toàn bộ bảng
-2. CafeManagement_SeedData.sql  ← Nạp dữ liệu mẫu (ca làm, chức vụ, món ăn...)
-```
-
-### Bước 4 — Chạy ứng dụng
-
-Nhấn **Run** hoặc **F5** trong Visual Studio.
-
-### Bước 5 — Đăng nhập
-
-Truy cập `http://localhost:7190`.
-
-| Tài khoản | Mật khẩu |
+| Email | Password |
 |---|---|
 | `admin@cafe.com` | `Admin@123` |
 
 ---
 
-## Cấu trúc dự án
+## Demo
 
-```
-CafeManagement/
-├── Controllers/            # MVC Controllers (mỗi thành viên thêm controller của mình vào đây)
-├── Services/
-│   ├── Interfaces/         # Interface định nghĩa bởi Leader (IInventoryService, IPointService...)
-│   └── Implementations/    # Các thành implement vào đây
-├── Models/
-│   ├── Domain/             # Entity classes (map với database)
-│   └── ViewModels/         # ViewModel cho từng màn hình
-├── Views/                  # Razor Views
-│   └── Shared/
-│       └── _AdminLayout.cshtml   # Layout chung cho trang Admin
-├── Data/
-│   └── AppDbContext.cs     # EF Core DbContext
-├── wwwroot/                # CSS, JS, hình ảnh tĩnh dùng Bootstrap và Jquery.
-├── appsettings.json        # Cấu hình (connection string...)
-└── Program.cs              # Entry point, DI registration
-
-CafeManagement_Schema.sql   # Script tạo database (chạy thủ công)
-CafeManagement_SeedData.sql # Script nạp dữ liệu mẫu
-```
+[![Watch the full demo on YouTube](https://img.shields.io/badge/▶%20Full%20Demo-YouTube-red?style=flat-square&logo=youtube)](https://youtu.be/Eg-ARTI8crY)
 
 ---
 
-## Quy tắc code chung
+## About
 
-### 1. Đặt tên
-
-```
-Controller:  <Feature>Controller.cs         VD: OrderController.cs
-Service:     I<Feature>Service.cs (interface)
-             <Feature>Service.cs (implementation)
-ViewModel:   <Feature>ViewModel.cs          VD: OrderViewModel.cs
-View:        Views/<Controller>/<Action>.cshtml
-```
-
-### 2. Thêm Service mới
-
-Sau khi tạo interface và implementation, đăng ký trong `Program.cs`:
-
-```csharp
-builder.Services.AddScoped<IMyService, MyService>();
-```
-
-### 3. Thêm bảng mới vào database
-
-1. Tạo model class trong `Models/Domain/`
-2. Thêm `DbSet<T>` vào `Data/AppDbContext.cs`
-3. Viết câu `ALTER TABLE` hoặc `CREATE TABLE` vào `CafeManagement_Schema.sql` tất cả thay đổi DB làm thủ công qua SQL
-
-### 4. Git workflow
-
-```bash
-# Trước khi bắt đầu làm việc
-git pull origin main
-
-# Sau khi hoàn thành 1 tính năng
-git add .
-git commit -m "feat: <mô tả ngắn>"
-git push origin <tên-branch-của-bạn>
-```
-
-> Không commit thẳng vào `main`. Tạo branch riêng theo tên: `tv2/pos-order`, `tv3/inventory`, v.v.
-
----
-
-## Interfaces cần implement
-
-Thành viên 3 và Thành viên 5 implement các service đã được chỉ định.
-
----
-
-## Tài khoản admin mặc định
-
-App tự động tạo khi khởi động lần đầu (xem `Program.cs → SeedAdminAsync`):
-
-```
-Email:    admin@cafe.com
-Password: Admin@123
-Role:     Admin
-```
-
----
-
-## Lưu ý
-
-- File `appsettings.json` chứa connection string — **không commit password thật** lên GitHub nếu deploy production.
-- Thư mục `obj/` và `bin/` đã được bỏ qua trong `.gitignore`, không cần quan tâm.
+This project was developed as a hands-on ASP.NET Core MVC exercise in a team environment, applying a Git feature-branch workflow with modules divided across team members.
